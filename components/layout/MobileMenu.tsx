@@ -229,9 +229,17 @@ export function MobileMenu() {
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400" />
                         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-400" />
                       </span>
-                      Live
+                    Live
                     </span>
                   }
+                />
+                <Item
+                  index={4}
+                  href="/subjects"
+                  icon={BookOpen}
+                  label="বিষয়সমূহ"
+                  active={isActive("/subjects")}
+                  onNavigate={close}
                 />
               </ul>
 

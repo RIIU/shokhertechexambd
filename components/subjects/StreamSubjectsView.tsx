@@ -62,22 +62,46 @@ export async function StreamSubjectsView({ level, stream }: StreamSubjectsViewPr
             {str.taglineBn}। যেকোনো বিষয় বেছে নাও, তারপর অনুশীলন, মডেল টেস্ট বা লাইভ পরীক্ষা শুরু করো।
           </p>
 
-          <div data-reveal className="mb-10 flex flex-wrap gap-2">
-            {STREAM_IDS.map((id) => (
-              <Link
-                key={id}
-                href={`/${level}/${id}`}
-                aria-current={id === stream ? "page" : undefined}
-                className={cn(
-                  "rounded-xl border px-4 py-2 text-sm font-medium transition-all",
-                  id === stream
-                    ? "border-brand-400/50 bg-brand-400/10 text-brand-200 shadow-glow-sm"
-                    : "border-white/10 text-ink-muted hover:border-white/20 hover:text-ink",
-                )}
-              >
-                <span lang="bn">{STREAMS[id].nameBn}</span>
-              </Link>
-            ))}
+          {/* Level & Stream Switcher */}
+          <div data-reveal className="mb-10 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs uppercase tracking-wider text-ink-subtle font-semibold mr-1">স্তর:</span>
+              <div className="glass inline-flex rounded-xl p-1">
+                {(["ssc", "hsc"] as const).map((l) => (
+                  <Link
+                    key={l}
+                    href={`/${l}/${stream}`}
+                    className={cn(
+                      "rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-bold transition-all",
+                      l === level ? "bg-brand-400 text-forest shadow-glow-sm" : "text-ink-muted hover:text-ink",
+                    )}
+                  >
+                    <span lang="bn">{LEVELS[l].nameBn}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs uppercase tracking-wider text-ink-subtle font-semibold mr-1">বিভাগ:</span>
+              <div className="flex flex-wrap gap-2">
+                {STREAM_IDS.map((id) => (
+                  <Link
+                    key={id}
+                    href={`/${level}/${id}`}
+                    aria-current={id === stream ? "page" : undefined}
+                    className={cn(
+                      "rounded-xl border px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all",
+                      id === stream
+                        ? "border-brand-400/50 bg-brand-400/10 text-brand-200 shadow-glow-sm font-bold"
+                        : "border-white/10 text-ink-muted hover:border-white/20 hover:text-ink",
+                    )}
+                  >
+                    <span lang="bn">{STREAMS[id].nameBn}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
 
           <dl data-reveal className="grid max-w-xl grid-cols-3 gap-3">

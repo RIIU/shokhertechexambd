@@ -29,7 +29,7 @@ const LINKS = [
   { href: "/packages", label: "প্যাকেজসমূহ" },
   { href: "/ssc", label: "এসএসসি" },
   { href: "/hsc", label: "এইচএসসি" },
-  { href: "/ssc/science", label: "বিষয়সমূহ" },
+  { href: "/subjects", label: "বিষয়সমূহ" },
 ];
 
 function UserDropdown({
