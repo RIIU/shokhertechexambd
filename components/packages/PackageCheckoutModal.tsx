@@ -139,14 +139,14 @@ export function PackageCheckoutModal({ packageItem, onClose, user }: PackageChec
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2 max-w-sm mx-auto">
               <Link
-                href={`/login?next=${encodeURIComponent("/#packages")}`}
+                href={`/login?next=${encodeURIComponent("/packages")}`}
                 className="btn-ghost flex-1 py-3"
               >
                 <LogIn className="h-4 w-4" />
                 <span lang="bn">লগইন</span>
               </Link>
               <Link
-                href={`/register?next=${encodeURIComponent("/#packages")}`}
+                href={`/register?next=${encodeURIComponent("/packages")}`}
                 className="btn-primary flex-1 py-3"
               >
                 <UserPlus className="h-4 w-4" />

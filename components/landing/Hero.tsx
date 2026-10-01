@@ -91,7 +91,7 @@ export function Hero() {
               <Radio className="h-5 w-5" strokeWidth={1.5} />
               <span lang="bn">লাইভ পরীক্ষা দাও</span>
             </Link>
-            <Link href="#packages" className="btn-ghost px-6 py-3 text-base">
+            <Link href="/packages" className="btn-ghost px-6 py-3 text-base">
               <span lang="bn">প্যাকেজসমূহ দেখো</span>
               <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
             </Link>

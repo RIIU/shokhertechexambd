@@ -194,10 +194,10 @@ export function MobileMenu() {
                 <Item index={0} href="/" icon={Home} label="হোম" active={isActive("/")} onNavigate={close} />
                 <Item
                   index={1}
-                  href="/#packages"
+                  href="/packages"
                   icon={Sparkles}
                   label="প্যাকেজসমূহ"
-                  active={false}
+                  active={isActive("/packages")}
                   onNavigate={close}
                   badge={
                     <span className="inline-flex items-center gap-1 rounded-full bg-brand-400/20 px-2 py-0.5 text-[10px] font-bold text-brand-300">
