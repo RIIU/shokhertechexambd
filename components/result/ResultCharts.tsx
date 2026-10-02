@@ -6,16 +6,16 @@ import { toBn } from "@/lib/utils";
 import type { ExamResult } from "@/lib/types";
 
 /*
- * Status colors (good / critical / neutral), validated against the #111827 card
+ * Status colors (good / critical / neutral), validated against the #042E1B card
  * surface: all clear 3:1 contrast. Gray-vs-rose is in the 6–8 ΔE protan band, so
  * every slice also carries an icon + text label and a 2px surface gap.
  */
 const STATUS: { key: "correct" | "wrong" | "skipped"; label: string; color: string; icon: LucideIcon }[] = [
-  { key: "correct", label: "সঠিক", color: "#00E699", icon: CheckCircle2 },
+  { key: "correct", label: "সঠিক", color: "#99FE00", icon: CheckCircle2 },
   { key: "wrong", label: "ভুল", color: "#F43F5E", icon: XCircle },
   { key: "skipped", label: "উত্তর দেওয়া হয়নি", color: "#64748B", icon: MinusCircle },
 ];
-const SURFACE = "#111827";
+const SURFACE = "#042E1B";
 
 function ChartTooltip({ active, payload }: { active?: boolean; payload?: { name?: string; value?: number; payload?: Record<string, unknown> }[] }) {
   const p = payload?.[0];
@@ -108,13 +108,13 @@ export function TopicBars({ result }: { result: ExamResult }) {
               width={130}
               tickLine={false}
               axisLine={false}
-              tick={{ fill: "#9CA3AF", fontSize: 13 }}
+              tick={{ fill: "#A7BDB5", fontSize: 13 }}
             />
             <Tooltip cursor={{ fill: "rgba(255,255,255,0.03)" }} content={<ChartTooltip />} />
             <Bar
               dataKey="value"
               name="সঠিক উত্তরের হার"
-              fill="#00E699"
+              fill="#99FE00"
               radius={[0, 4, 4, 0]}
               background={{ fill: "rgba(255,255,255,0.04)", radius: 4 }}
               label={{ position: "right", fill: "#E5E7EB", fontSize: 12, formatter: (v: number) => `${toBn(v)}%` }}

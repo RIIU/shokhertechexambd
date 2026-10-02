@@ -1,8 +1,9 @@
 /**
  * ShokherTech Exam BD — Design tokens
  * -----------------------------------------------------------------------------
- * Dark-first palette inspired by pixxen.com: obsidian surfaces, electric
- * emerald brand, indigo glow secondary and cyan highlights.
+ * Colors are sampled pixel-for-pixel from pixxen.com: deep forest-green
+ * backgrounds, an electric lime primary (#99FE00), a leaf-green secondary
+ * (#19CB61) and sage text (#A7BDB5).
  *
  * Fonts are loaded with next/font in app/layout.tsx and exposed as CSS
  * variables, so this file only maps them to families.
@@ -25,57 +26,55 @@ module.exports = {
     },
     extend: {
       colors: {
-        // Electric Emerald — primary brand
+        // Electric lime — primary (pixxen CTA buttons)
         brand: {
-          50: "#E6FFF6",
-          100: "#B8FFE6",
-          200: "#7DFFD2",
-          300: "#3DF5B5",
-          400: "#00E699", // signature
-          500: "#00CC88",
-          600: "#00A36D",
-          700: "#007A52",
-          800: "#005238",
-          900: "#00291C",
-          DEFAULT: "#00E699",
+          50: "#F5FFE6",
+          100: "#E6FFC2",
+          200: "#CCFF85",
+          300: "#B3FE47",
+          400: "#99FE00", // signature
+          500: "#85DE00",
+          600: "#6AB300",
+          700: "#4F8500",
+          800: "#355900",
+          900: "#1A2C00",
+          DEFAULT: "#99FE00",
         },
-        // Indigo Glow — secondary accent
-        glow: {
-          300: "#A5B4FC",
-          400: "#818CF8",
-          500: "#6366F1",
-          600: "#4F46E5",
-          DEFAULT: "#6366F1",
+        // Leaf green — secondary (pixxen labels, dots, icons)
+        leaf: {
+          300: "#5EE596",
+          400: "#19CB61",
+          500: "#19B357",
+          600: "#19914A",
+          DEFAULT: "#19CB61",
         },
-        // Light cyan highlights
-        cyanlight: {
-          300: "#67E8F9",
-          400: "#22D3EE",
-          DEFAULT: "#67E8F9",
+        // Dark green fills and text on lime buttons (pixxen #065136)
+        forest: {
+          DEFAULT: "#065136",
         },
-        // Backgrounds & surfaces
+        // Backgrounds & surfaces (pixxen)
         obsidian: {
-          950: "#070A12",
-          900: "#0B0F19", // app background
-          800: "#111827", // raised background
-          DEFAULT: "#0B0F19",
+          950: "#001A10", // modal scrims
+          900: "#002417", // app background
+          800: "#012819", // header, raised surfaces
+          DEFAULT: "#002417",
         },
         surface: {
-          DEFAULT: "#1F2937",
-          soft: "#161E2C",
-          hover: "#243041",
-          border: "#1F2937",
+          DEFAULT: "#042E1B", // hero top / chips
+          soft: "#012819",
+          hover: "#0A3C26",
+          border: "#29473C", // card borders
         },
         ink: {
           DEFAULT: "#FFFFFF",
-          muted: "#9CA3AF",
-          subtle: "#6B7280",
+          muted: "#A7BDB5",
+          subtle: "#6F8F84",
         },
         // Semantic exam states
         state: {
-          answered: "#00E699",
+          answered: "#99FE00",
           flagged: "#F59E0B",
-          unanswered: "#374151",
+          unanswered: "#29473C",
           danger: "#F43F5E",
         },
       },
@@ -89,25 +88,27 @@ module.exports = {
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       backgroundImage: {
+        // pixxen hero: lighter green band behind the header
+        hero: "linear-gradient(180deg, #042E1B 0%, #09351F 55%, #063B25 100%)",
         "grid-faint":
           "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
         "radial-brand":
-          "radial-gradient(60% 60% at 50% 0%, rgba(0,230,153,0.18) 0%, rgba(11,15,25,0) 70%)",
+          "radial-gradient(60% 60% at 50% 0%, rgba(26,120,52,0.35) 0%, rgba(0,36,23,0) 70%)",
         "radial-glow":
-          "radial-gradient(50% 50% at 50% 50%, rgba(99,102,241,0.25) 0%, rgba(11,15,25,0) 70%)",
-        "brand-gradient": "linear-gradient(135deg, #00E699 0%, #67E8F9 50%, #6366F1 100%)",
-        "text-gradient": "linear-gradient(90deg, #FFFFFF 0%, #B8FFE6 40%, #00E699 70%, #67E8F9 100%)",
+          "radial-gradient(50% 50% at 50% 50%, rgba(153,254,0,0.14) 0%, rgba(0,36,23,0) 70%)",
+        "brand-gradient": "linear-gradient(135deg, #99FE00 0%, #5EE596 50%, #19CB61 100%)",
+        "text-gradient": "linear-gradient(90deg, #FFFFFF 0%, #E6FFC2 35%, #99FE00 70%, #19CB61 100%)",
       },
       backgroundSize: {
         grid: "48px 48px",
       },
       boxShadow: {
-        "glow-sm": "0 0 0 1px rgba(0,230,153,0.15), 0 0 12px -2px rgba(0,230,153,0.35)",
-        glow: "0 0 0 1px rgba(0,230,153,0.25), 0 0 32px -6px rgba(0,230,153,0.45)",
-        "glow-lg": "0 0 0 1px rgba(0,230,153,0.3), 0 0 60px -10px rgba(0,230,153,0.55)",
-        "glow-indigo": "0 0 0 1px rgba(99,102,241,0.3), 0 0 40px -8px rgba(99,102,241,0.5)",
+        "glow-sm": "0 0 0 1px rgba(153,254,0,0.15), 0 0 12px -2px rgba(153,254,0,0.35)",
+        glow: "0 0 0 1px rgba(153,254,0,0.25), 0 0 32px -6px rgba(153,254,0,0.45)",
+        "glow-lg": "0 0 0 1px rgba(153,254,0,0.3), 0 0 60px -10px rgba(153,254,0,0.5)",
+        "glow-leaf": "0 0 0 1px rgba(25,203,97,0.3), 0 0 40px -8px rgba(25,203,97,0.5)",
         "glow-danger": "0 0 0 1px rgba(244,63,94,0.4), 0 0 32px -4px rgba(244,63,94,0.6)",
-        card: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 20px 40px -24px rgba(0,0,0,0.8)",
+        card: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 20px 40px -24px rgba(0,10,5,0.85)",
       },
       borderRadius: {
         "4xl": "2rem",
@@ -130,8 +131,8 @@ module.exports = {
           "80%, 100%": { transform: "scale(2.2)", opacity: "0" },
         },
         "glow-pulse": {
-          "0%, 100%": { boxShadow: "0 0 0 1px rgba(0,230,153,0.25), 0 0 18px -6px rgba(0,230,153,0.45)" },
-          "50%": { boxShadow: "0 0 0 1px rgba(0,230,153,0.5), 0 0 36px -4px rgba(0,230,153,0.7)" },
+          "0%, 100%": { boxShadow: "0 0 0 1px rgba(153,254,0,0.25), 0 0 18px -6px rgba(153,254,0,0.45)" },
+          "50%": { boxShadow: "0 0 0 1px rgba(153,254,0,0.5), 0 0 36px -4px rgba(153,254,0,0.7)" },
         },
         "danger-pulse": {
           "0%, 100%": { boxShadow: "0 0 0 1px rgba(244,63,94,0.4), 0 0 12px -4px rgba(244,63,94,0.5)", transform: "scale(1)" },
@@ -177,26 +178,26 @@ module.exports = {
         ".text-balance": { "text-wrap": "balance" },
         ".scrollbar-thin": {
           "scrollbar-width": "thin",
-          "scrollbar-color": "#374151 transparent",
+          "scrollbar-color": "#29473C transparent",
         },
       });
       addComponents({
         // Glass surface used by cards, nav and modals
         ".glass": {
-          background: "linear-gradient(180deg, rgba(31,41,55,0.72) 0%, rgba(17,24,39,0.62) 100%)",
+          background: "linear-gradient(180deg, rgba(4,46,27,0.82) 0%, rgba(1,40,25,0.74) 100%)",
           "-webkit-backdrop-filter": "blur(14px) saturate(140%)",
           "backdrop-filter": "blur(14px) saturate(140%)",
-          border: "1px solid rgba(255,255,255,0.06)",
+          border: "1px solid rgba(41,71,60,0.9)",
         },
         // Animated conic-gradient border. Needs `--border-angle` registered in globals.css.
         ".border-animated": {
           border: "1px solid transparent",
           background:
-            "linear-gradient(#111827, #111827) padding-box, conic-gradient(from var(--border-angle), rgba(31,41,55,0.9) 0%, rgba(31,41,55,0.9) 60%, #00E699 75%, #67E8F9 82%, #6366F1 90%, rgba(31,41,55,0.9) 100%) border-box",
+            "linear-gradient(#012819, #012819) padding-box, conic-gradient(from var(--border-angle), #29473C 0%, #29473C 60%, #99FE00 75%, #19CB61 84%, #065136 92%, #29473C 100%) border-box",
         },
         ".text-gradient": {
           "background-image":
-            "linear-gradient(90deg, #FFFFFF 0%, #B8FFE6 40%, #00E699 70%, #67E8F9 100%)",
+            "linear-gradient(90deg, #FFFFFF 0%, #E6FFC2 35%, #99FE00 70%, #19CB61 100%)",
           "-webkit-background-clip": "text",
           "background-clip": "text",
           color: "transparent",

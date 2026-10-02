@@ -75,7 +75,7 @@ export function ExamRulesGate({ exam, resuming, onStart }: ExamRulesGateProps) {
               transition={{ delay: 0.15 + i * 0.06 }}
               className="flex items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.015] p-3"
             >
-              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-cyanlight-300" strokeWidth={1.5} />
+              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-leaf-300" strokeWidth={1.5} />
               <span lang="bn" className="text-sm text-ink-muted">
                 {text}
               </span>

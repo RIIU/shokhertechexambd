@@ -11,17 +11,20 @@ Status legend used below: **Built** = implemented in this repo; **Planned** = sp
 
 ### 1.1 Color tokens (`tailwind.config.js`)
 
+All values are sampled pixel-for-pixel from pixxen.com screenshots.
+
 | Token | Hex | Use |
 |---|---|---|
-| `brand-400` (`brand`) | `#00E699` | Primary actions, answered state, focus rings, glows |
-| `brand-50…900` | scale | Tints for text-on-dark, fills |
-| `glow-500` (`glow`) | `#6366F1` | Secondary accent (HSC, explanations, indigo glow) |
-| `cyanlight-300` | `#67E8F9` | Highlights, current-question ring |
-| `obsidian-900` | `#0B0F19` | App background (dark is the default and only theme) |
-| `obsidian-800` | `#111827` | Raised surfaces, modals |
-| `surface` | `#1F2937` | Cards |
-| `ink` / `ink-muted` / `ink-subtle` | `#FFFFFF` / `#9CA3AF` / `#6B7280` | Headings / body / meta |
-| `state-answered` / `flagged` / `unanswered` / `danger` | `#00E699` / `#F59E0B` / `#374151` / `#F43F5E` | Exam palette and timer states |
+| `obsidian-900` | `#002417` | App background and cards (pixxen page background) |
+| `obsidian-800` | `#012819` | Header, raised surfaces, modals |
+| `obsidian-950` | `#001A10` | Modal scrims |
+| `bg-hero` | `#042E1B` → `#09351F` → `#063B25` | Landing hero band, plus a `#1A5C28`-style glow on the right |
+| `surface` / `surface-border` | `#042E1B` / `#29473C` | Chips and glass fills / card borders |
+| `brand-400` (`brand`) | `#99FE00` | Electric lime: primary buttons, answered state, focus rings, glows |
+| `forest` | `#065136` | Text on lime buttons, dark-green fills |
+| `leaf-400` / `leaf-600` | `#19CB61` / `#19914A` | Secondary green: labels, dots, icons, explanation callouts |
+| `ink` / `ink-muted` / `ink-subtle` | `#FFFFFF` / `#A7BDB5` / `#6F8F84` | Headings / body / meta (contrast on `#002417`: 16.6 / 8.4 / 4.7) |
+| `state-answered` / `flagged` / `unanswered` / `danger` | `#99FE00` / `#F59E0B` / `#29473C` / `#F43F5E` | Exam palette and timer states |
 
 Accent classes per subject/stream are kept in a **static map** (`lib/accent.ts`) so Tailwind's JIT sees every class. Never build class names like `` `text-${accent}-400` ``.
 
@@ -43,10 +46,10 @@ Bangla numerals: `toBn()` in `lib/utils.ts`; MCQ option labels are ক খ গ �
 |---|---|
 | `.glass` | Translucent gradient + 14px backdrop blur + hairline border |
 | `.border-animated` + `animate-border-spin` | Conic-gradient border rotating via the registered `@property --border-angle`. Used for **active exam cards** (live subjects), the rules gate, the submit dialog and the result card |
-| `shadow-glow*` | Emerald / indigo / danger outer glows |
+| `shadow-glow*` | Lime / leaf-green / danger outer glows |
 | `animate-glow-pulse`, `animate-danger-pulse`, `animate-pulse-ring` | Pulse indicators (live badges, timer < 5 min) |
 | `animate-gradient-x`, `animate-shimmer` | Progress bar |
-| `.text-gradient` | White → mint → emerald → cyan headline gradient |
+| `.text-gradient` | White → pale lime → lime → leaf-green headline gradient |
 | `.no-select` | `user-select: none` + `-webkit-touch-callout: none` |
 
 Motion split: **GSAP** for timelines, staggers, pointer physics (hero headline, parallax, grid load, card tilt, score count-up). **Framer Motion** for state-driven UI (tabs with `layoutId`, modals, sheets, option selection, question transitions). Both honour `prefers-reduced-motion` (GSAP via `gsap.matchMedia()`, CSS via a global media query).
@@ -181,9 +184,9 @@ Client-side controls only raise the cost of cheating; anyone who controls the br
 
 - Score card with GSAP count-up, progress bar, auto-submit reason banner.
 - Stats: rank / participants, accuracy (correct ÷ attempted), time taken, strikes.
-- **Accuracy donut:** correct / wrong / skipped use status colors (emerald / rose / slate). Each slice also has an icon + text label and a 2px surface gap, because slate vs rose is only 6.7 ΔE for protan vision (checked with the palette validator).
+- **Accuracy donut:** correct / wrong / skipped use status colors (lime / rose / slate). Each slice also has an icon + text label and a 2px surface gap, because slate vs rose is only 6.7 ΔE for protan vision (checked with the palette validator).
 - **Topic bars:** single-series horizontal bars (% correct per topic, 0–100, direct value labels).
-- **Explanations:** filter (all / correct / wrong / skipped); correct option in emerald, a wrong pick in rose with icons, solution in an indigo callout.
+- **Explanations:** filter (all / correct / wrong / skipped); correct option in lime, a wrong pick in rose with icons, solution in a leaf-green callout.
 - Negative marking: `score = Σ marks(correct) − negativeMark × wrong`, floored at 0.
 - Rank is currently simulated (`estimateRank`). **Planned:** Redis sorted set per exam (`ZADD exam:{id} score attemptId`, `ZREVRANK`).
 

@@ -2,7 +2,7 @@ export type Level = "ssc" | "hsc";
 export type StreamId = "science" | "arts" | "commerce";
 export type ExamType = "practice" | "model" | "live" | "archive";
 export type OptionId = "a" | "b" | "c" | "d";
-export type Accent = "brand" | "indigo" | "cyan" | "amber" | "rose" | "violet";
+export type Accent = "brand" | "leaf" | "teal" | "amber" | "rose" | "violet";
 
 export type SubjectIconKey =
   | "atom"

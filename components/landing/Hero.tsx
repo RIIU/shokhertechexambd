@@ -44,9 +44,11 @@ export function Hero() {
   );
 
   return (
-    <section ref={root} className="relative overflow-hidden">
+    <section ref={root} className="relative isolate overflow-hidden bg-hero">
       <div className="page-backdrop" />
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[680px] bg-radial-brand" />
+      {/* pixxen-style soft green glow on the right edge */}
+      <div className="pointer-events-none absolute -right-48 top-1/3 -z-10 h-[560px] w-[560px] rounded-full bg-[radial-gradient(closest-side,rgba(34,120,48,0.6),transparent)]" />
       <div className="pointer-events-none absolute -left-40 top-60 -z-10 h-[420px] w-[420px] rounded-full bg-radial-glow blur-2xl" />
 
       <div className="container grid items-center gap-14 pb-20 pt-12 sm:pt-20 lg:grid-cols-[1.1fr_1fr]">
@@ -110,9 +112,9 @@ export function Hero() {
           </span>
           <span
             data-badge
-            className="absolute -bottom-6 -right-2 z-10 rounded-2xl border border-glow-500/40 bg-obsidian-800/90 px-4 py-2.5 shadow-glow-indigo backdrop-blur sm:-right-8"
+            className="absolute -bottom-6 -right-2 z-10 rounded-2xl border border-leaf-400/40 bg-obsidian-800/90 px-4 py-2.5 shadow-glow-leaf backdrop-blur sm:-right-8"
           >
-            <span className="block font-display text-lg font-black text-glow-300">HSC</span>
+            <span className="block font-display text-lg font-black text-leaf-300">HSC</span>
             <span lang="bn" className="block text-[11px] text-ink-muted">
               ১ম ও ২য় পত্র
             </span>
@@ -172,7 +174,7 @@ function ExamPreview() {
               lang="bn"
               className={cn(
                 "flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold",
-                sel ? "bg-brand-400 text-obsidian-900" : "border border-white/15",
+                sel ? "bg-brand-400 text-forest" : "border border-white/15",
               )}
             >
               {l}
@@ -192,7 +194,7 @@ function ExamPreview() {
                 "flex h-6 w-6 items-center justify-center rounded-md border text-[10px] font-semibold",
                 s === "a" && "border-brand-400/60 bg-brand-400/15 text-brand-200",
                 s === "f" && "border-state-flagged/60 bg-state-flagged/15 text-amber-200",
-                s === "c" && "border-cyanlight-300 text-ink shadow-[0_0_10px_-2px_rgba(103,232,249,0.7)]",
+                s === "c" && "border-white text-ink shadow-[0_0_10px_-2px_rgba(255,255,255,0.55)]",
                 s === "u" && "border-white/10 text-ink-subtle",
               )}
             >

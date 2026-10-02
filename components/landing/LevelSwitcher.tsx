@@ -28,7 +28,7 @@ export function LevelSwitcher({ initial = "ssc" }: { initial?: Level }) {
                 onClick={() => setLevel(id)}
                 className={cn(
                   "relative rounded-xl px-5 py-3 text-left transition-colors sm:px-8",
-                  active ? "text-obsidian-900" : "text-ink-muted hover:text-ink",
+                  active ? "text-forest" : "text-ink-muted hover:text-ink",
                 )}
               >
                 {active && (

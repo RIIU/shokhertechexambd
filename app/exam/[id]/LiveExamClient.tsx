@@ -161,7 +161,7 @@ export function LiveExamClient({ exam, candidate }: LiveExamClientProps) {
         <div className="glass mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-2xl px-3 py-2 sm:px-5">
           <div className="flex min-w-0 items-center gap-3">
             <Link href="/" aria-label="Home" className="hidden shrink-0 items-center gap-2 sm:flex" tabIndex={-1}>
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-400 font-display text-sm font-black text-obsidian-900 shadow-glow">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-400 font-display text-sm font-black text-forest shadow-glow">
                 ST
               </span>
             </Link>

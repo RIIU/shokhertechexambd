@@ -171,7 +171,7 @@ export function OptionSelector({ name, options, selected, onSelect, labelledBy }
               className={cn(
                 "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border font-bangla text-base font-bold transition-colors",
                 isSelected
-                  ? "border-brand-400 bg-brand-400 text-obsidian-900"
+                  ? "border-brand-400 bg-brand-400 text-forest"
                   : "border-white/15 text-ink-muted group-hover:border-brand-400/50 group-hover:text-brand-300",
               )}
             >

@@ -1,6 +1,6 @@
 # ShokherTech Exam BD
 
-Anti-cheat online exam portal for Bangladesh's **SSC & HSC** students: chapter practice, model tests, live exams and instant analytics, in a dark, glassy, emerald-accented UI.
+Anti-cheat online exam portal for Bangladesh's **SSC & HSC** students: chapter practice, model tests, live exams and instant analytics, in a deep-green, lime-accented UI whose colors are taken from pixxen.com.
 
 **Stack:** Next.js 14 (App Router) · TypeScript · Tailwind CSS 3 · GSAP · Framer Motion · Recharts · lucide-react
 

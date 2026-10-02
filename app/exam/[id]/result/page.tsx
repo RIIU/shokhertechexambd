@@ -174,7 +174,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
                   role="tab"
                   aria-selected={filter === f.id}
                   onClick={() => setFilter(f.id)}
-                  className={cn("relative rounded-xl px-4 py-2 text-sm", filter === f.id ? "text-obsidian-900" : "text-ink-muted hover:text-ink")}
+                  className={cn("relative rounded-xl px-4 py-2 text-sm", filter === f.id ? "text-forest" : "text-ink-muted hover:text-ink")}
                 >
                   {filter === f.id && <motion.span layoutId="exp-filter" className="absolute inset-0 rounded-xl bg-brand-400" />}
                   <span lang="bn" className="relative">
@@ -259,8 +259,8 @@ function ExplanationCard({ q, number }: { q: QuestionResult; number: number }) {
           );
         })}
       </ul>
-      <div className="flex gap-3 rounded-2xl bg-glow-500/[0.07] p-4 ring-1 ring-glow-500/20">
-        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-glow-300" strokeWidth={1.5} />
+      <div className="flex gap-3 rounded-2xl bg-leaf-400/[0.07] p-4 ring-1 ring-leaf-400/20">
+        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-leaf-300" strokeWidth={1.5} />
         <p lang="bn" className="text-sm leading-relaxed text-ink/85">
           {q.explanation}
         </p>

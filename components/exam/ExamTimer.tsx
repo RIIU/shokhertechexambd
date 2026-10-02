@@ -42,7 +42,7 @@ export function ExamTimer({ endsAt, durationSec, onExpire, dangerAt = 300, warnA
   const progress = durationSec > 0 ? left / durationSec : 0;
 
   const tone = {
-    ok: { text: "text-brand-300", stroke: "#00E699", ring: "border-brand-400/25 shadow-glow-sm" },
+    ok: { text: "text-brand-300", stroke: "#99FE00", ring: "border-brand-400/25 shadow-glow-sm" },
     warn: { text: "text-amber-300", stroke: "#FBBF24", ring: "border-amber-400/40" },
     danger: { text: "text-rose-300", stroke: "#F43F5E", ring: "border-state-danger/60 animate-danger-pulse" },
   }[state];

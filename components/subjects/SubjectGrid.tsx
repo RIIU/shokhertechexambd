@@ -74,7 +74,7 @@ export function SubjectGrid({ subjects, level, stream }: SubjectGridProps) {
               onClick={() => setFilter(f.id)}
               className={cn(
                 "relative rounded-xl px-4 py-2 text-sm font-medium transition-colors",
-                filter === f.id ? "text-obsidian-900" : "text-ink-muted hover:text-ink",
+                filter === f.id ? "text-forest" : "text-ink-muted hover:text-ink",
               )}
             >
               {filter === f.id && (

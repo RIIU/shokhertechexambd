@@ -45,7 +45,7 @@ export function Navbar() {
         )}
       >
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-400 font-display text-sm font-black text-obsidian-900 shadow-glow">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-400 font-display text-sm font-black text-forest shadow-glow">
             ST
           </span>
           <span className="font-display text-base font-bold tracking-tight text-ink">

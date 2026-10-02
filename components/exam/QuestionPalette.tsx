@@ -93,7 +93,7 @@ export function QuestionPalette({ questions, answers, flags, current, onJump, on
                 {isCurrent && (
                   <motion.span
                     layoutId="palette-current"
-                    className="absolute -inset-[3px] rounded-[14px] border-2 border-cyanlight-300 shadow-[0_0_16px_-2px_rgba(103,232,249,0.7)]"
+                    className="absolute -inset-[3px] rounded-[14px] border-2 border-white shadow-[0_0_16px_-2px_rgba(255,255,255,0.55)]"
                     transition={{ type: "spring", stiffness: 450, damping: 32 }}
                   />
                 )}
