@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 /** Web app manifest: name, colors and icons for "Add to Home screen" on Android/Chrome. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "ShokherTech Exam BD",
-    short_name: "ShokherTech",
+    name: "Shokher Tech Academy",
+    short_name: "Shokher Tech Academy",
     description: "এসএসসি ও এইচএসসি অনলাইন পরীক্ষা: অনুশীলন, মডেল টেস্ট ও লাইভ পরীক্ষা",
     start_url: "/",
     display: "standalone",

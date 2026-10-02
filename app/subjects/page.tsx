@@ -4,7 +4,7 @@ import { isLevel, isStream } from "@/lib/data/catalog";
 import type { Level, StreamId } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "সকল বিষয়সমূহ ও সিলেবাস | ShokherTech Exam BD",
+  title: "সকল বিষয়সমূহ ও সিলেবাস | Shokher Tech Academy",
   description:
     "এসএসসি ও এইচএসসি সকল বিভাগের (বিজ্ঞান, মানবিক, ব্যবসায় শিক্ষা) বিষয়ভিত্তিক অনুশীলন, মডেল টেস্ট ও লাইভ পরীক্ষা।",
 };
