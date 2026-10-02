@@ -4,9 +4,8 @@
  * Dark-first palette inspired by pixxen.com: obsidian surfaces, electric
  * emerald brand, indigo glow secondary and cyan highlights.
  *
- * Fonts are wired as CSS variables in app/layout.tsx (next/font) and
- * app/globals.css (@font-face for Ador Noirrit), so this file only maps them
- * to families.
+ * Fonts are loaded with next/font in app/layout.tsx and exposed as CSS
+ * variables, so this file only maps them to families.
  */
 const plugin = require("tailwindcss/plugin");
 
@@ -81,13 +80,12 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "var(--font-bangla-fallback)", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "var(--font-bangla)", "system-ui", "sans-serif"],
         display: ["var(--font-jakarta)", "var(--font-inter)", "system-ui", "sans-serif"],
-        // Every Bangla string uses this family. 'Ador Noirrit' is self-hosted
-        // and limited to the Bengali unicode-range (see globals.css), so Latin
-        // letters inside Bangla sentences fall through to Inter. Hind Siliguri
-        // covers Bangla glyphs while Ador Noirrit loads or if it is missing.
-        bangla: ["'Ador Noirrit'", "var(--font-inter)", "var(--font-bangla-fallback)", "sans-serif"],
+        // Every Bangla string uses this family. Inter comes first and has no
+        // Bengali glyphs, so English words and Latin digits inside a Bangla
+        // sentence stay in Inter while Bangla letters and ০–৯ use Baloo Da 2.
+        bangla: ["var(--font-inter)", "var(--font-bangla)", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       backgroundImage: {

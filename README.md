@@ -25,6 +25,6 @@ Demo exams: `/exam/ssc-physics-live-01` (12 Qs, 15 min, −0.25 negative marking
 | Result & analytics | `app/exam/[id]/result/page.tsx`, `components/result/ResultCharts.tsx` |
 | Full spec: architecture, admin panel, data model, security model | [`docs/SPEC.md`](docs/SPEC.md) |
 
-## Bangla font
+## Fonts
 
-All Bangla text uses **Ador Noirrit**, which is self-hosted. The font files aren't committed. Put `AdorNoirrit-Regular.woff2` and `AdorNoirrit-Bold.woff2` in `public/fonts/ador-noirrit/` (see the README there). Until then, the UI falls back to Hind Siliguri.
+Bangla text uses **Baloo Da 2** and English text and numbers use **Inter**, both loaded from Google Fonts with `next/font` (no files to add). Baloo Da 2 is under the SIL Open Font License, so it is free for web use.

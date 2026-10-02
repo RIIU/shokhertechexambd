@@ -2,28 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* -------------------------------------------------------------------------- */
-/*  Ador Noirrit (আদর নোররিৎ) — self-hosted Bangla display/body face.          */
-/*  Drop the licensed .woff2 files in public/fonts/ador-noirrit/ (see README). */
-/*  Until then, the `bangla` family falls back to Hind Siliguri via next/font. */
-/* -------------------------------------------------------------------------- */
-@font-face {
-  font-family: "Ador Noirrit";
-  src: url("/fonts/ador-noirrit/AdorNoirrit-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0980-09FF, U+200C-200D, U+25CC;
-}
-@font-face {
-  font-family: "Ador Noirrit";
-  src: url("/fonts/ador-noirrit/AdorNoirrit-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0980-09FF, U+200C-200D, U+25CC;
-}
-
 /* Registered so the conic border gradient can be animated smoothly. */
 @property --border-angle {
   syntax: "<angle>";

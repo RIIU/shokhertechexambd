@@ -31,10 +31,9 @@ Accent classes per subject/stream are kept in a **static map** (`lib/accent.ts`)
 |---|---|---|
 | Inter | `font-sans` | `next/font/google` → `--font-inter` |
 | Plus Jakarta Sans | `font-display` | `next/font/google` → `--font-jakarta` (numbers, headings in Latin) |
-| **Ador Noirrit** | `font-bangla` | Self-hosted `@font-face` in `app/globals.css`, limited to the Bengali `unicode-range`. Files go in `public/fonts/ador-noirrit/` (see README there). |
-| Hind Siliguri | fallback | `next/font/google` → `--font-bangla-fallback`; used while Ador Noirrit loads or if the files are absent |
+| **Baloo Da 2** | `font-bangla` | `next/font/google` → `--font-bangla`, Bengali subset, variable weight 400–800, SIL Open Font License |
 
-Rule: every Bangla string is wrapped in an element with `lang="bn"`. `globals.css` maps `body [lang="bn"]` to `font-bangla`, which is accessible and keeps the font choice in one place. Latin characters inside Bangla text fall through to Inter, because Ador Noirrit is restricted to the Bengali range.
+Rule: every Bangla string is wrapped in an element with `lang="bn"`. `globals.css` maps `body [lang="bn"]` to `font-bangla`, which is accessible and keeps the font choice in one place. The `font-bangla` stack lists Inter first. Inter has no Bengali glyphs, so English words and Latin digits inside Bangla text stay in Inter, while Bangla letters and ০–৯ render in Baloo Da 2.
 
 Bangla numerals: `toBn()` in `lib/utils.ts`; MCQ option labels are ক খ গ ঘ (`OPTION_LABEL_BN`).
 
@@ -114,7 +113,7 @@ lib/
 ├───────────────────────────────────────────────────────────────┬───────────────────────────────┤
 │ প্রশ্ন ৪/১২ · topic · মান ১                      [⚑ পরে দেখব]│  প্রশ্ন তালিকা         ৩/১২    │
 │                                                               │  [উত্তর ৩][চিহ্নিত ১][বাকি ৮] │
-│ Question text (Ador Noirrit, 18–20px)                         │  ① ② ③ ④ ⑤                    │
+│ Question text (Baloo Da 2, 18–20px)                           │  ① ② ③ ④ ⑤                    │
 │ ┌ক option────────┐ ┌খ option────────┐                         │  ⑥ ⑦ ⑧ ⑨ ⑩   (sticky)         │
 │ └────────────────┘ └────────────────┘                         │  ⑪ ⑫                           │
 │ ┌গ option────────┐ ┌ঘ option────────┐                         │  [ পরীক্ষা জমা দাও ]           │

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Hind_Siliguri, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Baloo_Da_2, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
@@ -11,11 +11,10 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   display: "swap",
 });
-// Fallback for 'Ador Noirrit' (self-hosted via @font-face in globals.css).
-const banglaFallback = Hind_Siliguri({
-  subsets: ["bengali", "latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-bangla-fallback",
+// Bangla face (Google Fonts, SIL Open Font License). Variable font: weights 400–800.
+const bangla = Baloo_Da_2({
+  subsets: ["bengali"],
+  variable: "--font-bangla",
   display: "swap",
 });
 
@@ -35,7 +34,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="bn" className={`dark ${inter.variable} ${jakarta.variable} ${banglaFallback.variable}`}>
+    <html lang="bn" className={`dark ${inter.variable} ${jakarta.variable} ${bangla.variable}`}>
       <body>
         <Navbar />
         {children}

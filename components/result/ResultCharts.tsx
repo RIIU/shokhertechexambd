@@ -97,7 +97,8 @@ export function TopicBars({ result }: { result: ExamResult }) {
   }));
   return (
     <figure>
-      <div style={{ height: Math.max(120, data.length * 56) }}>
+      {/* SVG tick labels inherit the Bangla font stack from this wrapper. */}
+      <div className="font-bangla" style={{ height: Math.max(120, data.length * 56) }}>
         <ResponsiveContainer>
           <BarChart data={data} layout="vertical" margin={{ top: 4, right: 40, bottom: 4, left: 8 }} barCategoryGap={14}>
             <XAxis type="number" domain={[0, 100]} hide />
@@ -107,7 +108,7 @@ export function TopicBars({ result }: { result: ExamResult }) {
               width={130}
               tickLine={false}
               axisLine={false}
-              tick={{ fill: "#9CA3AF", fontSize: 13, fontFamily: "var(--font-bangla-fallback)" }}
+              tick={{ fill: "#9CA3AF", fontSize: 13 }}
             />
             <Tooltip cursor={{ fill: "rgba(255,255,255,0.03)" }} content={<ChartTooltip />} />
             <Bar
