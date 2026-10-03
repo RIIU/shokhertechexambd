@@ -7,6 +7,8 @@ import { createStudent, findUserByPhone } from "@/lib/server/users";
 import { dummyHash, verifyPassword } from "@/lib/server/password";
 import { normalizePhone } from "@/lib/phone";
 import { isLevel, isStream } from "@/lib/data/catalog";
+import { ConfigError, sessionSecretOk, userFacingError } from "@/lib/server/diagnose";
+import type { User } from "@/lib/types";
 
 export interface AuthFormState {
   error?: string;
@@ -48,17 +50,23 @@ export async function loginAction(_prev: AuthFormState, form: FormData): Promise
   const key = `${phone}|${ip}`;
   if (tooManyAttempts(key)) return { error: "অনেকবার ভুল চেষ্টা হয়েছে। ১০ মিনিট পর আবার চেষ্টা করো।" };
 
-  const user = await findUserByPhone(phone);
-  // Verify even when the user is missing, so response time doesn't reveal which numbers exist.
-  const ok = await verifyPassword(password, user?.passwordHash ?? (await dummyHash()));
-  if (!user || !ok) {
-    noteFailure(key);
-    return { error: "মোবাইল নম্বর বা পাসওয়ার্ড ভুল।" };
+  let user: User | undefined;
+  try {
+    if (!sessionSecretOk()) throw new ConfigError("SESSION_SECRET_MISSING");
+    user = await findUserByPhone(phone);
+    // Verify even when the user is missing, so response time doesn't reveal which numbers exist.
+    const ok = await verifyPassword(password, user?.passwordHash ?? (await dummyHash()));
+    if (!user || !ok) {
+      noteFailure(key);
+      return { error: "মোবাইল নম্বর বা পাসওয়ার্ড ভুল।" };
+    }
+    if (user.blocked) return { error: "তোমার অ্যাকাউন্ট বন্ধ রাখা হয়েছে। অ্যাডমিনের সাথে যোগাযোগ করো।" };
+    fails.delete(key);
+    await startSession(user);
+  } catch (err) {
+    return { error: userFacingError(err, "login") };
   }
-  if (user.blocked) return { error: "তোমার অ্যাকাউন্ট বন্ধ রাখা হয়েছে। অ্যাডমিনের সাথে যোগাযোগ করো।" };
-
-  fails.delete(key);
-  await startSession(user);
+  // redirect() works by throwing, so it must stay outside the try/catch.
   redirect(safeNext(form.get("next"), user.role === "admin" ? "/admin" : "/dashboard"));
 }
 
@@ -80,10 +88,15 @@ export async function registerAction(_prev: AuthFormState, form: FormData): Prom
   if (!isStream(stream)) fieldErrors.stream = "বিভাগ বেছে নাও";
   if (Object.keys(fieldErrors).length || !phone || !isLevel(level) || !isStream(stream)) return { fieldErrors };
 
-  const user = await createStudent({ name, phone, password, level, stream, institution });
-  if (user === "phone-taken") return { fieldErrors: { phone: "এই নম্বরে আগেই অ্যাকাউন্ট আছে। লগইন করো।" } };
-
-  await startSession(user);
+  try {
+    // Check before creating the account, so a missing secret can't leave a user who can't sign in.
+    if (!sessionSecretOk()) throw new ConfigError("SESSION_SECRET_MISSING");
+    const user = await createStudent({ name, phone, password, level, stream, institution });
+    if (user === "phone-taken") return { fieldErrors: { phone: "এই নম্বরে আগেই অ্যাকাউন্ট আছে। লগইন করো।" } };
+    await startSession(user);
+  } catch (err) {
+    return { error: userFacingError(err, "register") };
+  }
   redirect(safeNext(form.get("next"), "/dashboard"));
 }
 

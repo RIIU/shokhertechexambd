@@ -45,5 +45,21 @@ npm run dev
 ## ৬. Vercel-এ ডিপ্লয়
 Vercel প্রজেক্টের **Settings → Environment Variables**-এ উপরের ৫টি ভেরিয়েবল বসাও, তারপর ডিপ্লয় করো। Supabase থাকায় Vercel-এও ডেটা হারাবে না।
 
+> মনে রেখো: Vercel-এ ভেরিয়েবল বদলালে **Deployments → … → Redeploy** না করা পর্যন্ত নতুন মান কাজ করে না।
+
+## ৭. সমস্যা হলে: `/api/health`
+ডিপ্লয়ের পর ব্রাউজারে `https://তোমার-সাইট/api/health` খোলো। কোন ভেরিয়েবল আছে বা নেই, টেবিল আছে কিনা, key ঠিক কিনা সব দেখাবে (কোনো secret দেখায় না)। সব ঠিক থাকলে `"ok": true`।
+
+| কোড | মানে | সমাধান |
+|---|---|---|
+| `TABLES_MISSING` | টেবিল তৈরি হয়নি | ধাপ ২-এর SQL পুরোটা Run করো |
+| `NO_DATABASE_ON_SERVERLESS` | Vercel-এ Supabase ভেরিয়েবল নেই | `SUPABASE_URL`, `SUPABASE_SECRET_KEY` বসিয়ে Redeploy |
+| `SESSION_SECRET_MISSING` | `SESSION_SECRET` নেই বা ৩২ অক্ষরের কম | লম্বা র‍্যান্ডম স্ট্রিং বসিয়ে Redeploy |
+| `PUBLISHABLE_KEY_USED` | secret-এর জায়গায় publishable key | `sb_secret_…` key দাও |
+| `INVALID_KEY` | key ভুল বা বাতিল (rotate করার পর পুরনো key) | নতুন secret key বসাও |
+| `SUPABASE_UNREACHABLE` | URL ভুল বা প্রজেক্ট pause | URL দেখো, Supabase ড্যাশবোর্ডে প্রজেক্ট Restore করো |
+
+রেজিস্টার/লগইন ফর্মেও এখন এই কোডসহ বার্তা দেখাবে। বিস্তারিত কারণ Vercel-এর **Logs** ট্যাবে `[register]` বা `[login]` লিখে খুঁজলে পাবে।
+
 ## ব্যাকআপ
 Supabase-এর ফ্রি প্ল্যানে স্বয়ংক্রিয় ব্যাকআপ সীমিত। গুরুত্বপূর্ণ পরীক্ষার আগে **Database → Backups** দেখে নাও, অথবা নিয়মিত `pg_dump` দিয়ে কপি রাখো।

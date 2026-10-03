@@ -2,6 +2,7 @@ import "server-only";
 import { jsonStore } from "./json";
 import { supabaseStore } from "./supabase";
 import type { Store } from "./types";
+import { ConfigError, isServerless } from "../diagnose";
 
 export type { Store } from "./types";
 
@@ -17,12 +18,20 @@ export function supabaseConfigured(): boolean {
 
 const g = globalThis as unknown as { __stSeed?: Promise<void>; __stWarned?: boolean };
 
+/** The driver the current environment selects, without seeding (used by /api/health). */
+export function activeDriver(): Store {
+  return supabaseConfigured() ? supabaseStore : jsonStore;
+}
+
 /**
  * The active store, seeded once per server process (demo exams + first
  * admin). Await this instead of importing a driver directly.
  */
 export async function store(): Promise<Store> {
-  const s = supabaseConfigured() ? supabaseStore : jsonStore;
+  const s = activeDriver();
+  // Vercel & co. have no persistent disk: the JSON fallback would lose data or crash.
+  if (s.kind === "json" && isServerless()) throw new ConfigError("NO_DATABASE_ON_SERVERLESS");
+  if (s.kind === "supabase" && supabaseServerKey()?.startsWith("sb_publishable_")) throw new ConfigError("PUBLISHABLE_KEY_USED");
   if (s.kind === "json" && process.env.NODE_ENV === "production" && !g.__stWarned) {
     g.__stWarned = true;
     console.warn("[store] Supabase is not configured; using the local JSON file. Set SUPABASE_URL and SUPABASE_SECRET_KEY for production.");

@@ -177,7 +177,7 @@ const toViolation = (r: ViolationRow): StoredViolation => ({
 /* ------------------------------- Client --------------------------------- */
 
 let client: SupabaseClient | undefined;
-function db(): SupabaseClient {
+export function db(): SupabaseClient {
   if (client) return client;
   const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   // New `sb_secret_…` keys and legacy service_role JWTs both work; supabase-js sends
