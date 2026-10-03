@@ -14,20 +14,20 @@
 
 ফাইলটা দুবার চালালেও কোনো সমস্যা নেই, কিছু ডুপ্লিকেট হবে না।
 
-## ৩. চাবি (key) কপি করো
-**Project Settings → API** থেকে:
-- **Project URL**: এটা `SUPABASE_URL`
-- **service_role** key (secret): এটা `SUPABASE_SERVICE_ROLE_KEY`
+## ৩. URL আর secret key
+- **Project Settings → Data API**: **Project URL** (যেমন `https://abcdxyz.supabase.co`)। এটা `SUPABASE_URL`
+- **Project Settings → API Keys → Secret keys**: `sb_secret_…` দিয়ে শুরু হওয়া key। এটা `SUPABASE_SECRET_KEY`
+  (পুরোনো প্রজেক্টে **Legacy API keys**-এর `service_role` key-ও চলবে, তখন নাম দাও `SUPABASE_SERVICE_ROLE_KEY`)
 
-> ⚠️ service_role key দিয়ে পুরো ডেটাবেস পড়া ও বদলানো যায়। এটা কখনো GitHub-এ, ব্রাউজারের কোডে বা কাউকে পাঠাবে না। নামের আগে `NEXT_PUBLIC_` লাগাবে না।
-> anon key এই অ্যাপে লাগে না। নিরাপত্তার জন্য সব টেবিলে RLS চালু, তাই anon key দিয়ে কিছুই পড়া যায় না।
+> ⚠️ secret key দিয়ে পুরো ডেটাবেস পড়া ও বদলানো যায়। এটা কখনো GitHub-এ, ব্রাউজারের কোডে, চ্যাটে বা কাউকে পাঠাবে না। নামের আগে `NEXT_PUBLIC_` লাগাবে না। কোথাও ফাঁস হয়ে গেলে **API Keys** পেজ থেকে নতুন secret key বানিয়ে পুরোনোটা মুছে দাও।
+> **publishable key** (`sb_publishable_…`) এই অ্যাপে লাগে না। সব টেবিলে RLS চালু, তাই ওই key দিয়ে কিছুই পড়া যায় না।
 
 ## ৪. `.env.local` ফাইল
 প্রজেক্টের মূল ফোল্ডারে `.env.local` তৈরি করো (`.env.example` দেখে):
 
 ```
 SUPABASE_URL=https://xxxxxxxx.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
+SUPABASE_SECRET_KEY=sb_secret_...
 SESSION_SECRET=৩২+ অক্ষরের র‍্যান্ডম লেখা
 ADMIN_PHONE=01XXXXXXXXX
 ADMIN_PASSWORD=শক্ত-একটা-পাসওয়ার্ড

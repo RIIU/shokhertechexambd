@@ -238,9 +238,9 @@ Data lives in **Supabase Postgres** (`supabase/migrations/20261003000000_init.sq
 | `attempts` | start/end/submit times, answers, graded `result` (`jsonb`), `score`, `strikes` | partial unique index = one open attempt per student per exam; rank index on `(exam_id, score)` |
 | `violations` | anti-cheat events | trigger bumps `attempts.strikes` on a strike |
 
-- **Access model:** only the Next.js server talks to the database, with the `service_role` key (`lib/server/store/supabase.ts`). RLS is enabled on every table with **no policies** and `anon`/`authenticated` privileges revoked, so the public anon key can read nothing, including the answer keys.
+- **Access model:** only the Next.js server talks to the database, with the secret key, `sb_secret_…` or legacy `service_role` (`lib/server/store/supabase.ts`). RLS is enabled on every table with **no policies** and `anon`/`authenticated` privileges revoked, so the public anon key can read nothing, including the answer keys.
 - **Auth** stays custom (mobile + password, JWT cookie) because Supabase phone auth needs a paid SMS provider. Users are rows in `public.users`, not `auth.users`.
-- **Driver interface** `lib/server/store/types.ts`; `store()` picks Supabase when `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` are set, otherwise the JSON file (`json.ts`, development only). Business rules live above it in `lib/server/{users,exams,attempts,stats}.ts`.
+- **Driver interface** `lib/server/store/types.ts`; `store()` picks Supabase when `SUPABASE_URL` + `SUPABASE_SECRET_KEY` are set, otherwise the JSON file (`json.ts`, development only). Business rules live above it in `lib/server/{users,exams,attempts,stats}.ts`.
 - Reads page through PostgREST's 1000-row cap; Supabase calls opt out of Next.js fetch caching.
 - First start seeds the demo exams and the first admin (`lib/server/seed.ts`).
 

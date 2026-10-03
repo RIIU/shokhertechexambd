@@ -4,8 +4,9 @@ import type { Store } from "./types";
 import type { Attempt, ExamResult, ExamType, Level, OptionId, Question, QuestionOption, Role, StoredExam, StoredViolation, StreamId, SubmitReason, User, ViolationKind } from "@/lib/types";
 
 /**
- * Supabase (Postgres) driver. Server-side only: it uses the service_role key,
- * which bypasses Row Level Security. Never import this from client code.
+ * Supabase (Postgres) driver. Server-side only: it uses the secret key
+ * (sb_secret_… or legacy service_role), which bypasses Row Level Security.
+ * Never import this from client code.
  * Schema: supabase/migrations/*.sql
  */
 
@@ -179,8 +180,11 @@ let client: SupabaseClient | undefined;
 function db(): SupabaseClient {
   if (client) return client;
   const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set.");
+  // New `sb_secret_…` keys and legacy service_role JWTs both work; supabase-js sends
+  // new-format keys only in the `apikey` header, as Supabase requires.
+  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error("SUPABASE_URL and SUPABASE_SECRET_KEY must be set.");
+  if (key.startsWith("sb_publishable_")) throw new Error("SUPABASE_SECRET_KEY must be the secret (sb_secret_…) key, not the publishable key.");
   client = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     // Next.js caches fetch() in server components by default; database reads must always be fresh.

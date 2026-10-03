@@ -5,9 +5,14 @@ import type { Store } from "./types";
 
 export type { Store } from "./types";
 
-/** Supabase when SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY are set, otherwise the local JSON file. */
+/** Server key: the new `sb_secret_…` key (SUPABASE_SECRET_KEY) or the legacy service_role JWT. */
+export function supabaseServerKey(): string | undefined {
+  return process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || undefined;
+}
+
+/** Supabase when a project URL and a server key are set, otherwise the local JSON file. */
 export function supabaseConfigured(): boolean {
-  return Boolean((process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL) && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return Boolean((process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL) && supabaseServerKey());
 }
 
 const g = globalThis as unknown as { __stSeed?: Promise<void>; __stWarned?: boolean };
@@ -20,7 +25,7 @@ export async function store(): Promise<Store> {
   const s = supabaseConfigured() ? supabaseStore : jsonStore;
   if (s.kind === "json" && process.env.NODE_ENV === "production" && !g.__stWarned) {
     g.__stWarned = true;
-    console.warn("[store] Supabase is not configured; using the local JSON file. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY for production.");
+    console.warn("[store] Supabase is not configured; using the local JSON file. Set SUPABASE_URL and SUPABASE_SECRET_KEY for production.");
   }
   g.__stSeed ??= import("../seed")
     .then(({ seed }) => seed(s))
