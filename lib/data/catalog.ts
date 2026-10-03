@@ -56,17 +56,6 @@ export const EXAM_TYPE_META: Record<ExamType, { nameBn: string; nameEn: string; 
 
 type SubjectSeed = [id: string, nameBn: string, nameEn: string, code: string, icon: SubjectIconKey, accent: Accent, chapters: number];
 
-/** Deterministic pseudo-counts so the seed data looks realistic but stable. */
-function examCounts(seed: string, chapters: number): Record<ExamType, number> {
-  const h = [...seed].reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0, 7);
-  return {
-    practice: chapters * 3 + (h % 7),
-    model: 8 + (h % 9),
-    live: 1 + (h % 3),
-    archive: 20 + (h % 40),
-  };
-}
-
 function build(level: Level, seeds: SubjectSeed[], compulsory: string[] = []): Subject[] {
   return seeds.map(([id, nameBn, nameEn, code, icon, accent, chapters]) => ({
     id,
@@ -77,7 +66,6 @@ function build(level: Level, seeds: SubjectSeed[], compulsory: string[] = []): S
     accent,
     chapters,
     compulsory: compulsory.includes(id),
-    exams: examCounts(`${level}-${id}`, chapters),
   }));
 }
 
@@ -183,16 +171,9 @@ const SUBJECTS: Record<Level, Record<StreamId, Subject[]>> = {
   },
 };
 
-/** Exams that are seeded in lib/exams/bank.ts and can actually be taken. */
-const FEATURED: Partial<Record<`${Level}:${StreamId}:${string}`, Subject["featuredExamIds"]>> = {
-  "ssc:science:physics": { live: "ssc-physics-live-01", practice: "ssc-physics-practice-ch1" },
-};
-
+/** Static subject list. Exams are attached from the database (see StreamSubjectsView). */
 export function getSubjects(level: Level, stream: StreamId): Subject[] {
-  return SUBJECTS[level][stream].map((s) => ({
-    ...s,
-    featuredExamIds: FEATURED[`${level}:${stream}:${s.id}`],
-  }));
+  return SUBJECTS[level][stream];
 }
 
 export function isLevel(value: string): value is Level {

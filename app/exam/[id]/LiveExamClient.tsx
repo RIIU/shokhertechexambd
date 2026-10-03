@@ -12,9 +12,9 @@ import { ExamTimer } from "@/components/exam/ExamTimer";
 import { QuestionCard } from "@/components/exam/QuestionCard";
 import { QuestionPalette } from "@/components/exam/QuestionPalette";
 import { SubmitDialog } from "@/components/exam/SubmitDialog";
-import { clearExamSession, resultStorageKey, useExamSession } from "@/lib/hooks/useExamSession";
+import { clearExamSession, useExamSession } from "@/lib/hooks/useExamSession";
 import { cn, toBn } from "@/lib/utils";
-import type { CandidateExam, ExamResult, OptionId, SubmitPayload, SubmitReason } from "@/lib/types";
+import type { CandidateExam, OptionId, SubmitPayload, SubmitReason } from "@/lib/types";
 
 export interface Candidate {
   name: string;
@@ -23,19 +23,40 @@ export interface Candidate {
   ip: string;
 }
 
+/** The server-side attempt: its deadline is the only one that counts. */
+export interface AttemptInfo {
+  id: string;
+  startedAt: number;
+  endsAt: number;
+  strikes: number;
+  /** Server clock when this was sent; used to correct a wrong device clock. */
+  serverNow: number;
+}
+
+/** Shift server timestamps onto the device clock so the countdown is right even if the phone's clock is off. */
+function toLocalClock(a: AttemptInfo): AttemptInfo {
+  const skew = a.serverNow - Date.now();
+  return { ...a, startedAt: a.startedAt - skew, endsAt: a.endsAt - skew, serverNow: Date.now() };
+}
+
 interface LiveExamClientProps {
   exam: CandidateExam;
   candidate: Candidate;
+  /** An attempt already in progress (resumed after a refresh), if any. */
+  initialAttempt: AttemptInfo | null;
 }
 
 const OPTION_KEYS: Record<string, OptionId> = { "1": "a", "2": "b", "3": "c", "4": "d" };
 
-export function LiveExamClient({ exam, candidate }: LiveExamClientProps) {
+export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClientProps) {
   const router = useRouter();
   const total = exam.questions.length;
-  const { state, start, select, toggleFlag, goTo, setStrikes } = useExamSession(exam.id, exam.durationSec, total);
+  const [attempt, setAttempt] = useState<AttemptInfo | null>(() => (initialAttempt ? toLocalClock(initialAttempt) : null));
+  const { state, select, toggleFlag, goTo, setStrikes } = useExamSession(attempt?.id ?? null, total);
 
   const [running, setRunning] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -46,40 +67,66 @@ export function LiveExamClient({ exam, candidate }: LiveExamClientProps) {
   const answeredCount = useMemo(() => exam.questions.filter((q) => state.answers[q.id]).length, [exam.questions, state.answers]);
   const flaggedCount = useMemo(() => exam.questions.filter((q) => state.flags[q.id]).length, [exam.questions, state.flags]);
 
+  /* ------------------------------- Start --------------------------------- */
+  const begin = useCallback(async () => {
+    // Fullscreen must be requested synchronously inside the click handler.
+    if (document.fullscreenEnabled && !document.fullscreenElement) {
+      void document.documentElement.requestFullscreen({ navigationUI: "hide" }).catch(() => undefined);
+    }
+    if (attempt) {
+      setRunning(true);
+      return;
+    }
+    setStarting(true);
+    setStartError(null);
+    try {
+      const res = await fetch(`/api/exams/${exam.id}/start`, { method: "POST" });
+      const body = (await res.json()) as { attempt?: AttemptInfo; error?: string; attemptId?: string };
+      if (res.status === 409 && body.attemptId) {
+        router.replace(`/results/${body.attemptId}`);
+        return;
+      }
+      if (!res.ok || !body.attempt) throw new Error(body.error ?? `HTTP ${res.status}`);
+      setAttempt(toLocalClock(body.attempt));
+      setRunning(true);
+    } catch {
+      setStartError("পরীক্ষা শুরু করা যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করো।");
+      if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
+    } finally {
+      setStarting(false);
+    }
+  }, [attempt, exam.id, router]);
+
   /* ------------------------------- Submit -------------------------------- */
   const submit = useCallback(
     async (reason: SubmitReason, strikesOverride?: number) => {
-      if (submittingRef.current) return;
+      if (submittingRef.current || !attempt) return;
       submittingRef.current = true;
       setSubmitting(true);
       setSubmitError(null);
 
+      // The server recomputes time taken and strikes; these are hints.
       const payload: SubmitPayload = {
         answers: state.answers,
         reason,
-        strikes: strikesOverride ?? state.strikes,
-        timeTakenSec: state.startedAt ? (Date.now() - state.startedAt) / 1000 : exam.durationSec,
+        strikes: strikesOverride ?? Math.max(state.strikes, attempt.strikes),
+        timeTakenSec: (Date.now() - attempt.startedAt) / 1000,
       };
 
       // Forced submissions (time up / max warnings) retry; the student can't do it themselves.
-      const attempts = reason === "manual" ? 1 : 3;
-      for (let i = 0; i < attempts; i++) {
+      const tries = reason === "manual" ? 1 : 3;
+      for (let i = 0; i < tries; i++) {
         try {
-          const res = await fetch(`/api/exams/${exam.id}/submit`, {
+          const res = await fetch(`/api/attempts/${attempt.id}/submit`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const result = (await res.json()) as ExamResult;
-          try {
-            window.sessionStorage.setItem(resultStorageKey(exam.id), JSON.stringify(result));
-          } catch {
-            /* result page will show an empty state */
-          }
-          clearExamSession(exam.id);
+          // 409 = already submitted (e.g. from another tab): the result exists either way.
+          if (!res.ok && res.status !== 409) throw new Error(`HTTP ${res.status}`);
+          clearExamSession(attempt.id);
           setRunning(false);
-          router.replace(`/exam/${exam.id}/result`);
+          router.replace(`/results/${attempt.id}`);
           return;
         } catch {
           await new Promise((r) => setTimeout(r, 800 * (i + 1)));
@@ -90,7 +137,7 @@ export function LiveExamClient({ exam, candidate }: LiveExamClientProps) {
       setSubmitting(false);
       setSubmitError("জমা দেওয়া যায়নি। ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করো।");
     },
-    [exam.durationSec, exam.id, router, state.answers, state.startedAt, state.strikes],
+    [attempt, router, state.answers, state.strikes],
   );
 
   /* -------------------------- Keyboard shortcuts ------------------------- */
@@ -120,22 +167,11 @@ export function LiveExamClient({ exam, candidate }: LiveExamClientProps) {
 
   if (!running) {
     return (
-      <ExamRulesGate
-        exam={exam}
-        resuming={Boolean(state.startedAt)}
-        onStart={() => {
-          // Fullscreen must be requested synchronously inside the click handler.
-          if (document.fullscreenEnabled && !document.fullscreenElement) {
-            void document.documentElement.requestFullscreen({ navigationUI: "hide" }).catch(() => undefined);
-          }
-          start();
-          setRunning(true);
-        }}
-      />
+      <ExamRulesGate exam={exam} resuming={Boolean(attempt)} starting={starting} error={startError} onStart={() => void begin()} />
     );
   }
 
-  if (!question || !state.endsAt) return null;
+  if (!question || !attempt) return null;
 
   const isLast = state.current === total - 1;
 
@@ -143,9 +179,9 @@ export function LiveExamClient({ exam, candidate }: LiveExamClientProps) {
     <AntiCheatWrapper
       active={running && !submitting}
       maxWarnings={exam.maxWarnings}
-      initialStrikes={state.strikes}
+      initialStrikes={Math.max(state.strikes, attempt.strikes)}
       watermarkLines={[`${candidate.name} · ${candidate.phone}`, `IP ${candidate.ip} · ${candidate.roll}`]}
-      reportEndpoint={`/api/exams/${exam.id}/violations`}
+      reportEndpoint={`/api/exams/${exam.id}/violations?attempt=${attempt.id}`}
       onViolation={(event, strikes) => {
         if (event.strike) setStrikes(strikes);
       }}
@@ -181,7 +217,7 @@ export function LiveExamClient({ exam, candidate }: LiveExamClientProps) {
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <StrikeMeter />
-            <ExamTimer endsAt={state.endsAt} durationSec={exam.durationSec} onExpire={() => void submit("time-up")} compact />
+            <ExamTimer endsAt={attempt.endsAt} durationSec={exam.durationSec} onExpire={() => void submit("time-up")} compact />
           </div>
         </div>
       </header>

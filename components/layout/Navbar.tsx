@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Radio, X } from "lucide-react";
+import { LayoutDashboard, LogIn, LogOut, Menu, Radio, ShieldCheck, X } from "lucide-react";
+import { logoutAction } from "@/app/(auth)/actions";
+import { useSessionUser } from "@/lib/hooks/useSessionUser";
 import { isFocusRoute } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,8 @@ const LINKS = [
 export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { user, loading } = useSessionUser();
+  const home = user?.role === "admin" ? { href: "/admin", label: "অ্যাডমিন", Icon: ShieldCheck } : { href: "/dashboard", label: "ড্যাশবোর্ড", Icon: LayoutDashboard };
 
   useEffect(() => setOpen(false), [pathname]);
 
@@ -83,13 +87,51 @@ export function Navbar() {
           })}
         </ul>
 
-        <Link
-          href="/exam/ssc-physics-live-01"
-          className="flex items-center gap-2 bg-brand-400 px-4 text-sm font-semibold text-forest transition-colors hover:bg-brand-300 sm:px-6 lg:px-10"
-        >
-          <Radio className="h-4 w-4" strokeWidth={1.75} />
-          <span lang="bn">লাইভ পরীক্ষা</span>
-        </Link>
+        <div className="flex items-stretch">
+          {/* Account: pixxen's outlined "Client Portal" slot */}
+          {!loading && (
+            <div className="hidden items-stretch md:flex">
+              {user ? (
+                <>
+                  <Link
+                    href={home.href}
+                    className="flex items-center gap-2 border-l border-forest px-5 text-sm text-ink transition-colors hover:bg-surface-pill"
+                  >
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-forest text-xs font-bold text-brand-300">
+                      {user.name.trim().charAt(0).toUpperCase()}
+                    </span>
+                    <span lang="bn">{home.label}</span>
+                  </Link>
+                  <form action={logoutAction} className="flex">
+                    <button
+                      type="submit"
+                      aria-label="Log out"
+                      title="লগআউট"
+                      className="flex items-center border-l border-forest px-4 text-ink-muted transition-colors hover:bg-surface-pill hover:text-ink"
+                    >
+                      <LogOut className="h-4 w-4" />
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <Link
+                  href={`/login?next=${encodeURIComponent(pathname ?? "/")}`}
+                  className="flex items-center gap-2 border-l border-forest px-5 text-sm text-ink transition-colors hover:bg-surface-pill"
+                >
+                  <LogIn className="h-4 w-4" />
+                  <span lang="bn">লগইন</span>
+                </Link>
+              )}
+            </div>
+          )}
+          <Link
+            href={user ? "/exam/ssc-physics-live-01" : "/register"}
+            className="flex items-center gap-2 bg-brand-400 px-4 text-sm font-semibold text-forest transition-colors hover:bg-brand-300 sm:px-6 lg:px-10"
+          >
+            <Radio className="h-4 w-4" strokeWidth={1.75} />
+            <span lang="bn">{user ? "লাইভ পরীক্ষা" : "ফ্রি রেজিস্ট্রেশন"}</span>
+          </Link>
+        </div>
       </nav>
 
       <AnimatePresence>
@@ -101,12 +143,37 @@ export function Navbar() {
             className="overflow-hidden border-t border-surface-border bg-obsidian-800 md:hidden"
           >
             {LINKS.map((l) => (
-              <li key={l.href} className="border-b border-surface-border last:border-b-0">
+              <li key={l.href} className="border-b border-surface-border">
                 <Link href={l.href} lang="bn" className="block px-5 py-4 text-ink-muted hover:bg-surface-pill hover:text-ink">
                   {l.label}
                 </Link>
               </li>
             ))}
+            {user ? (
+              <>
+                <li className="border-b border-surface-border">
+                  <Link href={home.href} lang="bn" className="flex items-center gap-2 px-5 py-4 text-ink hover:bg-surface-pill">
+                    <home.Icon className="h-4 w-4 text-brand-400" />
+                    {home.label} · {user.name}
+                  </Link>
+                </li>
+                <li>
+                  <form action={logoutAction}>
+                    <button type="submit" lang="bn" className="flex w-full items-center gap-2 px-5 py-4 text-left text-ink-muted hover:bg-surface-pill hover:text-ink">
+                      <LogOut className="h-4 w-4" />
+                      লগআউট
+                    </button>
+                  </form>
+                </li>
+              </>
+            ) : (
+              <li>
+                <Link href="/login" lang="bn" className="flex items-center gap-2 px-5 py-4 text-ink hover:bg-surface-pill">
+                  <LogIn className="h-4 w-4 text-brand-400" />
+                  লগইন
+                </Link>
+              </li>
+            )}
           </motion.ul>
         )}
       </AnimatePresence>

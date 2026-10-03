@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -8,7 +8,6 @@ import { motion } from "framer-motion";
 import { AlertTriangle, CheckCircle2, Clock, Home, Lightbulb, MinusCircle, RotateCcw, Target, Trophy, XCircle } from "lucide-react";
 import { AccuracyDonut, TopicBars } from "@/components/result/ResultCharts";
 import { cn, formatClock, OPTION_LABEL_BN, toBn } from "@/lib/utils";
-import { resultStorageKey } from "@/lib/hooks/useExamSession";
 import type { ExamResult, QuestionResult } from "@/lib/types";
 
 gsap.registerPlugin(useGSAP);
@@ -27,24 +26,23 @@ const REASON_COPY: Record<ExamResult["reason"], string | null> = {
   "max-warnings": "সর্বোচ্চ সতর্কতার সীমা পার হওয়ায় পরীক্ষা স্বয়ংক্রিয়ভাবে জমা হয়েছে।",
 };
 
-export default function ResultPage({ params }: { params: { id: string } }) {
-  const [result, setResult] = useState<ExamResult | null | undefined>(undefined);
+interface ResultViewProps {
+  result: ExamResult;
+  /** Live exams can be taken once, so no "try again" button. */
+  canRetake: boolean;
+  /** Shown when an admin is viewing someone else's result. */
+  studentName?: string;
+  backHref: string;
+  backLabel: string;
+}
+
+export function ResultView({ result, canRetake, studentName, backHref, backLabel }: ResultViewProps) {
   const [filter, setFilter] = useState<Filter>("all");
   const scoreRef = useRef<HTMLSpanElement>(null);
   const root = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    try {
-      const raw = window.sessionStorage.getItem(resultStorageKey(params.id));
-      setResult(raw ? (JSON.parse(raw) as ExamResult) : null);
-    } catch {
-      setResult(null);
-    }
-  }, [params.id]);
-
   useGSAP(
     () => {
-      if (!result) return;
       const counter = { v: 0 };
       gsap.to(counter, {
         v: result.score,
@@ -59,25 +57,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
     { scope: root, dependencies: [result] },
   );
 
-  const questions = useMemo(
-    () => (result ? result.questions.filter((q) => filter === "all" || q.status === filter) : []),
-    [result, filter],
-  );
-
-  if (result === undefined) return <main className="min-h-screen" />;
-
-  if (result === null) {
-    return (
-      <main className="container flex min-h-[60vh] flex-col items-center justify-center text-center">
-        <p lang="bn" className="mb-6 text-ink-muted">
-          এই পরীক্ষার কোনো ফলাফল এই ডিভাইসে পাওয়া যায়নি।
-        </p>
-        <Link href={`/exam/${params.id}`} className="btn-primary">
-          <span lang="bn">পরীক্ষা দাও</span>
-        </Link>
-      </main>
-    );
-  }
+  const questions = useMemo(() => result.questions.filter((q) => filter === "all" || q.status === filter), [result, filter]);
 
   const pct = result.totalMarks > 0 ? (result.score / result.totalMarks) * 100 : 0;
   const reason = REASON_COPY[result.reason];
@@ -105,7 +85,9 @@ export default function ResultPage({ params }: { params: { id: string } }) {
         {/* Score card */}
         <div className="border-animated animate-border-spin mb-6 grid gap-8 rounded-4xl p-6 shadow-glow-lg sm:p-10 lg:grid-cols-[1fr_1.4fr]">
           <div>
-            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-400">Result</p>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-400">
+              Result{studentName && <span lang="bn" className="ml-2 normal-case tracking-normal text-ink-muted">· {studentName}</span>}
+            </p>
             <h1 lang="bn" className="mb-6 text-2xl font-bold text-ink">
               {result.titleBn}
             </h1>
@@ -193,14 +175,16 @@ export default function ResultPage({ params }: { params: { id: string } }) {
         </section>
 
         <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <Link href="/ssc/science" className="btn-ghost">
+          <Link href={backHref} className="btn-ghost">
             <Home className="h-4 w-4" strokeWidth={1.5} />
-            <span lang="bn">বিষয়ে ফিরে যাও</span>
+            <span lang="bn">{backLabel}</span>
           </Link>
-          <Link href={`/exam/${result.examId}`} className="btn-primary">
-            <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
-            <span lang="bn">আবার পরীক্ষা দাও</span>
-          </Link>
+          {canRetake && (
+            <Link href={`/exam/${result.examId}`} className="btn-primary">
+              <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+              <span lang="bn">আবার পরীক্ষা দাও</span>
+            </Link>
+          )}
         </div>
       </section>
     </main>

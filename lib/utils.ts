@@ -36,3 +36,18 @@ export const OPTION_LABEL_BN: Record<OptionId, string> = {
   c: "গ",
   d: "ঘ",
 };
+
+const BN_DATE = new Intl.DateTimeFormat("bn-BD", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Dhaka" });
+const BN_DATETIME = new Intl.DateTimeFormat("bn-BD", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+  timeZone: "Asia/Dhaka",
+});
+
+/** 1790986964000 → "৩ অক্টো, ২০২৬" (Bangladesh time). */
+export function formatDateBn(ts: number, withTime = false): string {
+  return (withTime ? BN_DATETIME : BN_DATE).format(ts);
+}

@@ -15,3 +15,6 @@ export const metadata: Metadata = {
 export default function SscSciencePage() {
   return <StreamSubjectsView level="ssc" stream="science" />;
 }
+
+// Published exams come from the database, so always render fresh.
+export const dynamic = "force-dynamic";

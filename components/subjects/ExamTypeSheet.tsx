@@ -7,7 +7,7 @@ import { Archive, ArrowRight, Lock, PenLine, Radio, Target, X, type LucideIcon }
 import { SubjectIcon } from "./SubjectIcon";
 import { ACCENT_STYLES } from "@/lib/accent";
 import { EXAM_TYPES, EXAM_TYPE_META, LEVELS, STREAMS } from "@/lib/data/catalog";
-import { cn, toBn } from "@/lib/utils";
+import { cn, formatMinutesBn, toBn } from "@/lib/utils";
 import type { ExamType, Level, StreamId, Subject } from "@/lib/types";
 
 const TYPE_ICON: Record<ExamType, LucideIcon> = {
@@ -93,59 +93,74 @@ export function ExamTypeSheet({ subject, level, stream, onClose }: ExamTypeSheet
               {EXAM_TYPES.map((type, i) => {
                 const Icon = TYPE_ICON[type];
                 const meta = EXAM_TYPE_META[type];
-                const examId = subject.featuredExamIds?.[type];
-                const body = (
-                  <>
-                    <span
-                      className={cn(
-                        "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1",
-                        type === "live" ? "bg-state-danger/10 text-rose-300 ring-state-danger/30" : "bg-white/[0.04] text-brand-300 ring-white/10",
-                      )}
-                    >
-                      <Icon className="h-5 w-5" strokeWidth={1.5} />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span lang="bn" className="block font-semibold text-ink">
-                        {meta.nameBn}
-                      </span>
-                      <span lang="bn" className="block text-xs text-ink-muted">
-                        {meta.descBn} · {toBn(subject.exams[type])}টি
-                      </span>
-                    </span>
-                    {examId ? (
-                      <ArrowRight className="h-5 w-5 shrink-0 text-brand-400 transition-transform group-hover:translate-x-1" strokeWidth={1.5} />
-                    ) : (
-                      <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-ink-subtle">
-                        <Lock className="h-3.5 w-3.5" strokeWidth={1.5} />
-                        <span lang="bn">শীঘ্রই</span>
-                      </span>
-                    )}
-                  </>
-                );
-
+                const exams = subject.available?.[type] ?? [];
+                const isLive = type === "live";
                 return (
                   <motion.li
                     key={type}
                     initial={{ opacity: 0, x: 24 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.08 + i * 0.05 }}
+                    className={cn(
+                      "rounded-2xl border p-4",
+                      isLive && exams.length ? "border-state-danger/30 bg-state-danger/[0.04]" : "border-surface-border bg-obsidian-900",
+                    )}
                   >
-                    {examId ? (
-                      <Link
-                        href={`/exam/${examId}`}
+                    <div className={cn("flex items-center gap-4", !exams.length && "opacity-60")}>
+                      <span
                         className={cn(
-                          "group flex items-center gap-4 rounded-2xl border p-4 transition-all",
-                          type === "live"
-                            ? "border-state-danger/30 bg-state-danger/[0.04] hover:shadow-glow-danger"
-                            : "border-surface-border bg-white/[0.02] hover:border-brand-400/40 hover:shadow-glow-sm",
+                          "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1",
+                          isLive ? "bg-state-danger/10 text-rose-300 ring-state-danger/30" : "bg-surface-pill text-brand-300 ring-surface-border",
                         )}
                       >
-                        {body}
-                      </Link>
-                    ) : (
-                      <div aria-disabled="true" className="flex items-center gap-4 rounded-2xl border border-surface-border bg-white/[0.01] p-4 opacity-60">
-                        {body}
-                      </div>
+                        <Icon className="h-5 w-5" strokeWidth={1.5} />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span lang="bn" className="block font-semibold text-ink">
+                          {meta.nameBn}
+                        </span>
+                        <span lang="bn" className="block text-xs text-ink-muted">
+                          {meta.descBn}
+                        </span>
+                      </span>
+                      {exams.length ? (
+                        <span lang="bn" className="chip shrink-0">
+                          {toBn(exams.length)}টি
+                        </span>
+                      ) : (
+                        <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-ink-subtle">
+                          <Lock className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          <span lang="bn">শীঘ্রই</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {exams.length > 0 && (
+                      <ul className="mt-3 space-y-2">
+                        {exams.map((e) => (
+                          <li key={e.id}>
+                            <Link
+                              href={`/exam/${e.id}`}
+                              className={cn(
+                                "group flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all",
+                                isLive
+                                  ? "border-state-danger/30 hover:shadow-glow-danger"
+                                  : "border-surface-border hover:border-brand-400/50 hover:shadow-glow-sm",
+                              )}
+                            >
+                              <span className="min-w-0 flex-1">
+                                <span lang="bn" className="block truncate text-sm font-medium text-ink">
+                                  {e.titleBn}
+                                </span>
+                                <span lang="bn" className="block text-[11px] text-ink-subtle">
+                                  {toBn(e.questions)}টি প্রশ্ন · {formatMinutesBn(e.durationSec)}
+                                </span>
+                              </span>
+                              <ArrowRight className="h-4 w-4 shrink-0 text-brand-400 transition-transform group-hover:translate-x-1" strokeWidth={1.5} />
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </motion.li>
                 );

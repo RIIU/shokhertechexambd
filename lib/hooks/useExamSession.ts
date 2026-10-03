@@ -4,17 +4,13 @@ import { useCallback, useEffect, useReducer } from "react";
 import type { Answers, OptionId } from "@/lib/types";
 
 /**
- * Exam attempt state, persisted to sessionStorage so a refresh resumes the
- * same attempt with the same deadline and strike count.
- *
- * In production the server owns `startedAt` (and therefore the deadline);
- * the client copy only drives the UI.
+ * Answer-sheet state for one attempt, kept in sessionStorage so a refresh
+ * restores answers, flags and position. Timing is NOT stored here: the
+ * deadline comes from the server-side attempt.
  */
 
 export interface ExamSessionState {
   hydrated: boolean;
-  startedAt: number | null;
-  endsAt: number | null;
   answers: Answers;
   flags: Record<string, boolean>;
   current: number;
@@ -25,7 +21,6 @@ export interface ExamSessionState {
 
 type Action =
   | { type: "hydrate"; state: Partial<ExamSessionState> }
-  | { type: "start"; now: number; durationSec: number }
   | { type: "select"; questionId: string; optionId: OptionId | null }
   | { type: "flag"; questionId: string }
   | { type: "goto"; index: number; total: number }
@@ -33,8 +28,6 @@ type Action =
 
 const INITIAL: ExamSessionState = {
   hydrated: false,
-  startedAt: null,
-  endsAt: null,
   answers: {},
   flags: {},
   current: 0,
@@ -45,10 +38,7 @@ const INITIAL: ExamSessionState = {
 function reducer(state: ExamSessionState, action: Action): ExamSessionState {
   switch (action.type) {
     case "hydrate":
-      return { ...state, ...action.state, hydrated: true };
-    case "start":
-      if (state.startedAt) return state; // resuming keeps the original deadline
-      return { ...state, startedAt: action.now, endsAt: action.now + action.durationSec * 1000 };
+      return { ...INITIAL, ...action.state, hydrated: true };
     case "select":
       return { ...state, answers: { ...state.answers, [action.questionId]: action.optionId } };
     case "flag":
@@ -63,48 +53,45 @@ function reducer(state: ExamSessionState, action: Action): ExamSessionState {
   }
 }
 
-const storageKey = (examId: string) => `exam:${examId}:session`;
+const storageKey = (attemptId: string) => `attempt:${attemptId}`;
 
-/** Where the graded result is kept for the result page. */
-export const resultStorageKey = (examId: string) => `exam:${examId}:result`;
-
-function read(examId: string): Partial<ExamSessionState> {
+function read(attemptId: string | null): Partial<ExamSessionState> {
+  if (!attemptId) return {};
   try {
-    const raw = window.sessionStorage.getItem(storageKey(examId));
+    const raw = window.sessionStorage.getItem(storageKey(attemptId));
     return raw ? (JSON.parse(raw) as Partial<ExamSessionState>) : {};
   } catch {
     return {};
   }
 }
 
-export function clearExamSession(examId: string) {
+export function clearExamSession(attemptId: string) {
   try {
-    window.sessionStorage.removeItem(storageKey(examId));
+    window.sessionStorage.removeItem(storageKey(attemptId));
   } catch {
     /* storage unavailable */
   }
 }
 
-export function useExamSession(examId: string, durationSec: number, totalQuestions: number) {
+export function useExamSession(attemptId: string | null, totalQuestions: number) {
   const [state, dispatch] = useReducer(reducer, INITIAL);
 
   useEffect(() => {
-    dispatch({ type: "hydrate", state: read(examId) });
-  }, [examId]);
+    dispatch({ type: "hydrate", state: read(attemptId) });
+  }, [attemptId]);
 
   useEffect(() => {
-    if (!state.hydrated || !state.startedAt) return;
+    if (!state.hydrated || !attemptId) return;
     const { hydrated: _h, direction: _d, ...persisted } = state;
     try {
-      window.sessionStorage.setItem(storageKey(examId), JSON.stringify(persisted));
+      window.sessionStorage.setItem(storageKey(attemptId), JSON.stringify(persisted));
     } catch {
       /* storage full or blocked: the attempt still works, it just won't survive a reload */
     }
-  }, [examId, state]);
+  }, [attemptId, state]);
 
   return {
     state,
-    start: useCallback(() => dispatch({ type: "start", now: Date.now(), durationSec }), [durationSec]),
     select: useCallback(
       (questionId: string, optionId: OptionId | null) => dispatch({ type: "select", questionId, optionId }),
       [],

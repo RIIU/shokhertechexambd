@@ -68,42 +68,43 @@ Icons: lucide-react with `strokeWidth={1.5}`.
 /ssc/science              Subject grid (explicit route file)                                   [Built]
 /{ssc|hsc}/{stream}       Subject grid for the other five level × stream combos                [Built]
    └─ subject card click → Exam-type sheet: Practice · Model Test · Live · Archive            [Built]
-/exam/[id]                Rules gate → Live Exam (strict mode)                                  [Built]
-/exam/[id]/result         Score, rank, accuracy donut, topic bars, explanations                [Built]
-/admin/*                  Control center (see §6)                                               [Planned]
-/login, /dashboard        Phone-OTP auth, student history                                       [Planned]
+/login, /register          Mobile number + password accounts                                    [Built]
+/dashboard                Student home: stats, score trend, subject skill, results             [Built]
+/exam/[id]                Rules gate → Live Exam (strict mode), login required                  [Built]
+/results/[attemptId]      Score, live rank, accuracy donut, topic bars, explanations           [Built]
+/admin/*                  Control center (see §6), admin role only                              [Built]
 ```
 
 ### Route → file map
 
 ```
+middleware.ts                    redirects signed-out users (and non-admins on /admin)
 app/
 ├─ layout.tsx                    fonts, Navbar/Footer (hidden on /exam/[id])
 ├─ page.tsx                      landing
-├─ ssc/page.tsx, hsc/page.tsx    LevelOverview
-├─ ssc/science/page.tsx          StreamSubjectsView(level="ssc", stream="science")
-├─ ssc/[stream]/page.tsx         arts, commerce (SSG, dynamicParams=false)
-├─ hsc/[stream]/page.tsx         science, arts, commerce (SSG)
-├─ exam/[id]/page.tsx            server: load exam, strip answer key, resolve candidate + IP
+├─ (auth)/login, (auth)/register login & sign-up pages; (auth)/actions.ts = server actions
+├─ dashboard/page.tsx            student dashboard
+├─ ssc/…, hsc/…                  level + stream subject grids (exams read from the database)
+├─ exam/[id]/page.tsx            server: auth, strip answer key, resume open attempt
 ├─ exam/[id]/LiveExamClient.tsx  client: exam state machine and layout
-├─ exam/[id]/result/page.tsx     client: reads graded result from sessionStorage
-└─ api/exams/[id]/
-   ├─ submit/route.ts            POST: validate and grade server-side
-   └─ violations/route.ts        POST: anti-cheat event sink (sendBeacon)
-components/
-├─ security/AntiCheatWrapper.tsx, Watermark.tsx
-├─ exam/ExamTimer, ExamProgressBar, QuestionCard (+OptionSelector), QuestionPalette, SubmitDialog, ExamRulesGate
-├─ subjects/StreamSubjectsView, SubjectGrid, SubjectCard, ExamTypeSheet, SubjectIcon
-├─ landing/Hero, LevelSwitcher, StreamCards, LevelOverview, Features
-├─ result/ResultCharts
-├─ layout/Navbar, Footer
-└─ ui/GsapReveal
+├─ results/[attemptId]/page.tsx  graded result (owner or admin)
+├─ admin/                        layout (admin guard) + overview, exams, exams/new, exams/[id],
+│                                students, attempts, alerts; admin/actions.ts = server actions
+└─ api/
+   ├─ auth/me                    GET: who is signed in (navbar)
+   ├─ exams/[id]/start           POST: create/resume attempt, server deadline
+   ├─ exams/[id]/violations      POST: anti-cheat event sink (sendBeacon)
+   └─ attempts/[attemptId]/submit POST: grade once, server-side
+components/  security/, exam/, subjects/, landing/, result/ (ResultView, ResultCharts),
+             dashboard/, admin/, auth/, layout/, ui/ (StatTile, Panel, GsapReveal)
 lib/
-├─ types.ts, utils.ts, accent.ts, routes.ts
+├─ types.ts, utils.ts, accent.ts, routes.ts, phone.ts, session-token.ts (edge-safe JWT)
 ├─ data/catalog.ts               levels, streams, subjects (NCTB codes), exam-type meta
-├─ exams/bank.ts                 SERVER-ONLY seed questions with answer keys
-├─ exams/repository.ts           getExam, toCandidateExam, parseSubmitPayload, gradeExam
-└─ hooks/useExamSession.ts       persisted attempt state
+├─ exams/bank.ts                 seed questions (copied into the database on first run)
+├─ exams/grading.ts              toCandidateExam, parseSubmitPayload, gradeExam
+├─ hooks/useExamSession.ts       answer sheet per attempt (sessionStorage)
+└─ server/                       SERVER-ONLY: db (JSON store), seed, password (scrypt),
+                                 auth (cookie session), users, exams, attempts, stats
 ```
 
 ---
@@ -131,12 +132,13 @@ Mobile (<lg): palette moves into a draggable bottom sheet; a fixed bottom bar ho
 
 ```
 hydrating ──► gate (ExamRulesGate) ──click (requests fullscreen)──► running
-running ──manual confirm──► submitting ──► /exam/[id]/result
+gate ──click──► POST /api/exams/[id]/start (server sets startedAt/endsAt) ──► running
+running ──manual confirm──► submitting ──► /results/[attemptId]
 running ──timer hits 0──► submitting (reason "time-up", retried ×3)
 running ──strike #maxWarnings──► submitting (reason "max-warnings", retried ×3)
 ```
 
-`useExamSession` persists `{startedAt, endsAt, answers, flags, current, strikes}` to `sessionStorage`. A refresh resumes the **same deadline and strike count**. The timer derives remaining time from the absolute `endsAt`, so background-tab throttling or a reload can't buy time.
+The deadline lives on the server attempt. The exam page hands an open attempt back after a refresh, the countdown is corrected for a wrong device clock, and `useExamSession` keeps only the answer sheet (`answers, flags, current, strikes`) in `sessionStorage`, keyed by attempt id. Live exams allow one submission per student.
 
 ### 3.3 Components
 
@@ -178,7 +180,8 @@ At `maxWarnings` (default 3) strikes, the wrapper fires `onMaxWarnings` once and
 Client-side controls only raise the cost of cheating; anyone who controls the browser can bypass them. The real guarantees are server-side:
 
 - **Built:** the answer key never leaves the server before submission (`toCandidateExam` strips `correctOptionId` and `explanation`). Grading runs in `POST /api/exams/[id]/submit`, which re-validates every field (`parseSubmitPayload`). Exam routes send `X-Frame-Options: DENY` and `Cache-Control: no-store`.
-- **Planned:** authenticated attempts (`attemptId` issued at start, `startedAt` stored server-side, submissions rejected after `startedAt + duration + grace`); one submission per attempt; per-candidate shuffled question/option order (seeded by `attemptId`); rate limiting; persisting violation events and streaming them to the admin Live Monitor; device fingerprint + concurrent-session lock.
+- **Built:** login required for every exam; attempts created server-side with the server's `startedAt`/`endsAt`; time taken computed by the server; answers arriving more than 2 minutes after the deadline are discarded; each attempt is graded once; strikes = max(server log, client count); violation events stored with user, attempt and IP and shown in the admin log; login rate limit (8 failures / 10 min per number + IP).
+- **Planned:** per-candidate shuffled question/option order (seeded by attempt id); device fingerprint + concurrent-session lock; websocket push for the live monitor (it polls every 10 s today).
 
 ---
 
@@ -190,40 +193,40 @@ Client-side controls only raise the cost of cheating; anyone who controls the br
 - **Topic bars:** single-series horizontal bars (% correct per topic, 0–100, direct value labels).
 - **Explanations:** filter (all / correct / wrong / skipped); correct option in lime, a wrong pick in rose with icons, solution in a leaf-green callout.
 - Negative marking: `score = Σ marks(correct) − negativeMark × wrong`, floored at 0.
-- Rank is currently simulated (`estimateRank`). **Planned:** Redis sorted set per exam (`ZADD exam:{id} score attemptId`, `ZREVRANK`).
+- Rank is real: 1 + number of submitted attempts on the same exam with a higher score, computed when the result is viewed (so it updates as others submit). At scale, move to a Redis sorted set per exam.
 
 ---
 
-## 6. Admin panel: Control Center (Planned)
+## 6. Accounts, dashboard & admin (Built)
 
-Route group `app/(admin)/admin/*`, protected by middleware (role = `admin | moderator`).
+### 6.1 Accounts
 
-| Route | Purpose | Key UI |
-|---|---|---|
-| `/admin` | Overview | KPI tiles (active students, live attempts, today's submissions, alerts), live-exam ticker |
-| `/admin/batches` | Batches / cohorts | Table + create drawer (name, level, stream, schedule, price) |
-| `/admin/exams` | Exam list | Filters (level, stream, subject, type, status); duplicate / publish / archive |
-| `/admin/exams/new` | Exam builder | Stepper: meta → pick questions from bank (filters + drag order) → rules (duration, negative mark, `maxWarnings`, shuffle, start window) → preview → publish |
-| `/admin/questions` | Question bank | Virtualised table; MCQ editor (Bangla rich text, KaTeX for math, image upload, 4 options, answer, explanation, topic, chapter, difficulty); **bulk import** (CSV/XLSX template); **written (CQ) upload**: stem + ক/খ/গ/ঘ sub-questions with marks, PDF/image attachment |
-| `/admin/monitor` | Live Exam Monitor | Per-exam grid of active candidates (progress, time left, strikes) over SSE/websocket; row turns rose on a strike; force-submit / extend time |
-| `/admin/alerts` | Anti-cheat log | Stream of `ViolationEvent`s (kind, candidate, IP, time), filter by kind and exam, mark reviewed, invalidate attempt |
-| `/admin/analytics` | User analytics | Cohort retention, score distributions per exam, question difficulty index & discrimination (flags bad questions) |
+- Sign-up: name, mobile number (normalised to `01XXXXXXXXX`), SSC/HSC, stream, optional institution, password (6+ chars).
+- Passwords hashed with scrypt (Node `crypto`, random salt, constant-time compare).
+- Session: HS256 JWT (`jose`) in an `httpOnly`, `SameSite=Lax` cookie for 7 days, signed with `SESSION_SECRET`. The middleware checks the signature; pages and APIs re-read the user from the database, so blocking a student or changing a role takes effect at once.
+- Roles: `student`, `admin`. The first admin is created from `ADMIN_PHONE` / `ADMIN_PASSWORD` (dev fallback `01700000000` / `admin12345`, never in production).
 
-Shared admin components: `DataTable` (TanStack Table), `StatTile`, `FilterBar`, `Drawer`, `ConfirmDialog`, `QuestionEditor`.
+### 6.2 Student dashboard (`/dashboard`)
 
-### 6.1 Data model (Planned, PostgreSQL / Prisma)
+Exams taken, average score %, average accuracy, best rank · score trend line (last 12) · per-subject average · recent results with live rank · in-progress attempts with "continue" · suggested published exams for the student's level and stream.
 
-```
-User(id, phone UNIQUE, name, role, level, stream, createdAt)
-Batch(id, name, level, stream, startsAt, endsAt)            BatchMember(batchId, userId)
-Subject(id, level, stream, code, nameBn, nameEn, chapters)
-Question(id, subjectId, chapter, topic, type[MCQ|CQ], stem, options JSON, answer, explanation, difficulty, createdBy)
-Exam(id, subjectId, type[practice|model|live|archive], titleBn, durationSec, negativeMark, maxWarnings, shuffle, opensAt, closesAt, status)
-ExamQuestion(examId, questionId, order, marks)
-Attempt(id, examId, userId, startedAt, submittedAt, reason, score, strikes, ip, userAgent)   UNIQUE(examId,userId) for live
-Answer(attemptId, questionId, optionId, answeredAt)
-Violation(id, attemptId, kind, strike, detail, ip, at)
-```
+### 6.3 Admin control center (`/admin`)
+
+| Route | What it does |
+|---|---|
+| `/admin` | KPIs (students, published/draft exams, submissions and strikes in 24 h), **live monitor** of students currently sitting an exam (time left, strikes; refreshes every 10 s), recent strikes, 14-day submissions chart |
+| `/admin/exams` | All exams with status filter, question count, submissions |
+| `/admin/exams/new` | Create exam: Bangla/English title, level, stream, subject, type, minutes, negative mark, max warnings |
+| `/admin/exams/[id]` | Question bank for the exam: add MCQ (4 options, correct answer, topic, marks, explanation), delete, edit details, publish/unpublish (needs ≥ 1 question), preview, delete exam (blocked once anyone has sat it) |
+| `/admin/students` | Search by name/number/institution; exams taken, average, strikes; block/unblock |
+| `/admin/attempts` | Every submission: score, live rank, time, strikes, submit reason; filter by exam or student; open the full result |
+| `/admin/alerts` | Anti-cheat log: strikes only or all events, with student, exam, detail and IP |
+
+**Next steps:** bulk question import (CSV/XLSX), images/math (KaTeX) in questions, written (CQ) answers, batches & scheduled live windows, moderator role.
+
+### 6.4 Storage
+
+`lib/server/db.ts` is a JSON-file store (`.data/db.json`, override with `DATA_DIR`) with serialised writes and atomic renames, fine for development and a single server (VPS/Docker). The schema (`users`, `exams`, `attempts`, `violations`) maps one-to-one onto SQL tables, and only `lib/server/*` touches it, so moving to Postgres (Prisma/Drizzle) is contained. Serverless hosts such as Vercel need that move, because their filesystem is not persistent.
 
 ---
 
@@ -232,14 +235,15 @@ Violation(id, attemptId, kind, strike, detail, ip, at)
 - Every interactive element is a real `button`/`a` with visible `:focus-visible` rings; the radio group, timer (`role="timer"`), progress bar, dialogs (`aria-modal`) and palette (`aria-current="step"`) carry ARIA.
 - Bangla content marked `lang="bn"` for screen readers and font selection.
 - Reduced motion respected globally.
-- Subject pages are statically generated (SSG). Exam pages are dynamic (personalised watermark, `no-store`). Recharts is imported only by the result page, so no other route ships it.
+- Landing and level pages are static; subject, exam, dashboard and admin pages render per request (fresh exams, personalised watermark, `no-store` on exam routes). Recharts is imported only by the result page, so no other route ships it.
 
 ## 8. Running locally
 
 ```bash
 npm install
-npm run dev          # http://localhost:3000
+cp .env.example .env.local   # optional in dev
+npm run dev                  # http://localhost:3000
 npm run typecheck && npm run lint && npm run build
 ```
 
-Try it: `/ssc/science` → পদার্থবিজ্ঞান → লাইভ পরীক্ষা, or go straight to `/exam/ssc-physics-live-01`.
+Dev admin: `01700000000` / `admin12345` (unless `ADMIN_PHONE`/`ADMIN_PASSWORD` are set). Register a student at `/register`, then try `/exam/ssc-physics-live-01`.

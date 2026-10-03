@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, Copy, Eye, Maximize, MonitorX, ShieldCheck, Play } from "lucide-react";
+import { Clock, Copy, Eye, Loader2, Maximize, MonitorX, ShieldCheck, Play } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { formatMinutesBn, toBn } from "@/lib/utils";
 import type { CandidateExam } from "@/lib/types";
@@ -9,11 +9,13 @@ import type { CandidateExam } from "@/lib/types";
 interface ExamRulesGateProps {
   exam: CandidateExam;
   resuming: boolean;
+  starting?: boolean;
+  error?: string | null;
   onStart: () => void;
 }
 
 /** Pre-exam briefing. The start click doubles as the user gesture fullscreen requires. */
-export function ExamRulesGate({ exam, resuming, onStart }: ExamRulesGateProps) {
+export function ExamRulesGate({ exam, resuming, starting, error, onStart }: ExamRulesGateProps) {
   const rules: { icon: LucideIcon; text: string }[] = [
     { icon: Maximize, text: "পরীক্ষা ফুলস্ক্রিন মোডে চলবে। ফুলস্ক্রিন থেকে বের হলে সতর্কতা দেওয়া হবে।" },
     {
@@ -89,8 +91,14 @@ export function ExamRulesGate({ exam, resuming, onStart }: ExamRulesGateProps) {
           </p>
         )}
 
-        <button type="button" onClick={onStart} className="btn-primary w-full py-3.5 text-base">
-          <Play className="h-5 w-5 fill-current" strokeWidth={1.5} />
+        {error && (
+          <p lang="bn" role="alert" className="mb-4 rounded-xl bg-state-danger/10 p-3 text-center text-sm text-rose-200 ring-1 ring-state-danger/30">
+            {error}
+          </p>
+        )}
+
+        <button type="button" onClick={onStart} disabled={starting} className="btn-primary w-full py-3.5 text-base">
+          {starting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Play className="h-5 w-5 fill-current" strokeWidth={1.5} />}
           <span lang="bn">{resuming ? "পরীক্ষা চালিয়ে যাও" : "নিয়ম মেনে পরীক্ষা শুরু করো"}</span>
         </button>
       </motion.section>

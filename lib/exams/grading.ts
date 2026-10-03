@@ -8,19 +8,14 @@ import type {
   SubmitPayload,
   SubmitReason,
 } from "@/lib/types";
-import { EXAM_BANK } from "./bank";
 
 /**
- * Exam data access. SERVER-ONLY (imports the answer key).
- * Swap the EXAM_BANK lookups for database queries in production.
+ * Pure grading helpers. Only ever call these on the server: they work on the
+ * full exam including the answer key.
  */
 
 const OPTION_IDS: readonly OptionId[] = ["a", "b", "c", "d"];
 const SUBMIT_REASONS: readonly SubmitReason[] = ["manual", "time-up", "max-warnings"];
-
-export function getExam(id: string): Exam | undefined {
-  return EXAM_BANK[id];
-}
 
 /** Strips the answer key and explanations before data leaves the server. */
 export function toCandidateExam(exam: Exam): CandidateExam {
@@ -57,20 +52,9 @@ export function parseSubmitPayload(body: unknown, exam: Exam): SubmitPayload | n
   };
 }
 
-/**
- * Simulated cohort so the result page can show a rank. Replace with a
- * leaderboard query (e.g. Redis sorted set keyed by exam id) in production.
- */
-function estimateRank(score: number, totalMarks: number, examId: string) {
-  const participants = 3000 + ([...examId].reduce((a, c) => a + c.charCodeAt(0), 0) % 2500);
-  const ratio = totalMarks > 0 ? score / totalMarks : 0;
-  // Logistic curve centred at 55% with a moderate spread.
-  const percentile = 1 / (1 + Math.exp(-(ratio - 0.55) * 9));
-  const rank = Math.max(1, Math.round(participants * (1 - percentile)));
-  return { rank, participants };
-}
+export type GradedResult = Omit<ExamResult, "rank" | "participants">;
 
-export function gradeExam(exam: Exam, payload: SubmitPayload): ExamResult {
+export function gradeExam(exam: Exam, payload: SubmitPayload): GradedResult {
   let correct = 0;
   let wrong = 0;
   let skipped = 0;
@@ -122,7 +106,6 @@ export function gradeExam(exam: Exam, payload: SubmitPayload): ExamResult {
     wrong,
     skipped,
     accuracy: attempted > 0 ? Math.round((correct / attempted) * 100) : 0,
-    ...estimateRank(finalScore, totalMarks, exam.id),
     timeTakenSec: Math.round(payload.timeTakenSec),
     strikes: payload.strikes,
     reason: payload.reason,

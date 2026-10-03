@@ -36,11 +36,18 @@ export interface Subject {
   accent: Accent;
   chapters: number;
   compulsory?: boolean;
-  /** Number of published exams per exam type. */
-  exams: Record<ExamType, number>;
-  /** Exam ids that are open right now, keyed by type. */
-  featuredExamIds?: Partial<Record<ExamType, string>>;
+  /** Published exams for this subject, filled in from the database. */
+  available?: SubjectExams;
 }
+
+export interface ExamSummary {
+  id: string;
+  titleBn: string;
+  questions: number;
+  durationSec: number;
+}
+
+export type SubjectExams = Partial<Record<ExamType, ExamSummary[]>>;
 
 export interface Stream {
   id: StreamId;
@@ -135,6 +142,7 @@ export interface QuestionResult {
 
 export interface ExamResult {
   examId: string;
+  attemptId?: string;
   titleBn: string;
   score: number;
   totalMarks: number;
@@ -150,4 +158,66 @@ export interface ExamResult {
   topics: { topic: string; correct: number; total: number }[];
   questions: QuestionResult[];
   submittedAt: number;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Accounts, attempts & admin                                                */
+/* -------------------------------------------------------------------------- */
+
+export type Role = "student" | "admin";
+
+export interface User {
+  id: string;
+  name: string;
+  /** Bangladeshi mobile number, normalised to 01XXXXXXXXX. */
+  phone: string;
+  passwordHash: string;
+  role: Role;
+  level?: Level;
+  stream?: StreamId;
+  institution?: string;
+  blocked?: boolean;
+  createdAt: number;
+}
+
+/** What the browser and most pages see: never includes the password hash. */
+export type PublicUser = Omit<User, "passwordHash">;
+
+export type ExamStatus = "draft" | "published";
+
+export interface StoredExam extends Exam {
+  status: ExamStatus;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Attempt {
+  id: string;
+  examId: string;
+  userId: string;
+  /** Server clock: the deadline is derived from this, never from the browser. */
+  startedAt: number;
+  endsAt: number;
+  submittedAt?: number;
+  reason?: SubmitReason;
+  answers?: Answers;
+  strikes: number;
+  /** Graded result without rank (rank is computed live when viewed). */
+  result?: Omit<ExamResult, "rank" | "participants">;
+  ip?: string;
+  userAgent?: string;
+}
+
+export interface StoredViolation extends ViolationEvent {
+  id: string;
+  examId: string;
+  attemptId?: string;
+  userId?: string;
+  ip?: string;
+}
+
+export interface Session {
+  userId: string;
+  role: Role;
+  name: string;
 }

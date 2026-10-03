@@ -3,6 +3,7 @@ import { ChevronRight, Layers, Radio, Sparkles } from "lucide-react";
 import { GsapReveal } from "@/components/ui/GsapReveal";
 import { SubjectGrid } from "./SubjectGrid";
 import { LEVELS, STREAMS, STREAM_IDS, getSubjects } from "@/lib/data/catalog";
+import { examIndex } from "@/lib/server/exams";
 import { cn, toBn } from "@/lib/utils";
 import type { Level, StreamId } from "@/lib/types";
 
@@ -12,16 +13,17 @@ interface StreamSubjectsViewProps {
 }
 
 /** Stream landing: hero, stream switcher, stats and the animated subject grid. */
-export function StreamSubjectsView({ level, stream }: StreamSubjectsViewProps) {
+export async function StreamSubjectsView({ level, stream }: StreamSubjectsViewProps) {
   const lvl = LEVELS[level];
   const str = STREAMS[stream];
-  const subjects = getSubjects(level, stream);
-  const totalExams = subjects.reduce((sum, s) => sum + Object.values(s.exams).reduce((a, b) => a + b, 0), 0);
-  const liveNow = subjects.filter((s) => s.featuredExamIds?.live).length;
+  const index = await examIndex(level, stream);
+  const subjects = getSubjects(level, stream).map((s) => ({ ...s, available: index[s.id] }));
+  const totalExams = Object.values(index).reduce((sum, byType) => sum + Object.values(byType).reduce((n, l) => n + (l?.length ?? 0), 0), 0);
+  const liveNow = subjects.filter((s) => s.available?.live?.length).length;
 
   const stats = [
     { icon: Layers, label: "বিষয়", value: toBn(subjects.length) },
-    { icon: Sparkles, label: "মোট পরীক্ষা", value: `${toBn(totalExams)}+` },
+    { icon: Sparkles, label: "মোট পরীক্ষা", value: toBn(totalExams) },
     { icon: Radio, label: "এখন লাইভ", value: toBn(liveNow) },
   ];
 

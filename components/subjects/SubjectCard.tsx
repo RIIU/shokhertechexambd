@@ -23,7 +23,8 @@ gsap.registerPlugin(useGSAP);
 export function SubjectCard({ subject, onOpen }: SubjectCardProps) {
   const ref = useRef<HTMLButtonElement>(null);
   const accent = ACCENT_STYLES[subject.accent];
-  const live = Boolean(subject.featuredExamIds?.live);
+  const live = Boolean(subject.available?.live?.length);
+  const examCount = Object.values(subject.available ?? {}).reduce((n, list) => n + (list?.length ?? 0), 0);
 
   const { contextSafe } = useGSAP({ scope: ref });
 
@@ -131,7 +132,7 @@ export function SubjectCard({ subject, onOpen }: SubjectCardProps) {
           <Layers className="h-3.5 w-3.5" strokeWidth={1.5} />
           <dt className="sr-only">Exams</dt>
           <dd lang="bn">
-            {toBn(Object.values(subject.exams).reduce((a, b) => a + b, 0))} পরীক্ষা
+            {examCount ? `${toBn(examCount)}টি পরীক্ষা` : "শীঘ্রই আসছে"}
           </dd>
         </div>
       </dl>
