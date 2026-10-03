@@ -31,7 +31,7 @@ import type { Level } from "@/lib/types";
 const LIVE_EXAM_HREF = "/exam/ssc-physics-live-01";
 
 /**
- * Mobile navigation drawer (pixxen-style full-height panel).
+ * Mobile navigation menu: full-screen panel like pixxen.com's mobile menu.
  * Slides in from the left, locks page scroll, closes on Esc, backdrop tap,
  * a left swipe or any navigation, and returns focus to the menu button.
  */
@@ -86,7 +86,7 @@ export function MobileMenu() {
 
           <motion.nav
             aria-label="Mobile"
-            className="absolute inset-y-0 left-0 flex w-[88vw] max-w-[380px] flex-col overflow-hidden border-r border-forest bg-obsidian-800 shadow-card"
+            className="absolute inset-0 flex w-full flex-col overflow-hidden bg-obsidian-800"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
