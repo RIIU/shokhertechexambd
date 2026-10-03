@@ -32,7 +32,12 @@
      it onto English UI text.) */
   body [lang="bn"] {
     @apply font-bangla;
-    line-height: 1.7;
+  }
+  /* Fallback line height for Bangla without a text-size class. :where() keeps
+     it at zero specificity so text-* and leading-* utilities always win;
+     the per-size values live in tailwind.config.js (fontSize). */
+  :where(body [lang="bn"]) {
+    line-height: 1.6;
   }
 
   ::selection {

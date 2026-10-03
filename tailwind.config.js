@@ -80,6 +80,23 @@ module.exports = {
           danger: "#F43F5E",
         },
       },
+      // Line heights tuned for Bangla (Baloo Da 2): matras and conjuncts need
+      // more room than Latin in body text, while big headings need much less
+      // than body text so multi-line titles stay one visual block.
+      fontSize: {
+        xs: ["0.75rem", { lineHeight: "1.5" }],
+        sm: ["0.875rem", { lineHeight: "1.55" }],
+        base: ["1rem", { lineHeight: "1.6" }],
+        lg: ["1.125rem", { lineHeight: "1.55" }],
+        xl: ["1.25rem", { lineHeight: "1.45" }],
+        "2xl": ["1.5rem", { lineHeight: "1.35" }],
+        "3xl": ["1.875rem", { lineHeight: "1.3" }],
+        "4xl": ["2.25rem", { lineHeight: "1.25" }],
+        "5xl": ["3rem", { lineHeight: "1.2" }],
+        "6xl": ["3.75rem", { lineHeight: "1.18" }],
+        "7xl": ["4.5rem", { lineHeight: "1.15" }],
+        "8xl": ["6rem", { lineHeight: "1.1" }],
+      },
       fontFamily: {
         sans: ["var(--font-inter)", "var(--font-bangla)", "system-ui", "sans-serif"],
         display: ["var(--font-jakarta)", "var(--font-inter)", "system-ui", "sans-serif"],

@@ -40,6 +40,8 @@ Accent classes per subject/stream are kept in a **static map** (`lib/accent.ts`)
 
 Rule: every Bangla string is wrapped in an element with `lang="bn"`. `globals.css` maps `body [lang="bn"]` to `font-bangla`, which is accessible and keeps the font choice in one place. The `font-bangla` stack lists Inter first. Inter has no Bengali glyphs, so English words and Latin digits inside Bangla text stay in Inter, while Bangla letters and ০–৯ render in Baloo Da 2.
 
+Line heights are set per text size in `tailwind.config.js` (`fontSize`), tuned for Baloo Da 2: about 1.5–1.6 for body sizes, falling to 1.15–1.2 for the largest headings. The global Bangla rule only supplies a zero-specificity fallback (`:where(...)`), so `text-*` and `leading-*` utilities always win.
+
 Bangla numerals: `toBn()` in `lib/utils.ts`; MCQ option labels are ক খ গ ঘ (`OPTION_LABEL_BN`).
 
 ### 1.3 Surfaces, glow & motion primitives
