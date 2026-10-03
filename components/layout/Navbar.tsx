@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
-import { LayoutDashboard, LogIn, LogOut, Menu, Radio, ShieldCheck, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { LogIn, LogOut, Menu, Radio, UserPlus, X } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/actions";
-import { useSessionUser } from "@/lib/hooks/useSessionUser";
+import { useAppShell } from "./AppShell";
 import { isFocusRoute } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
@@ -20,15 +19,13 @@ const LINKS = [
 /**
  * Full-width header modelled on pixxen.com: solid #012819 bar with a #065136
  * bottom border, a dark-green menu cell on the left (mobile) and a flush lime
- * call-to-action block on the right.
+ * call-to-action block on the right. On phones the menu button opens
+ * <MobileMenu />, and <MobileTabBar /> adds bottom navigation.
  */
 export function Navbar() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  const { user, loading } = useSessionUser();
-  const home = user?.role === "admin" ? { href: "/admin", label: "অ্যাডমিন", Icon: ShieldCheck } : { href: "/dashboard", label: "ড্যাশবোর্ড", Icon: LayoutDashboard };
-
-  useEffect(() => setOpen(false), [pathname]);
+  const { user, loading, menuOpen, setMenuOpen } = useAppShell();
+  const home = user?.role === "admin" ? { href: "/admin", label: "অ্যাডমিন" } : { href: "/dashboard", label: "ড্যাশবোর্ড" };
 
   if (isFocusRoute(pathname)) return null;
 
@@ -43,12 +40,12 @@ export function Navbar() {
         <div className="flex items-stretch">
           <button
             type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            aria-label="Menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-expanded={menuOpen}
+            aria-label="মেনু খোলো"
             className="flex w-14 items-center justify-center bg-forest text-ink transition-colors hover:bg-leaf-600 sm:w-16 md:hidden"
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <Link href="/" className="flex items-center gap-2.5 px-4 sm:px-6 lg:px-8">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-400 font-display text-sm font-black text-forest">
@@ -128,55 +125,17 @@ export function Navbar() {
             href={user ? "/exam/ssc-physics-live-01" : "/register"}
             className="flex items-center gap-2 bg-brand-400 px-4 text-sm font-semibold text-forest transition-colors hover:bg-brand-300 sm:px-6 lg:px-10"
           >
-            <Radio className="h-4 w-4" strokeWidth={1.75} />
-            <span lang="bn">{user ? "লাইভ পরীক্ষা" : "ফ্রি রেজিস্ট্রেশন"}</span>
+            {user ? <Radio className="h-4 w-4" strokeWidth={1.75} /> : <UserPlus className="h-4 w-4" strokeWidth={1.75} />}
+            <span lang="bn" className="hidden min-[380px]:inline">
+              {user ? "লাইভ পরীক্ষা" : "ফ্রি রেজিস্ট্রেশন"}
+            </span>
+            <span lang="bn" className="min-[380px]:hidden">
+              {user ? "লাইভ" : "রেজিস্টার"}
+            </span>
           </Link>
         </div>
       </nav>
 
-      <AnimatePresence>
-        {open && (
-          <motion.ul
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden border-t border-surface-border bg-obsidian-800 md:hidden"
-          >
-            {LINKS.map((l) => (
-              <li key={l.href} className="border-b border-surface-border">
-                <Link href={l.href} lang="bn" className="block px-5 py-4 text-ink-muted hover:bg-surface-pill hover:text-ink">
-                  {l.label}
-                </Link>
-              </li>
-            ))}
-            {user ? (
-              <>
-                <li className="border-b border-surface-border">
-                  <Link href={home.href} lang="bn" className="flex items-center gap-2 px-5 py-4 text-ink hover:bg-surface-pill">
-                    <home.Icon className="h-4 w-4 text-brand-400" />
-                    {home.label} · {user.name}
-                  </Link>
-                </li>
-                <li>
-                  <form action={logoutAction}>
-                    <button type="submit" lang="bn" className="flex w-full items-center gap-2 px-5 py-4 text-left text-ink-muted hover:bg-surface-pill hover:text-ink">
-                      <LogOut className="h-4 w-4" />
-                      লগআউট
-                    </button>
-                  </form>
-                </li>
-              </>
-            ) : (
-              <li>
-                <Link href="/login" lang="bn" className="flex items-center gap-2 px-5 py-4 text-ink hover:bg-surface-pill">
-                  <LogIn className="h-4 w-4 text-brand-400" />
-                  লগইন
-                </Link>
-              </li>
-            )}
-          </motion.ul>
-        )}
-      </AnimatePresence>
     </header>
   );
 }

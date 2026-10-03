@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Baloo_Da_2, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { AppShellProvider } from "@/components/layout/AppShell";
 import { Navbar } from "@/components/layout/Navbar";
+import { MobileMenu } from "@/components/layout/MobileMenu";
+import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 
@@ -36,9 +39,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="bn" className={`dark ${inter.variable} ${jakarta.variable} ${bangla.variable}`}>
       <body>
-        <Navbar />
-        {children}
-        <Footer />
+        <AppShellProvider>
+          <Navbar />
+          <MobileMenu />
+          {children}
+          <Footer />
+          <MobileTabBar />
+        </AppShellProvider>
       </body>
     </html>
   );
