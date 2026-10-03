@@ -23,7 +23,7 @@ All values are sampled pixel-for-pixel from pixxen.com screenshots and cross-che
 | `brand-400` (`brand`) | `#99FE00` | Electric lime: primary buttons, answered state, focus rings, glows |
 | `forest` | `#065136` | Text on lime buttons, dark-green fills |
 | `leaf-400` / `leaf-600` | `#19CC61` / `#19914A` | Secondary green: labels, dots, icons, explanation callouts |
-| `ink` / `ink-muted` / `ink-subtle` | `#FFFFFF` / `#A7BDB5` / `#759187` | Headings / body / meta (contrast on `#002417`: 16.6 / 8.4 / 5.2) |
+| `ink` / `ink-muted` / `ink-subtle` | `#FFFFFF` / `#A7BDB5` / `#759187` | Headings / body / meta (contrast on `#002417`: 16.6 / 8.4 / 4.9) |
 | `state-answered` / `flagged` / `unanswered` / `danger` | `#99FE00` / `#F59E0B` / `#29473C` / `#F43F5E` | Exam palette and timer states |
 
 Header, buttons and popups follow pixxen's components: a full-width `#012819` header with a `#065136` bottom border, a dark-green menu cell and a flush lime call-to-action; secondary buttons are white outlines that fill white on hover; popups and animated-border panels use pixxen's `radial-gradient(… #065136 → #002417)`.
