@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/server/auth";
 import { getExam } from "@/lib/server/exams";
-import { listAttempts, submitAttempt } from "@/lib/server/attempts";
+import { getUserAttempt, submitAttempt } from "@/lib/server/attempts";
 import { parseSubmitPayload } from "@/lib/exams/grading";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export async function POST(request: Request, { params }: { params: { attemptId: 
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
 
-  const attempt = (await listAttempts({ userId: user.id })).find((a) => a.id === params.attemptId);
+  const attempt = await getUserAttempt(params.attemptId, user.id);
   if (!attempt) return NextResponse.json({ error: "Attempt not found" }, { status: 404 });
   const exam = await getExam(attempt.examId);
   if (!exam) return NextResponse.json({ error: "Exam not found" }, { status: 404 });

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { AdminHeader, Badge, Table } from "@/components/admin/AdminUi";
-import { readDb } from "@/lib/server/db";
-import { rankFor } from "@/lib/server/attempts";
+import { listAttempts, rankFrom, scoresByExam } from "@/lib/server/attempts";
+import { listExams } from "@/lib/server/exams";
+import { listUsers } from "@/lib/server/users";
 import { formatPhone } from "@/lib/phone";
 import { formatClock, formatDateBn, toBn } from "@/lib/utils";
 
@@ -14,14 +15,14 @@ const REASON: Record<string, { label: string; tone: "muted" | "amber" | "danger"
 };
 
 export default async function AttemptsPage({ searchParams }: { searchParams: { exam?: string; user?: string } }) {
-  const db = await readDb();
-  const users = new Map(db.users.map((u) => [u.id, u]));
-  const exams = new Map(db.exams.map((e) => [e.id, e]));
-  const rows = db.attempts
-    .filter((a) => a.result)
-    .filter((a) => (!searchParams.exam || a.examId === searchParams.exam) && (!searchParams.user || a.userId === searchParams.user))
-    .sort((a, b) => (b.submittedAt ?? 0) - (a.submittedAt ?? 0))
-    .slice(0, 300);
+  const [rows, userList, examList] = await Promise.all([
+    listAttempts({ submittedOnly: true, examId: searchParams.exam, userId: searchParams.user, limit: 300 }),
+    listUsers(),
+    listExams(),
+  ]);
+  const users = new Map(userList.map((u) => [u.id, u]));
+  const exams = new Map(examList.map((e) => [e.id, e]));
+  const scores = await scoresByExam(rows.map((a) => a.examId));
   const filteredBy = searchParams.exam ? exams.get(searchParams.exam)?.titleBn : searchParams.user ? users.get(searchParams.user)?.name : undefined;
 
   return (
@@ -38,10 +39,10 @@ export default async function AttemptsPage({ searchParams }: { searchParams: { e
         }
       />
       <Table head={["শিক্ষার্থী", "পরীক্ষা", "জমা", "স্কোর", "র‍্যাংক", "সময়", "সতর্কতা", "কারণ"]} empty={rows.length ? undefined : "এখনো কোনো জমা নেই।"}>
-        {rows.map((a) => {
+        {rows.filter((a) => a.result).map((a) => {
           const r = a.result!;
           const u = users.get(a.userId);
-          const rank = rankFor(db.attempts, a.examId, r.score);
+          const rank = rankFrom(scores.get(a.examId), r.score);
           const reason = REASON[a.reason ?? "manual"] ?? REASON.manual!;
           return (
             <tr key={a.id} className="hover:bg-surface-pill/40">

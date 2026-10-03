@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { AdminHeader, Badge, Table } from "@/components/admin/AdminUi";
-import { readDb } from "@/lib/server/db";
+import { listViolations } from "@/lib/server/attempts";
+import { listExams } from "@/lib/server/exams";
+import { listUsers } from "@/lib/server/users";
 import { formatPhone } from "@/lib/phone";
 import { formatDateBn, toBn } from "@/lib/utils";
 import type { ViolationKind } from "@/lib/types";
@@ -20,13 +22,13 @@ const KIND_BN: Record<ViolationKind, string> = {
 
 export default async function AlertsPage({ searchParams }: { searchParams: { all?: string; attempt?: string } }) {
   const strikesOnly = searchParams.all !== "1";
-  const db = await readDb();
-  const users = new Map(db.users.map((u) => [u.id, u]));
-  const exams = new Map(db.exams.map((e) => [e.id, e]));
-  const rows = [...db.violations]
-    .filter((v) => (!strikesOnly || v.strike) && (!searchParams.attempt || v.attemptId === searchParams.attempt))
-    .sort((a, b) => b.at - a.at)
-    .slice(0, 500);
+  const [rows, userList, examList] = await Promise.all([
+    listViolations({ strikeOnly: strikesOnly, attemptId: searchParams.attempt, limit: 500 }),
+    listUsers(),
+    listExams(),
+  ]);
+  const users = new Map(userList.map((u) => [u.id, u]));
+  const exams = new Map(examList.map((e) => [e.id, e]));
 
   return (
     <>

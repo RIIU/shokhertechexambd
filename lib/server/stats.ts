@@ -1,6 +1,6 @@
 import "server-only";
-import { readDb } from "./db";
-import { rankFor } from "./attempts";
+import { store } from "./store";
+import { rankFrom } from "./attempts";
 import { getSubjects } from "@/lib/data/catalog";
 import type { ExamType, Level, StreamId } from "@/lib/types";
 
@@ -28,15 +28,17 @@ function subjectName(level: Level, stream: StreamId, subjectId: string): string 
 }
 
 export async function studentDashboard(userId: string) {
-  const db = await readDb();
-  const examById = new Map(db.exams.map((e) => [e.id, e]));
-  const mine = db.attempts.filter((a) => a.userId === userId);
+  const s = await store();
+  const mine = await s.findAttempts({ userId });
+  const examIds = [...new Set(mine.map((a) => a.examId))];
+  const [exams, scores] = await Promise.all([Promise.all(examIds.map((id) => s.getExam(id))), s.scoresByExam(examIds)]);
+  const examById = new Map(exams.filter((e) => e !== undefined).map((e) => [e.id, e]));
 
   const rows: AttemptRow[] = mine
     .map((a) => {
       const exam = examById.get(a.examId);
       const r = a.result;
-      const rank = r ? rankFor(db.attempts, a.examId, r.score) : undefined;
+      const rank = r ? rankFrom(scores.get(a.examId), r.score) : undefined;
       return {
         attemptId: a.id,
         examId: a.examId,
@@ -94,14 +96,23 @@ export async function studentDashboard(userId: string) {
 }
 
 export async function adminOverview() {
-  const db = await readDb();
+  const s = await store();
   const now = Date.now();
   const dayAgo = now - 24 * 60 * 60 * 1000;
-  const userById = new Map(db.users.map((u) => [u.id, u]));
-  const examById = new Map(db.exams.map((e) => [e.id, e]));
+  const fortnightAgo = now - 15 * 24 * 60 * 60 * 1000;
 
-  const submitted = db.attempts.filter((a) => a.submittedAt);
-  const live = db.attempts.filter((a) => !a.submittedAt && a.endsAt > now);
+  const [users, exams, open, recentSubmitted, strikes24h, recentAlerts] = await Promise.all([
+    s.listUsers(),
+    s.listExams(),
+    s.findAttempts({ submitted: false }),
+    s.findAttempts({ submitted: true, limit: 5000 }),
+    s.listViolations({ strikeOnly: true, since: dayAgo }),
+    s.listViolations({ strikeOnly: true, limit: 6 }),
+  ]);
+  const userById = new Map(users.map((u) => [u.id, u]));
+  const examById = new Map(exams.map((e) => [e.id, e]));
+  const submitted = recentSubmitted.filter((a) => (a.submittedAt ?? 0) >= fortnightAgo);
+  const live = open.filter((a) => a.endsAt > now);
 
   // Submissions per day for the last 14 days.
   const days = Array.from({ length: 14 }, (_, i) => {
@@ -117,14 +128,14 @@ export async function adminOverview() {
 
   return {
     kpis: {
-      students: db.users.filter((u) => u.role === "student").length,
-      newStudents24h: db.users.filter((u) => u.role === "student" && u.createdAt >= dayAgo).length,
-      publishedExams: db.exams.filter((e) => e.status === "published").length,
-      draftExams: db.exams.filter((e) => e.status === "draft").length,
+      students: users.filter((u) => u.role === "student").length,
+      newStudents24h: users.filter((u) => u.role === "student" && u.createdAt >= dayAgo).length,
+      publishedExams: exams.filter((e) => e.status === "published").length,
+      draftExams: exams.filter((e) => e.status === "draft").length,
       submissions24h: submitted.filter((a) => a.submittedAt! >= dayAgo).length,
-      submissionsTotal: submitted.length,
+      submissionsTotal: recentSubmitted.length,
       liveNow: live.length,
-      strikes24h: db.violations.filter((v) => v.strike && v.at >= dayAgo).length,
+      strikes24h: strikes24h.length,
     },
     perDay,
     live: live
@@ -137,10 +148,10 @@ export async function adminOverview() {
         strikes: a.strikes,
       }))
       .sort((a, b) => b.strikes - a.strikes),
-    recentAlerts: [...db.violations]
-      .filter((v) => v.strike)
-      .sort((a, b) => b.at - a.at)
-      .slice(0, 6)
-      .map((v) => ({ ...v, student: v.userId ? userById.get(v.userId)?.name ?? "—" : "—", exam: examById.get(v.examId)?.titleBn ?? v.examId })),
+    recentAlerts: recentAlerts.map((v) => ({
+      ...v,
+      student: v.userId ? userById.get(v.userId)?.name ?? "—" : "—",
+      exam: examById.get(v.examId)?.titleBn ?? v.examId,
+    })),
   };
 }

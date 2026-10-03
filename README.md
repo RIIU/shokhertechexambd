@@ -15,7 +15,8 @@ npm run typecheck && npm run lint
 
 - **Students** sign up at `/register` with a mobile number and password, then land on `/dashboard`.
 - **Admin**: in development an admin is created automatically: `01700000000` / `admin12345`. For a real deployment, copy `.env.example` to `.env.local` and set `SESSION_SECRET`, `ADMIN_PHONE` and `ADMIN_PASSWORD` **before the first start**.
-- Data is stored in `.data/db.json` (git-ignored). Back it up; delete it to start fresh. Use a real database before deploying to serverless hosting such as Vercel (see `docs/SPEC.md` §6.4).
+- **Database: Supabase (Postgres).** Run `supabase/migrations/20261003000000_init.sql` in your project's SQL editor and set `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`. Step-by-step guide (Bangla): [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md).
+- Without Supabase keys the app falls back to a local JSON file (`.data/db.json`, git-ignored): handy for development, not for Vercel.
 
 Demo exams: `/exam/ssc-physics-live-01` (12 Qs, 15 min, −0.25 negative marking, one attempt) and `/exam/ssc-physics-practice-ch1`.
 

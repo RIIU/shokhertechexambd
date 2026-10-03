@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { AdminHeader, Badge, Table } from "@/components/admin/AdminUi";
 import { listExams } from "@/lib/server/exams";
-import { listAttempts } from "@/lib/server/attempts";
+import { scoresByExam } from "@/lib/server/attempts";
 import { EXAM_TYPE_META, LEVELS, STREAMS, getSubjects } from "@/lib/data/catalog";
 import { formatDateBn, formatMinutesBn, toBn } from "@/lib/utils";
 
@@ -10,10 +10,9 @@ export const metadata = { title: "Exams" };
 
 export default async function AdminExamsPage({ searchParams }: { searchParams: { status?: string } }) {
   const status = searchParams.status === "draft" || searchParams.status === "published" ? searchParams.status : undefined;
-  const [exams, attempts] = await Promise.all([listExams(), listAttempts({ submittedOnly: true })]);
+  const exams = await listExams();
   const shown = exams.filter((e) => !status || e.status === status);
-  const subCount = new Map<string, number>();
-  for (const a of attempts) subCount.set(a.examId, (subCount.get(a.examId) ?? 0) + 1);
+  const scores = await scoresByExam(shown.map((e) => e.id));
 
   const tabs = [
     { key: undefined, label: "সব" },
@@ -74,7 +73,7 @@ export default async function AdminExamsPage({ searchParams }: { searchParams: {
                 {formatMinutesBn(e.durationSec)}
               </td>
               <td className="px-4 py-3 text-ink" lang="bn">
-                {toBn(subCount.get(e.id) ?? 0)}
+                {toBn(scores.get(e.id)?.length ?? 0)}
               </td>
               <td className="px-4 py-3" lang="bn">
                 <Badge tone={e.status === "published" ? "brand" : "amber"}>{e.status === "published" ? "প্রকাশিত" : "খসড়া"}</Badge>

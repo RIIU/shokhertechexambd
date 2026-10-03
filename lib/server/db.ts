@@ -4,14 +4,9 @@ import path from "node:path";
 import type { Attempt, StoredExam, StoredViolation, User } from "@/lib/types";
 
 /**
- * Tiny JSON-file database.
- *
- * Good enough for development and a single-server deployment (VPS, Docker,
- * `next start`). Every read and write goes through `readDb` / `mutateDb`, so
- * swapping this file for Postgres/Prisma later only touches lib/server/*.
- *
- * Not suitable for serverless hosts with a read-only or ephemeral filesystem
- * (e.g. Vercel): use a real database there.
+ * Tiny JSON-file database used by the "json" store driver (store/json.ts)
+ * when Supabase isn't configured. Fine for development and a single server;
+ * not for serverless hosts (Vercel), whose filesystem doesn't persist.
  */
 
 export interface DbSchema {
@@ -29,9 +24,9 @@ const EMPTY: DbSchema = { version: 1, users: [], exams: [], attempts: [], violat
 
 // Survive Next.js dev hot reloads: keep one cache + one write queue per process.
 const g = globalThis as unknown as {
-  __stDb?: { data: DbSchema | null; queue: Promise<unknown>; seeded: boolean };
+  __stDb?: { data: DbSchema | null; queue: Promise<unknown> };
 };
-const state = (g.__stDb ??= { data: null, queue: Promise.resolve(), seeded: false });
+const state = (g.__stDb ??= { data: null, queue: Promise.resolve() });
 
 async function load(): Promise<DbSchema> {
   if (state.data) return state.data;
@@ -41,11 +36,6 @@ async function load(): Promise<DbSchema> {
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
     state.data = structuredClone(EMPTY);
-  }
-  if (!state.seeded) {
-    state.seeded = true;
-    const { seed } = await import("./seed");
-    if (await seed(state.data)) await persist(state.data);
   }
   return state.data;
 }
@@ -76,8 +66,4 @@ export function mutateDb<T>(fn: (db: DbSchema) => T | Promise<T>): Promise<T> {
   });
   state.queue = run.catch(() => undefined);
   return run;
-}
-
-export function newId(prefix: string): string {
-  return `${prefix}_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
 }

@@ -97,14 +97,16 @@ app/
    └─ attempts/[attemptId]/submit POST: grade once, server-side
 components/  security/, exam/, subjects/, landing/, result/ (ResultView, ResultCharts),
              dashboard/, admin/, auth/, layout/, ui/ (StatTile, Panel, GsapReveal)
+supabase/migrations/            SQL schema (tables, indexes, strike trigger, RLS lock-down)
 lib/
 ├─ types.ts, utils.ts, accent.ts, routes.ts, phone.ts, session-token.ts (edge-safe JWT)
 ├─ data/catalog.ts               levels, streams, subjects (NCTB codes), exam-type meta
 ├─ exams/bank.ts                 seed questions (copied into the database on first run)
 ├─ exams/grading.ts              toCandidateExam, parseSubmitPayload, gradeExam
 ├─ hooks/useExamSession.ts       answer sheet per attempt (sessionStorage)
-└─ server/                       SERVER-ONLY: db (JSON store), seed, password (scrypt),
-                                 auth (cookie session), users, exams, attempts, stats
+└─ server/                       SERVER-ONLY: store/ (supabase + json drivers), seed,
+                                 password (scrypt), auth (cookie session), users, exams,
+                                 attempts, stats
 ```
 
 ---
@@ -224,9 +226,23 @@ Exams taken, average score %, average accuracy, best rank · score trend line (l
 
 **Next steps:** bulk question import (CSV/XLSX), images/math (KaTeX) in questions, written (CQ) answers, batches & scheduled live windows, moderator role.
 
-### 6.4 Storage
+### 6.4 Storage: Supabase
 
-`lib/server/db.ts` is a JSON-file store (`.data/db.json`, override with `DATA_DIR`) with serialised writes and atomic renames, fine for development and a single server (VPS/Docker). The schema (`users`, `exams`, `attempts`, `violations`) maps one-to-one onto SQL tables, and only `lib/server/*` touches it, so moving to Postgres (Prisma/Drizzle) is contained. Serverless hosts such as Vercel need that move, because their filesystem is not persistent.
+Data lives in **Supabase Postgres** (`supabase/migrations/20261003000000_init.sql`):
+
+| Table | Holds | Notes |
+|---|---|---|
+| `users` | students & admins | `phone` unique; scrypt `password_hash` |
+| `exams` | exam settings, `status` draft/published | |
+| `questions` | MCQs, options as `jsonb`, answer key | PK `(exam_id, id)`, ordered by `position` |
+| `attempts` | start/end/submit times, answers, graded `result` (`jsonb`), `score`, `strikes` | partial unique index = one open attempt per student per exam; rank index on `(exam_id, score)` |
+| `violations` | anti-cheat events | trigger bumps `attempts.strikes` on a strike |
+
+- **Access model:** only the Next.js server talks to the database, with the `service_role` key (`lib/server/store/supabase.ts`). RLS is enabled on every table with **no policies** and `anon`/`authenticated` privileges revoked, so the public anon key can read nothing, including the answer keys.
+- **Auth** stays custom (mobile + password, JWT cookie) because Supabase phone auth needs a paid SMS provider. Users are rows in `public.users`, not `auth.users`.
+- **Driver interface** `lib/server/store/types.ts`; `store()` picks Supabase when `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` are set, otherwise the JSON file (`json.ts`, development only). Business rules live above it in `lib/server/{users,exams,attempts,stats}.ts`.
+- Reads page through PostgREST's 1000-row cap; Supabase calls opt out of Next.js fetch caching.
+- First start seeds the demo exams and the first admin (`lib/server/seed.ts`).
 
 ---
 

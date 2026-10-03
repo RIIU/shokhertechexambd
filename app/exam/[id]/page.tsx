@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: ExamPageProps): Promise<Metad
 export default async function ExamPage({ params }: ExamPageProps) {
   const user = await requireUser(`/exam/${params.id}`);
   const exam = user.role === "admin" ? await getExam(params.id) : await getPublishedExam(params.id);
-  if (!exam) notFound();
+  if (!exam || exam.questions.length === 0) notFound();
 
   if (exam.type === "live") {
     const done = await getSubmittedLiveAttempt(exam.id, user.id);

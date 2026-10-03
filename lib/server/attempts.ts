@@ -1,6 +1,7 @@
 import "server-only";
 import { gradeExam } from "@/lib/exams/grading";
-import { mutateDb, newId, readDb } from "./db";
+import { store } from "./store";
+import { newId } from "./ids";
 import type { Attempt, ExamResult, StoredExam, StoredViolation, SubmitPayload, ViolationEvent } from "@/lib/types";
 
 /** Answers arriving later than this after the deadline are discarded. */
@@ -16,116 +17,121 @@ export type StartResult =
  * Live exams allow one submission per student.
  */
 export async function startAttempt(exam: StoredExam, userId: string, meta: { ip?: string; userAgent?: string }): Promise<StartResult> {
-  return mutateDb((db) => {
-    const mine = db.attempts.filter((a) => a.examId === exam.id && a.userId === userId);
-    const open = mine.find((a) => !a.submittedAt);
-    if (open) return { ok: true as const, attempt: open };
-    const done = mine.find((a) => a.submittedAt);
-    if (exam.type === "live" && done) return { ok: false as const, error: "already-submitted" as const, attemptId: done.id };
+  const s = await store();
+  const mine = await s.findAttempts({ examId: exam.id, userId });
+  const open = mine.find((a) => !a.submittedAt);
+  if (open) return { ok: true, attempt: open };
+  const done = mine.find((a) => a.submittedAt);
+  if (exam.type === "live" && done) return { ok: false, error: "already-submitted", attemptId: done.id };
 
-    const now = Date.now();
-    const attempt: Attempt = {
-      id: newId("att"),
-      examId: exam.id,
-      userId,
-      startedAt: now,
-      endsAt: now + exam.durationSec * 1000,
-      strikes: 0,
-      ...meta,
-    };
-    db.attempts.push(attempt);
-    return { ok: true as const, attempt };
-  });
+  const now = Date.now();
+  const attempt: Attempt = {
+    id: newId("att"),
+    examId: exam.id,
+    userId,
+    startedAt: now,
+    endsAt: now + exam.durationSec * 1000,
+    strikes: 0,
+    ...meta,
+  };
+  if ((await s.insertAttempt(attempt)) === "conflict") {
+    // Two tabs pressed "start" at once: resume the one that won.
+    const winner = (await s.findAttempts({ examId: exam.id, userId, submitted: false }))[0];
+    if (winner) return { ok: true, attempt: winner };
+  }
+  return { ok: true, attempt };
 }
 
 export async function getOpenAttempt(examId: string, userId: string): Promise<Attempt | undefined> {
-  return (await readDb()).attempts.find((a) => a.examId === examId && a.userId === userId && !a.submittedAt);
+  return (await (await store()).findAttempts({ examId, userId, submitted: false }))[0];
 }
 
 export async function getSubmittedLiveAttempt(examId: string, userId: string): Promise<Attempt | undefined> {
-  return (await readDb()).attempts.find((a) => a.examId === examId && a.userId === userId && a.submittedAt);
+  return (await (await store()).findAttempts({ examId, userId, submitted: true, limit: 1 }))[0];
 }
 
-export type SubmitResult =
-  | { ok: true; attemptId: string }
-  | { ok: false; error: "not-found" | "already-submitted" };
+export async function getUserAttempt(attemptId: string, userId: string): Promise<Attempt | undefined> {
+  const a = await (await store()).getAttempt(attemptId);
+  return a?.userId === userId ? a : undefined;
+}
 
-export async function submitAttempt(
-  attemptId: string,
-  userId: string,
-  exam: StoredExam,
-  payload: SubmitPayload,
-): Promise<SubmitResult> {
-  return mutateDb((db) => {
-    const attempt = db.attempts.find((a) => a.id === attemptId && a.userId === userId && a.examId === exam.id);
-    if (!attempt) return { ok: false as const, error: "not-found" as const };
-    if (attempt.submittedAt) return { ok: false as const, error: "already-submitted" as const };
+export type SubmitResult = { ok: true; attemptId: string } | { ok: false; error: "not-found" | "already-submitted" };
 
-    const now = Date.now();
-    const tooLate = now > attempt.endsAt + SUBMIT_GRACE_MS;
-    // Strikes: trust whichever is higher, the server log or the client count.
-    const serverStrikes = db.violations.filter((v) => v.attemptId === attempt.id && v.strike).length;
-    const strikes = Math.max(serverStrikes, payload.strikes);
-    const graded = gradeExam(exam, {
-      answers: tooLate ? {} : payload.answers,
-      reason: tooLate ? "time-up" : payload.reason,
-      strikes,
-      timeTakenSec: (Math.min(now, attempt.endsAt) - attempt.startedAt) / 1000,
-    });
+export async function submitAttempt(attemptId: string, userId: string, exam: StoredExam, payload: SubmitPayload): Promise<SubmitResult> {
+  const s = await store();
+  const attempt = await s.getAttempt(attemptId);
+  if (!attempt || attempt.userId !== userId || attempt.examId !== exam.id) return { ok: false, error: "not-found" };
+  if (attempt.submittedAt) return { ok: false, error: "already-submitted" };
 
-    attempt.submittedAt = now;
-    attempt.reason = graded.reason;
-    attempt.answers = tooLate ? {} : payload.answers;
-    attempt.strikes = strikes;
-    attempt.result = { ...graded, attemptId: attempt.id };
-    return { ok: true as const, attemptId: attempt.id };
+  const now = Date.now();
+  const tooLate = now > attempt.endsAt + SUBMIT_GRACE_MS;
+  // Strikes: trust whichever is higher, the server log or the client count.
+  const strikes = Math.max(await s.countStrikes(attempt.id), attempt.strikes, payload.strikes);
+  const answers = tooLate ? {} : payload.answers;
+  const graded = gradeExam(exam, {
+    answers,
+    reason: tooLate ? "time-up" : payload.reason,
+    strikes,
+    timeTakenSec: (Math.min(now, attempt.endsAt) - attempt.startedAt) / 1000,
   });
+
+  const saved = await s.completeAttempt(attempt.id, userId, {
+    submittedAt: now,
+    reason: graded.reason,
+    answers,
+    strikes,
+    result: { ...graded, attemptId: attempt.id },
+  });
+  return saved ? { ok: true, attemptId: attempt.id } : { ok: false, error: "already-submitted" };
 }
 
-/** Rank among everyone who has submitted this exam (ties share a rank). */
-export function rankFor(attempts: Attempt[], examId: string, score: number) {
-  const done = attempts.filter((a) => a.examId === examId && a.result);
-  return {
-    rank: 1 + done.filter((a) => (a.result?.score ?? 0) > score).length,
-    participants: done.length,
-  };
+/** Rank among everyone who submitted the exam (ties share a rank). */
+export function rankFrom(scores: number[] | undefined, score: number) {
+  const list = scores ?? [];
+  return { rank: 1 + list.filter((s) => s > score).length, participants: list.length };
 }
 
 export async function getResult(attemptId: string): Promise<{ attempt: Attempt; result: ExamResult } | undefined> {
-  const db = await readDb();
-  const attempt = db.attempts.find((a) => a.id === attemptId);
+  const s = await store();
+  const attempt = await s.getAttempt(attemptId);
   if (!attempt?.result) return undefined;
-  return { attempt, result: { ...attempt.result, ...rankFor(db.attempts, attempt.examId, attempt.result.score) } };
+  const scores = (await s.scoresByExam([attempt.examId])).get(attempt.examId);
+  return { attempt, result: { ...attempt.result, ...rankFrom(scores, attempt.result.score) } };
 }
 
-export async function listAttempts(filter?: { userId?: string; submittedOnly?: boolean }): Promise<Attempt[]> {
-  return (await readDb()).attempts
-    .filter((a) => (!filter?.userId || a.userId === filter.userId) && (!filter?.submittedOnly || a.submittedAt))
-    .sort((a, b) => (b.submittedAt ?? b.startedAt) - (a.submittedAt ?? a.startedAt));
+export async function listAttempts(filter?: { userId?: string; examId?: string; submittedOnly?: boolean; limit?: number }): Promise<Attempt[]> {
+  return (await store()).findAttempts({
+    userId: filter?.userId,
+    examId: filter?.examId,
+    submitted: filter?.submittedOnly ? true : undefined,
+    limit: filter?.limit,
+  });
+}
+
+export async function scoresByExam(examIds: string[]): Promise<Map<string, number[]>> {
+  return (await store()).scoresByExam(examIds);
 }
 
 export async function recordViolation(
   event: ViolationEvent,
   ctx: { examId: string; attemptId?: string; userId?: string; ip?: string },
 ): Promise<void> {
-  await mutateDb((db) => {
-    const attempt = ctx.attemptId ? db.attempts.find((a) => a.id === ctx.attemptId && a.userId === ctx.userId) : undefined;
-    const stored: StoredViolation = {
-      id: newId("vio"),
-      ...event,
-      at: Date.now(), // server time, not the client's claim
-      examId: ctx.examId,
-      attemptId: attempt?.id,
-      userId: ctx.userId,
-      ip: ctx.ip,
-    };
-    db.violations.push(stored);
-    if (attempt && !attempt.submittedAt && event.strike) attempt.strikes += 1;
-    // Keep the log bounded.
-    if (db.violations.length > 20000) db.violations.splice(0, db.violations.length - 20000);
-  });
+  const s = await store();
+  // Only link the event to an attempt that belongs to this user.
+  const attempt = ctx.attemptId && ctx.userId ? await s.getAttempt(ctx.attemptId) : undefined;
+  const linked = attempt && attempt.userId === ctx.userId && attempt.examId === ctx.examId ? attempt.id : undefined;
+  const stored: StoredViolation = {
+    id: newId("vio"),
+    ...event,
+    at: Date.now(), // server time, not the client's claim
+    examId: ctx.examId,
+    attemptId: linked,
+    userId: ctx.userId,
+    ip: ctx.ip,
+  };
+  await s.insertViolation(stored);
 }
 
-export async function listViolations(): Promise<StoredViolation[]> {
-  return [...(await readDb()).violations].sort((a, b) => b.at - a.at);
+export async function listViolations(filter: { strikeOnly?: boolean; attemptId?: string; since?: number; limit?: number }): Promise<StoredViolation[]> {
+  return (await store()).listViolations(filter);
 }
