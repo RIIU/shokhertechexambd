@@ -33,7 +33,7 @@ export function StreamCards({ level }: { level: Level }) {
             <Link
               href={`/${level}/${id}`}
               className={cn(
-                "group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.06] bg-obsidian-800/70 p-6 shadow-card backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]",
+                "group relative flex h-full flex-col overflow-hidden rounded-3xl border border-surface-border bg-obsidian-800/70 p-6 shadow-card backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]",
                 accent.glow,
               )}
             >
@@ -52,7 +52,7 @@ export function StreamCards({ level }: { level: Level }) {
               <p lang="bn" className="relative mb-6 flex-1 text-sm text-ink-muted">
                 {stream.taglineBn}
               </p>
-              <span className="relative flex items-center justify-between border-t border-white/[0.06] pt-4 text-sm">
+              <span className="relative flex items-center justify-between border-t border-surface-border pt-4 text-sm">
                 <span lang="bn" className="text-ink-muted">
                   {toBn(subjects.length)}টি বিষয়
                 </span>

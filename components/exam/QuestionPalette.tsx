@@ -61,7 +61,7 @@ export function QuestionPalette({ questions, answers, flags, current, onJump, on
 
       <ul className="grid grid-cols-3 gap-2">
         {LEGEND.map((l) => (
-          <li key={l.status} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-2 py-2 text-center">
+          <li key={l.status} className="rounded-xl border border-surface-border bg-white/[0.02] px-2 py-2 text-center">
             <span className="mb-1 flex items-center justify-center gap-1.5 text-[11px] text-ink-muted">
               <span className={cn("h-2 w-2 rounded-full", l.dot)} />
               <span lang="bn">{l.label}</span>

@@ -129,7 +129,7 @@ export default function ResultPage({ params }: { params: { id: string } }) {
 
           <dl className="grid grid-cols-2 gap-3">
             {stats.map(({ icon: Icon, label, value, sub }) => (
-              <div key={label} data-stat className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
+              <div key={label} data-stat className="rounded-2xl border border-surface-border bg-white/[0.02] p-4">
                 <dt className="mb-2 flex items-center gap-1.5 text-xs text-ink-muted">
                   <Icon className="h-3.5 w-3.5 text-brand-400" strokeWidth={1.5} />
                   <span lang="bn">{label}</span>
@@ -217,7 +217,7 @@ function ExplanationCard({ q, number }: { q: QuestionResult; number: number }) {
   const meta = STATUS_META[q.status];
   const Icon = meta.icon;
   return (
-    <li className="rounded-3xl border border-white/[0.06] bg-obsidian-800/60 p-5 sm:p-6">
+    <li className="rounded-3xl border border-surface-border bg-obsidian-800/60 p-5 sm:p-6">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <span lang="bn" className="font-display text-sm font-bold text-ink-muted">
           প্রশ্ন {toBn(number)}
@@ -244,7 +244,7 @@ function ExplanationCard({ q, number }: { q: QuestionResult; number: number }) {
                 "flex items-center gap-3 rounded-xl border p-3 text-sm",
                 isCorrect && "border-brand-400/60 bg-brand-400/10 text-ink",
                 isWrongPick && "border-state-danger/60 bg-state-danger/10 text-ink",
-                !isCorrect && !isWrongPick && "border-white/[0.06] text-ink-muted",
+                !isCorrect && !isWrongPick && "border-surface-border text-ink-muted",
               )}
             >
               <span lang="bn" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/15 text-xs font-bold">

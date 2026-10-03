@@ -50,7 +50,7 @@ export function SubmitDialog({ open, answered, flagged, total, submitting, onCan
                 { label: "চিহ্নিত", value: flagged, cls: "text-amber-300" },
                 { label: "বাকি", value: unanswered, cls: "text-ink" },
               ].map((s) => (
-                <div key={s.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] py-3">
+                <div key={s.label} className="rounded-2xl border border-surface-border bg-white/[0.02] py-3">
                   <dt lang="bn" className="text-[11px] text-ink-muted">
                     {s.label}
                   </dt>

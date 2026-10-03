@@ -43,7 +43,7 @@ export function QuestionCard({
         exit="exit"
         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
         aria-labelledby={`q-${question.id}-title`}
-        className="relative overflow-hidden rounded-3xl border border-white/[0.06] bg-obsidian-800/70 p-5 shadow-card backdrop-blur sm:p-8"
+        className="relative overflow-hidden rounded-3xl border border-surface-border bg-obsidian-800/70 p-5 shadow-card backdrop-blur sm:p-8"
       >
         <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-brand-400/10 blur-3xl" />
 
@@ -163,7 +163,7 @@ export function OptionSelector({ name, options, selected, onSelect, labelledBy }
               "group relative flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-colors duration-200",
               isSelected
                 ? "border-brand-400/70 bg-brand-400/[0.08] shadow-glow"
-                : "border-white/[0.07] bg-white/[0.02] hover:border-brand-400/30 hover:bg-white/[0.04]",
+                : "border-surface-border bg-white/[0.02] hover:border-brand-400/30 hover:bg-white/[0.04]",
             )}
           >
             {/* Radio indicator */}

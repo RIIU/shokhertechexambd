@@ -69,7 +69,7 @@ export function SubjectCard({ subject, onOpen }: SubjectCardProps) {
         "group relative flex h-full w-full flex-col overflow-hidden rounded-3xl p-5 text-left shadow-card transition-shadow duration-300 [transform-style:preserve-3d] will-change-transform",
         live
           ? "border-animated animate-border-spin shadow-glow"
-          : cn("border border-white/[0.06] bg-obsidian-800/80 hover:border-white/[0.12]", accent.glow),
+          : cn("border border-surface-border bg-obsidian-900 hover:border-leaf-600", accent.glow),
       )}
     >
       {/* Cursor spotlight */}
@@ -121,7 +121,7 @@ export function SubjectCard({ subject, onOpen }: SubjectCardProps) {
         </p>
       </div>
 
-      <dl className="relative grid grid-cols-2 gap-2 border-t border-white/[0.06] pt-4 text-xs">
+      <dl className="relative grid grid-cols-2 gap-2 border-t border-surface-border pt-4 text-xs">
         <div className="flex items-center gap-1.5 text-ink-muted">
           <BookMarked className="h-3.5 w-3.5" strokeWidth={1.5} />
           <dt className="sr-only">Chapters</dt>

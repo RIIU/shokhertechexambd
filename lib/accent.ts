@@ -22,7 +22,7 @@ export const ACCENT_STYLES: Record<
     border: "border-leaf-400/30",
     ring: "ring-leaf-400/40",
     glow: "group-hover:shadow-glow-leaf",
-    hex: "#19CB61",
+    hex: "#19CC61",
   },
   teal: {
     text: "text-teal-300",

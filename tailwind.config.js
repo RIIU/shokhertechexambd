@@ -3,7 +3,8 @@
  * -----------------------------------------------------------------------------
  * Colors are sampled pixel-for-pixel from pixxen.com: deep forest-green
  * backgrounds, an electric lime primary (#99FE00), a leaf-green secondary
- * (#19CB61) and sage text (#A7BDB5).
+ * (#19CC61) and sage text (#A7BDB5). Exact values cross-checked against
+ * pixxen.com's page source (green1–green5, dark-shade tokens).
  *
  * Fonts are loaded with next/font in app/layout.tsx and exposed as CSS
  * variables, so this file only maps them to families.
@@ -43,10 +44,10 @@ module.exports = {
         // Leaf green — secondary (pixxen labels, dots, icons)
         leaf: {
           300: "#5EE596",
-          400: "#19CB61",
+          400: "#19CC61", // pixxen green2
           500: "#19B357",
           600: "#19914A",
-          DEFAULT: "#19CB61",
+          DEFAULT: "#19CC61",
         },
         // Dark green fills and text on lime buttons (pixxen #065136)
         forest: {
@@ -54,7 +55,7 @@ module.exports = {
         },
         // Backgrounds & surfaces (pixxen)
         obsidian: {
-          950: "#001A10", // modal scrims
+          950: "#001B11", // section gradient end, modal scrims
           900: "#002417", // app background
           800: "#012819", // header, raised surfaces
           DEFAULT: "#002417",
@@ -63,12 +64,13 @@ module.exports = {
           DEFAULT: "#042E1B", // hero top / chips
           soft: "#012819",
           hover: "#0A3C26",
-          border: "#29473C", // card borders
+          border: "#29473C", // card borders (pixxen dark-shade3)
+          pill: "#1F382F", // pills, icon buttons
         },
         ink: {
           DEFAULT: "#FFFFFF",
           muted: "#A7BDB5",
-          subtle: "#6F8F84",
+          subtle: "#759187", // pixxen meta text
         },
         // Semantic exam states
         state: {
@@ -96,8 +98,12 @@ module.exports = {
           "radial-gradient(60% 60% at 50% 0%, rgba(26,120,52,0.35) 0%, rgba(0,36,23,0) 70%)",
         "radial-glow":
           "radial-gradient(50% 50% at 50% 50%, rgba(153,254,0,0.14) 0%, rgba(0,36,23,0) 70%)",
-        "brand-gradient": "linear-gradient(135deg, #99FE00 0%, #5EE596 50%, #19CB61 100%)",
-        "text-gradient": "linear-gradient(90deg, #FFFFFF 0%, #E6FFC2 35%, #99FE00 70%, #19CB61 100%)",
+        "brand-gradient": "linear-gradient(135deg, #99FE00 0%, #5EE596 50%, #19CC61 100%)",
+        "text-gradient": "linear-gradient(90deg, #FFFFFF 0%, #E6FFC2 35%, #99FE00 70%, #19CC61 100%)",
+        // pixxen section background
+        section: "linear-gradient(180deg, #002417 0%, #001B11 100%)",
+        // pixxen popup panel
+        "radial-forest": "radial-gradient(15.93% 43.85% at 50% 100%, #065136 0%, #002417 100%)",
       },
       backgroundSize: {
         grid: "48px 48px",
@@ -106,7 +112,7 @@ module.exports = {
         "glow-sm": "0 0 0 1px rgba(153,254,0,0.15), 0 0 12px -2px rgba(153,254,0,0.35)",
         glow: "0 0 0 1px rgba(153,254,0,0.25), 0 0 32px -6px rgba(153,254,0,0.45)",
         "glow-lg": "0 0 0 1px rgba(153,254,0,0.3), 0 0 60px -10px rgba(153,254,0,0.5)",
-        "glow-leaf": "0 0 0 1px rgba(25,203,97,0.3), 0 0 40px -8px rgba(25,203,97,0.5)",
+        "glow-leaf": "0 0 0 1px rgba(25,204,97,0.3), 0 0 40px -8px rgba(25,204,97,0.5)",
         "glow-danger": "0 0 0 1px rgba(244,63,94,0.4), 0 0 32px -4px rgba(244,63,94,0.6)",
         card: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 20px 40px -24px rgba(0,10,5,0.85)",
       },
@@ -193,11 +199,11 @@ module.exports = {
         ".border-animated": {
           border: "1px solid transparent",
           background:
-            "linear-gradient(#012819, #012819) padding-box, conic-gradient(from var(--border-angle), #29473C 0%, #29473C 60%, #99FE00 75%, #19CB61 84%, #065136 92%, #29473C 100%) border-box",
+            "radial-gradient(15.93% 43.85% at 50% 100%, #065136 0%, #002417 100%) padding-box, conic-gradient(from var(--border-angle), #29473C 0%, #29473C 60%, #99FE00 75%, #19CC61 84%, #065136 92%, #29473C 100%) border-box",
         },
         ".text-gradient": {
           "background-image":
-            "linear-gradient(90deg, #FFFFFF 0%, #E6FFC2 35%, #99FE00 70%, #19CB61 100%)",
+            "linear-gradient(90deg, #FFFFFF 0%, #E6FFC2 35%, #99FE00 70%, #19CC61 100%)",
           "-webkit-background-clip": "text",
           "background-clip": "text",
           color: "transparent",

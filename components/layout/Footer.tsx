@@ -8,7 +8,7 @@ export function Footer() {
   if (isFocusRoute(pathname)) return null;
 
   return (
-    <footer className="mt-24 border-t border-white/[0.06]">
+    <footer className="mt-24 border-t border-surface-border bg-section">
       <div className="container flex flex-col items-center justify-between gap-3 py-8 text-sm text-ink-subtle sm:flex-row">
         <p>
           © {new Date().getFullYear()} ShokherTech Exam BD.{" "}

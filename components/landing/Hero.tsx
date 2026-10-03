@@ -167,7 +167,7 @@ function ExamPreview() {
             key={String(l)}
             className={cn(
               "flex items-center gap-2.5 rounded-xl border p-2.5 text-sm",
-              sel ? "border-brand-400/70 bg-brand-400/10 text-ink shadow-glow-sm" : "border-white/[0.07] text-ink-muted",
+              sel ? "border-brand-400/70 bg-brand-400/10 text-ink shadow-glow-sm" : "border-surface-border text-ink-muted",
             )}
           >
             <span
@@ -184,7 +184,7 @@ function ExamPreview() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between border-t border-white/[0.06] pt-4">
+      <div className="flex items-center justify-between border-t border-surface-border pt-4">
         <div className="grid grid-cols-6 gap-1.5">
           {palette.map((s, i) => (
             <span

@@ -57,7 +57,7 @@ export function ExamTypeSheet({ subject, level, stream, onClose }: ExamTypeSheet
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 34 }}
-            className="relative flex max-h-[90vh] w-full flex-col overflow-y-auto rounded-t-4xl border-l border-white/[0.06] bg-obsidian-800 p-6 scrollbar-thin sm:max-h-none sm:w-[440px] sm:rounded-none sm:rounded-l-4xl"
+            className="relative flex max-h-[90vh] w-full flex-col overflow-y-auto rounded-t-4xl border-l border-surface-border bg-obsidian-800 p-6 scrollbar-thin sm:max-h-none sm:w-[440px] sm:rounded-none sm:rounded-l-4xl"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-radial-brand" />
             <button
@@ -137,13 +137,13 @@ export function ExamTypeSheet({ subject, level, stream, onClose }: ExamTypeSheet
                           "group flex items-center gap-4 rounded-2xl border p-4 transition-all",
                           type === "live"
                             ? "border-state-danger/30 bg-state-danger/[0.04] hover:shadow-glow-danger"
-                            : "border-white/[0.07] bg-white/[0.02] hover:border-brand-400/40 hover:shadow-glow-sm",
+                            : "border-surface-border bg-white/[0.02] hover:border-brand-400/40 hover:shadow-glow-sm",
                         )}
                       >
                         {body}
                       </Link>
                     ) : (
-                      <div aria-disabled="true" className="flex items-center gap-4 rounded-2xl border border-white/[0.05] bg-white/[0.01] p-4 opacity-60">
+                      <div aria-disabled="true" className="flex items-center gap-4 rounded-2xl border border-surface-border bg-white/[0.01] p-4 opacity-60">
                         {body}
                       </div>
                     )}

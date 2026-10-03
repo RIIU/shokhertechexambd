@@ -11,20 +11,22 @@ Status legend used below: **Built** = implemented in this repo; **Planned** = sp
 
 ### 1.1 Color tokens (`tailwind.config.js`)
 
-All values are sampled pixel-for-pixel from pixxen.com screenshots.
+All values are sampled pixel-for-pixel from pixxen.com screenshots and cross-checked against its page source (`green1`–`green5`, `dark-shade*`).
 
 | Token | Hex | Use |
 |---|---|---|
 | `obsidian-900` | `#002417` | App background and cards (pixxen page background) |
 | `obsidian-800` | `#012819` | Header, raised surfaces, modals |
-| `obsidian-950` | `#001A10` | Modal scrims |
+| `obsidian-950` | `#001B11` | Section gradient end (`bg-section`: `#002417` → `#001B11`), modal scrims |
 | `bg-hero` | `#042E1B` → `#09351F` → `#063B25` | Landing hero band, plus a `#1A5C28`-style glow on the right |
-| `surface` / `surface-border` | `#042E1B` / `#29473C` | Chips and glass fills / card borders |
+| `surface` / `surface-border` / `surface-pill` | `#042E1B` / `#29473C` / `#1F382F` | Glass fills / card borders (pixxen `dark-shade3`) / pills |
 | `brand-400` (`brand`) | `#99FE00` | Electric lime: primary buttons, answered state, focus rings, glows |
 | `forest` | `#065136` | Text on lime buttons, dark-green fills |
-| `leaf-400` / `leaf-600` | `#19CB61` / `#19914A` | Secondary green: labels, dots, icons, explanation callouts |
-| `ink` / `ink-muted` / `ink-subtle` | `#FFFFFF` / `#A7BDB5` / `#6F8F84` | Headings / body / meta (contrast on `#002417`: 16.6 / 8.4 / 4.7) |
+| `leaf-400` / `leaf-600` | `#19CC61` / `#19914A` | Secondary green: labels, dots, icons, explanation callouts |
+| `ink` / `ink-muted` / `ink-subtle` | `#FFFFFF` / `#A7BDB5` / `#759187` | Headings / body / meta (contrast on `#002417`: 16.6 / 8.4 / 5.2) |
 | `state-answered` / `flagged` / `unanswered` / `danger` | `#99FE00` / `#F59E0B` / `#29473C` / `#F43F5E` | Exam palette and timer states |
+
+Header, buttons and popups follow pixxen's components: a full-width `#012819` header with a `#065136` bottom border, a dark-green menu cell and a flush lime call-to-action; secondary buttons are white outlines that fill white on hover; popups and animated-border panels use pixxen's `radial-gradient(… #065136 → #002417)`.
 
 Accent classes per subject/stream are kept in a **static map** (`lib/accent.ts`) so Tailwind's JIT sees every class. Never build class names like `` `text-${accent}-400` ``.
 

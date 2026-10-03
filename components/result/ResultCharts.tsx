@@ -73,7 +73,7 @@ export function AccuracyDonut({ result }: { result: ExamResult }) {
       <figcaption className="w-full">
         <ul className="space-y-2">
           {STATUS.map(({ key, label, color, icon: Icon }) => (
-            <li key={key} className="flex items-center justify-between gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+            <li key={key} className="flex items-center justify-between gap-4 rounded-xl border border-surface-border bg-white/[0.02] px-3 py-2.5">
               <span className="flex items-center gap-2 text-sm text-ink-muted">
                 <Icon className="h-4 w-4" style={{ color }} strokeWidth={1.75} />
                 <span lang="bn">{label}</span>

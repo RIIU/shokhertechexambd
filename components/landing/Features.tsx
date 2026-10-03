@@ -31,7 +31,7 @@ export function Features() {
           <li
             key={title}
             className={cn(
-              "group relative overflow-hidden rounded-3xl border border-white/[0.06] bg-obsidian-800/60 p-6 shadow-card transition-all duration-300 hover:border-brand-400/25 hover:shadow-glow",
+              "group relative overflow-hidden rounded-3xl border border-surface-border bg-obsidian-900 p-6 shadow-card transition-all duration-300 hover:border-brand-400/25 hover:shadow-glow",
               className,
             )}
           >
