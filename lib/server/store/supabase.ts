@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient, type PostgrestError, type SupabaseClient } from "@supabase/supabase-js";
 import type { Store } from "./types";
-import type { Attempt, ExamResult, ExamType, Level, OptionId, Question, QuestionOption, Role, StoredExam, StoredViolation, StreamId, SubmitReason, User, ViolationKind } from "@/lib/types";
+import type { Attempt, ExamResult, ExamType, Level, OptionId, PaymentRequest, Question, QuestionOption, Role, StoredExam, StoredViolation, StreamId, SubmitReason, User, ViolationKind } from "@/lib/types";
 
 /**
  * Supabase (Postgres) driver. Server-side only: it uses the secret key
@@ -21,6 +21,9 @@ interface UserRow {
   level: Level | null;
   stream: StreamId | null;
   institution: string | null;
+  avatar_url?: string | null;
+  cover_url?: string | null;
+  bio?: string | null;
   blocked: boolean;
   created_at: string;
 }
@@ -46,6 +49,9 @@ interface ExamRow {
   duration_sec: number;
   negative_mark: number;
   max_warnings: number;
+  show_solutions?: boolean;
+  is_paid?: boolean;
+  price?: number;
   status: "draft" | "published";
   created_at: string;
   updated_at: string;
@@ -84,18 +90,95 @@ const ms = (iso: string) => Date.parse(iso);
 const iso = (n: number) => new Date(n).toISOString();
 const opt = <T>(v: T | null): T | undefined => (v === null ? undefined : v);
 
-const toUser = (r: UserRow): User => ({
-  id: r.id,
-  name: r.name,
-  phone: r.phone,
-  passwordHash: r.password_hash,
-  role: r.role,
-  level: opt(r.level),
-  stream: opt(r.stream),
-  institution: opt(r.institution),
-  blocked: r.blocked,
-  createdAt: ms(r.created_at),
-});
+const toUser = (r: UserRow): User => {
+  let institution = opt(r.institution);
+  let avatarUrl = opt(r.avatar_url);
+  let coverUrl = opt(r.cover_url);
+  let bio = opt(r.bio);
+  let enrolledExams: string[] | undefined = undefined;
+  let subscriptionStatus: "active" | "pending" | "none" | undefined = undefined;
+  let subscriptionValidUntil: number | undefined = undefined;
+  let paymentRequests: PaymentRequest[] | undefined = undefined;
+  let latestPayment: PaymentRequest | undefined = undefined;
+
+  if (institution && institution.startsWith('{"') && institution.endsWith('}')) {
+    try {
+      const meta = JSON.parse(institution);
+      if (typeof meta === "object" && meta !== null) {
+        institution = meta.institution ?? meta.inst ?? "";
+        if (!avatarUrl && meta.avatarUrl) avatarUrl = meta.avatarUrl;
+        if (!coverUrl && meta.coverUrl) coverUrl = meta.coverUrl;
+        if (!bio && meta.bio) bio = meta.bio;
+        if (Array.isArray(meta.enrolledExams)) enrolledExams = meta.enrolledExams;
+        if (meta.subscriptionStatus) subscriptionStatus = meta.subscriptionStatus;
+        if (meta.subscriptionValidUntil) subscriptionValidUntil = Number(meta.subscriptionValidUntil);
+        if (Array.isArray(meta.paymentRequests)) paymentRequests = meta.paymentRequests;
+        if (meta.latestPayment) latestPayment = meta.latestPayment;
+      }
+    } catch {
+      // not json
+    }
+  }
+
+  return {
+    id: r.id,
+    name: r.name,
+    phone: r.phone,
+    passwordHash: r.password_hash,
+    role: r.role,
+    level: opt(r.level),
+    stream: opt(r.stream),
+    institution: institution || undefined,
+    avatarUrl: avatarUrl || undefined,
+    coverUrl: coverUrl || undefined,
+    bio: bio || undefined,
+    enrolledExams: enrolledExams && enrolledExams.length > 0 ? enrolledExams : undefined,
+    subscriptionStatus,
+    subscriptionValidUntil,
+    paymentRequests,
+    latestPayment,
+    blocked: r.blocked,
+    createdAt: ms(r.created_at),
+  };
+};
+
+export const packInstitution = (u: Partial<User>): string | null => {
+  let existing: Record<string, unknown> = {};
+  if (u.institution && u.institution.startsWith('{"') && u.institution.endsWith('}')) {
+    try {
+      existing = JSON.parse(u.institution);
+    } catch {
+      existing = { inst: u.institution };
+    }
+  } else if (u.institution) {
+    existing = { inst: u.institution };
+  }
+
+  if (u.avatarUrl !== undefined) existing.avatarUrl = u.avatarUrl;
+  if (u.coverUrl !== undefined) existing.coverUrl = u.coverUrl;
+  if (u.bio !== undefined) existing.bio = u.bio;
+  if (u.enrolledExams !== undefined) existing.enrolledExams = u.enrolledExams;
+  if (u.subscriptionStatus !== undefined) existing.subscriptionStatus = u.subscriptionStatus;
+  if (u.subscriptionValidUntil !== undefined) existing.subscriptionValidUntil = u.subscriptionValidUntil;
+  if (u.paymentRequests !== undefined) existing.paymentRequests = u.paymentRequests;
+  if (u.latestPayment !== undefined) existing.latestPayment = u.latestPayment;
+
+  const hasExtra =
+    existing.avatarUrl ||
+    existing.coverUrl ||
+    existing.bio ||
+    (Array.isArray(existing.enrolledExams) && existing.enrolledExams.length > 0) ||
+    existing.subscriptionStatus ||
+    existing.subscriptionValidUntil ||
+    existing.paymentRequests ||
+    existing.latestPayment;
+
+  if (hasExtra) {
+    return JSON.stringify(existing);
+  }
+  return typeof existing.inst === "string" ? existing.inst : (u.institution ?? null);
+};
+
 const fromUser = (u: User): UserRow => ({
   id: u.id,
   name: u.name,
@@ -104,7 +187,7 @@ const fromUser = (u: User): UserRow => ({
   role: u.role,
   level: u.level ?? null,
   stream: u.stream ?? null,
-  institution: u.institution ?? null,
+  institution: packInstitution(u),
   blocked: Boolean(u.blocked),
   created_at: iso(u.createdAt),
 });
@@ -130,22 +213,59 @@ const fromQuestion = (examId: string, q: Question, position: number): QuestionRo
   marks: q.marks,
 });
 
-const toExam = (r: ExamRow): StoredExam => ({
-  id: r.id,
-  titleBn: r.title_bn,
-  titleEn: r.title_en,
-  level: r.level,
-  stream: r.stream,
-  subjectId: r.subject_id,
-  type: r.type,
-  durationSec: r.duration_sec,
-  negativeMark: Number(r.negative_mark),
-  maxWarnings: r.max_warnings,
-  status: r.status,
-  createdAt: ms(r.created_at),
-  updatedAt: ms(r.updated_at),
-  questions: [...(r.questions ?? [])].sort((a, b) => a.position - b.position).map(toQuestion),
-});
+const HIDE_SOLUTIONS_TAG = "[hide_solutions]";
+
+export const buildExamTags = (showSolutions?: boolean, isPaid?: boolean, price?: number): string => {
+  let tags = "";
+  if (showSolutions === false) tags += ` ${HIDE_SOLUTIONS_TAG}`;
+  if (isPaid) tags += ` [paid:${price || 50}]`;
+  return tags;
+};
+
+export const cleanExamTitle = (raw: string): string =>
+  raw
+    .replace(HIDE_SOLUTIONS_TAG, "")
+    .replace(/\[paid:\d+\]/g, "")
+    .replace(/\[paid\]/g, "")
+    .trim();
+
+const toExam = (r: ExamRow): StoredExam => {
+  const hiddenInTitle = r.title_en?.includes(HIDE_SOLUTIONS_TAG) ?? false;
+  const showSolutions = r.show_solutions !== undefined ? Boolean(r.show_solutions) : !hiddenInTitle;
+
+  let isPaid = r.is_paid !== undefined ? Boolean(r.is_paid) : false;
+  let price = r.price !== undefined ? Number(r.price) : 0;
+  const paidMatch = r.title_en?.match(/\[paid:(\d+)\]/);
+  if (paidMatch) {
+    isPaid = true;
+    price = Number(paidMatch[1]) || 50;
+  } else if (r.title_en?.includes("[paid]")) {
+    isPaid = true;
+    price = price || 50;
+  }
+
+  const cleanTitleEn = cleanExamTitle(r.title_en ?? "");
+
+  return {
+    id: r.id,
+    titleBn: r.title_bn,
+    titleEn: cleanTitleEn || r.title_bn,
+    level: r.level,
+    stream: r.stream,
+    subjectId: r.subject_id,
+    type: r.type,
+    durationSec: r.duration_sec,
+    negativeMark: Number(r.negative_mark),
+    maxWarnings: r.max_warnings,
+    showSolutions,
+    isPaid,
+    price,
+    status: r.status,
+    createdAt: ms(r.created_at),
+    updatedAt: ms(r.updated_at),
+    questions: [...(r.questions ?? [])].sort((a, b) => a.position - b.position).map(toQuestion),
+  };
+};
 
 const toAttempt = (r: AttemptRow): Attempt => ({
   id: r.id,
@@ -255,6 +375,22 @@ export const supabaseStore: Store = {
     const rows = await all<UserRow>((f, t) => db().from("users").select("*").order("created_at", { ascending: false }).range(f, t), "listUsers");
     return rows.map(toUser);
   },
+  async updateUser(id, patch) {
+    const current = await supabaseStore.getUser(id);
+    if (!current) throw new Error(`[supabase] updateUser: user ${id} not found`);
+
+    const merged: User = { ...current, ...patch };
+    const payload: Record<string, unknown> = {
+      name: merged.name,
+      password_hash: merged.passwordHash,
+      level: merged.level ?? null,
+      stream: merged.stream ?? null,
+      institution: packInstitution(merged),
+    };
+
+    const { error } = await db().from("users").update(payload).eq("id", id);
+    check(error, "updateUser");
+  },
   async setUserBlocked(id, blocked) {
     const { error } = await db().from("users").update({ blocked }).eq("id", id).neq("role", "admin");
     check(error, "setUserBlocked");
@@ -283,13 +419,15 @@ export const supabaseStore: Store = {
   },
   async insertExam(exam) {
     const { questions, ...e } = exam;
+    const tags = buildExamTags(e.showSolutions, e.isPaid, e.price);
+    const cleanEn = cleanExamTitle(e.titleEn || e.titleBn);
     const { error } = await db()
       .from("exams")
       .upsert(
         {
           id: e.id,
           title_bn: e.titleBn,
-          title_en: e.titleEn,
+          title_en: `${cleanEn}${tags}`,
           level: e.level,
           stream: e.stream,
           subject_id: e.subjectId,
@@ -314,7 +452,34 @@ export const supabaseStore: Store = {
   async updateExam(id, patch) {
     const row: Record<string, unknown> = { updated_at: iso(patch.updatedAt) };
     if (patch.titleBn !== undefined) row.title_bn = patch.titleBn;
-    if (patch.titleEn !== undefined) row.title_en = patch.titleEn;
+    if (
+      patch.titleEn !== undefined ||
+      patch.titleBn !== undefined ||
+      patch.showSolutions !== undefined ||
+      patch.isPaid !== undefined ||
+      patch.price !== undefined
+    ) {
+      let baseEn = patch.titleEn !== undefined ? patch.titleEn : (patch.titleBn ?? "");
+      let showSolutions = patch.showSolutions;
+      let isPaid = patch.isPaid;
+      let price = patch.price;
+
+      if (patch.titleEn === undefined || showSolutions === undefined || isPaid === undefined || price === undefined) {
+        const curr = await db().from("exams").select("title_en").eq("id", id).maybeSingle<{ title_en: string }>();
+        const currTitle = curr.data?.title_en ?? "";
+        if (patch.titleEn === undefined) baseEn = currTitle;
+        if (showSolutions === undefined) showSolutions = !currTitle.includes(HIDE_SOLUTIONS_TAG);
+        if (isPaid === undefined) {
+          isPaid = currTitle.includes("[paid");
+          const m = currTitle.match(/\[paid:(\d+)\]/);
+          if (m) price = Number(m[1]);
+        }
+      }
+
+      const cleanEn = cleanExamTitle(baseEn);
+      const tags = buildExamTags(showSolutions, isPaid, price);
+      row.title_en = `${cleanEn}${tags}`;
+    }
     if (patch.level !== undefined) row.level = patch.level;
     if (patch.stream !== undefined) row.stream = patch.stream;
     if (patch.subjectId !== undefined) row.subject_id = patch.subjectId;

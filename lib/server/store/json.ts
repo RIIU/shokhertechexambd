@@ -29,6 +29,12 @@ export const jsonStore: Store = {
   async listUsers() {
     return [...(await readDb()).users].sort(byNewest);
   },
+  async updateUser(id, patch) {
+    await mutateDb((db) => {
+      const u = db.users.find((x) => x.id === id);
+      if (u) Object.assign(u, patch);
+    });
+  },
   async setUserBlocked(id, blocked) {
     await mutateDb((db) => {
       const u = db.users.find((x) => x.id === id);

@@ -45,6 +45,8 @@ export interface ExamSummary {
   titleBn: string;
   questions: number;
   durationSec: number;
+  isPaid?: boolean;
+  price?: number;
 }
 
 export type SubjectExams = Partial<Record<ExamType, ExamSummary[]>>;
@@ -89,6 +91,47 @@ export interface ExamMeta {
   negativeMark: number;
   /** Maximum tab-switch / focus-loss strikes before forced submission. */
   maxWarnings: number;
+  /** Whether candidates can see correct answers and explanations after submitting (true by default). */
+  showSolutions?: boolean;
+  /** Whether this exam requires paid enrollment / ticket (free by default). */
+  isPaid?: boolean;
+  /** Exam fee in BDT if isPaid is true. */
+  price?: number;
+}
+
+export type PaymentMethod = "bkash" | "nagad" | "rocket" | "upay" | "demo";
+export type PaymentStatus = "pending" | "approved" | "rejected";
+export type PlanType = "monthly" | "exam";
+
+export interface PaymentRequest {
+  id: string;
+  userId: string;
+  userName: string;
+  userPhone: string;
+  planType: PlanType;
+  examId?: string;
+  examTitle?: string;
+  amount: number;
+  method: PaymentMethod;
+  senderPhone: string;
+  trxId: string;
+  status: PaymentStatus;
+  submittedAt: number;
+  reviewedAt?: number;
+  reviewedBy?: string;
+  validUntil?: number;
+  notes?: string;
+}
+
+export interface Enrollment {
+  id: string;
+  examId: string;
+  userId: string;
+  amount: number;
+  paymentMethod: PaymentMethod;
+  senderPhone?: string;
+  trxId?: string;
+  createdAt: number;
 }
 
 export interface Exam extends ExamMeta {
@@ -158,6 +201,7 @@ export interface ExamResult {
   topics: { topic: string; correct: number; total: number }[];
   questions: QuestionResult[];
   submittedAt: number;
+  showSolutions?: boolean;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -176,6 +220,14 @@ export interface User {
   level?: Level;
   stream?: StreamId;
   institution?: string;
+  avatarUrl?: string;
+  coverUrl?: string;
+  bio?: string;
+  enrolledExams?: string[];
+  subscriptionStatus?: "active" | "pending" | "none";
+  subscriptionValidUntil?: number;
+  paymentRequests?: PaymentRequest[];
+  latestPayment?: PaymentRequest;
   blocked?: boolean;
   createdAt: number;
 }
@@ -220,4 +272,5 @@ export interface Session {
   userId: string;
   role: Role;
   name: string;
+  avatarUrl?: string;
 }

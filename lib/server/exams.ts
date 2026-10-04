@@ -23,7 +23,14 @@ export async function examIndex(level: Level, stream: StreamId) {
   const index: Record<string, SubjectExams> = {};
   for (const e of exams) {
     const bySubject = (index[e.subjectId] ??= {});
-    (bySubject[e.type] ??= []).push({ id: e.id, titleBn: e.titleBn, questions: e.questions.length, durationSec: e.durationSec });
+    (bySubject[e.type] ??= []).push({
+      id: e.id,
+      titleBn: e.titleBn,
+      questions: e.questions.length,
+      durationSec: e.durationSec,
+      isPaid: e.isPaid,
+      price: e.price,
+    });
   }
   return index;
 }
@@ -38,6 +45,9 @@ export interface ExamMetaInput {
   durationSec: number;
   negativeMark: number;
   maxWarnings: number;
+  showSolutions?: boolean;
+  isPaid?: boolean;
+  price?: number;
 }
 
 export async function createExam(input: ExamMetaInput): Promise<StoredExam> {

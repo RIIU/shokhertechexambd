@@ -5,7 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { motion } from "framer-motion";
-import { AlertTriangle, CheckCircle2, Clock, Home, Lightbulb, MinusCircle, RotateCcw, Target, Trophy, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, Home, Lightbulb, Lock, MinusCircle, RotateCcw, Target, Trophy, XCircle } from "lucide-react";
 import { AccuracyDonut, TopicBars } from "@/components/result/ResultCharts";
 import { cn, formatClock, OPTION_LABEL_BN, toBn } from "@/lib/utils";
 import type { ExamResult, QuestionResult } from "@/lib/types";
@@ -34,9 +34,10 @@ interface ResultViewProps {
   studentName?: string;
   backHref: string;
   backLabel: string;
+  showSolutions?: boolean;
 }
 
-export function ResultView({ result, canRetake, studentName, backHref, backLabel }: ResultViewProps) {
+export function ResultView({ result, canRetake, studentName, backHref, backLabel, showSolutions = true }: ResultViewProps) {
   const [filter, setFilter] = useState<Filter>("all");
   const scoreRef = useRef<HTMLSpanElement>(null);
   const root = useRef<HTMLElement>(null);
@@ -57,6 +58,7 @@ export function ResultView({ result, canRetake, studentName, backHref, backLabel
     { scope: root, dependencies: [result] },
   );
 
+  const solutionsAllowed = showSolutions !== false && result.showSolutions !== false;
   const questions = useMemo(() => result.questions.filter((q) => filter === "all" || q.status === filter), [result, filter]);
 
   const pct = result.totalMarks > 0 ? (result.score / result.totalMarks) * 100 : 0;
@@ -149,29 +151,45 @@ export function ResultView({ result, canRetake, studentName, backHref, backLabel
             <h2 id="exp-title" lang="bn" className="text-2xl font-bold text-ink">
               সমাধান ও ব্যাখ্যা
             </h2>
-            <div role="tablist" className="glass inline-flex self-start rounded-2xl p-1">
-              {FILTERS.map((f) => (
-                <button
-                  key={f.id}
-                  role="tab"
-                  aria-selected={filter === f.id}
-                  onClick={() => setFilter(f.id)}
-                  className={cn("relative rounded-xl px-4 py-2 text-sm", filter === f.id ? "text-forest" : "text-ink-muted hover:text-ink")}
-                >
-                  {filter === f.id && <motion.span layoutId="exp-filter" className="absolute inset-0 rounded-xl bg-brand-400" />}
-                  <span lang="bn" className="relative">
-                    {f.label}
-                  </span>
-                </button>
-              ))}
-            </div>
+            {solutionsAllowed && (
+              <div role="tablist" className="glass inline-flex self-start rounded-2xl p-1">
+                {FILTERS.map((f) => (
+                  <button
+                    key={f.id}
+                    role="tab"
+                    aria-selected={filter === f.id}
+                    onClick={() => setFilter(f.id)}
+                    className={cn("relative rounded-xl px-4 py-2 text-sm", filter === f.id ? "text-forest" : "text-ink-muted hover:text-ink")}
+                  >
+                    {filter === f.id && <motion.span layoutId="exp-filter" className="absolute inset-0 rounded-xl bg-brand-400" />}
+                    <span lang="bn" className="relative">
+                      {f.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          <ol className="space-y-4">
-            {questions.map((q) => (
-              <ExplanationCard key={q.id} q={q} number={result.questions.indexOf(q) + 1} />
-            ))}
-          </ol>
+          {!solutionsAllowed ? (
+            <div className="rounded-3xl border border-amber-400/30 bg-amber-400/[0.08] p-8 text-center sm:p-12">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-400/20 text-amber-300">
+                <Lock className="h-7 w-7" strokeWidth={1.75} />
+              </div>
+              <h3 lang="bn" className="mb-2 text-xl font-bold text-ink">
+                সঠিক উত্তর ও সমাধান শীট গোপন রাখা হয়েছে
+              </h3>
+              <p lang="bn" className="mx-auto max-w-lg text-sm leading-relaxed text-ink-muted">
+                অ্যাডমিন এই পরীক্ষার সঠিক উত্তর ও সমাধান শীট গোপন রেখেছেন। তুমি তোমার অর্জিত স্কোর, সময়, নির্ভুলতা এবং মেধা তালিকায় অবস্থান দেখতে পাচ্ছ।
+              </p>
+            </div>
+          ) : (
+            <ol className="space-y-4">
+              {questions.map((q) => (
+                <ExplanationCard key={q.id} q={q} number={result.questions.indexOf(q) + 1} />
+              ))}
+            </ol>
+          )}
         </section>
 
         <div className="mt-10 flex flex-wrap justify-center gap-3">

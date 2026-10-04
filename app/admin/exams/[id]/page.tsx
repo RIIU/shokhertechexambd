@@ -111,6 +111,9 @@ export default async function EditExamPage({ params, searchParams }: { params: {
                 minutes: Math.round(exam.durationSec / 60),
                 negativeMark: exam.negativeMark,
                 maxWarnings: exam.maxWarnings,
+                showSolutions: exam.showSolutions !== false,
+                isPaid: Boolean(exam.isPaid),
+                price: exam.price ?? 50,
               }}
             />
           </Panel>

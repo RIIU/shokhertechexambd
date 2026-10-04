@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Activity, FileCheck2, Radio, ShieldAlert, Users } from "lucide-react";
+import { Activity, ArrowRight, CreditCard, FileCheck2, Radio, ShieldAlert, Users } from "lucide-react";
 import { AdminHeader, Badge } from "@/components/admin/AdminUi";
 import { AutoRefresh } from "@/components/admin/AutoRefresh";
 import { EmptyState, Panel, StatTile } from "@/components/ui/StatTile";
 import { adminOverview } from "@/lib/server/stats";
+import { countPendingPayments } from "@/lib/server/payments";
 import { formatPhone } from "@/lib/phone";
 import { formatClock, formatDateBn, toBn } from "@/lib/utils";
 
@@ -17,7 +18,7 @@ const KIND_BN: Record<string, string> = {
 };
 
 export default async function AdminOverviewPage() {
-  const data = await adminOverview();
+  const [data, pendingPayments] = await Promise.all([adminOverview(), countPendingPayments()]);
   const k = data.kpis;
   const maxDay = Math.max(1, ...data.perDay.map((d) => d.count));
   const now = Date.now();
@@ -26,6 +27,31 @@ export default async function AdminOverviewPage() {
     <>
       <AutoRefresh seconds={10} />
       <AdminHeader title="ওভারভিউ" subtitle="প্রতি ১০ সেকেন্ডে আপডেট হয়" />
+
+      {pendingPayments > 0 && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 ring-1 ring-amber-400/20">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400/20 text-amber-300">
+              <CreditCard className="h-5 w-5" />
+            </div>
+            <div>
+              <p lang="bn" className="text-sm font-bold text-ink">
+                {toBn(pendingPayments)}টি নতুন পেমেন্ট রিকোয়েস্ট অনুমোদনের অপেক্ষায় রয়েছে!
+              </p>
+              <p lang="bn" className="text-xs text-ink-muted">
+                শিক্ষার্থীরা বিকাশ/নগদে ফি পাঠিয়ে TrxID সাবমিট করেছে। পরীক্ষা আনলক করতে অনুমোদন দিন।
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin/payments"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-4 py-2 text-xs font-bold text-obsidian-950 hover:bg-amber-300 transition-colors shadow-sm"
+          >
+            <span>পেমেন্ট যাচাই ও অনুমোদন</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      )}
 
       <div className="mb-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatTile icon={Users} label="শিক্ষার্থী" value={toBn(k.students)} hint={`গত ২৪ ঘণ্টায় নতুন ${toBn(k.newStudents24h)} জন`} />

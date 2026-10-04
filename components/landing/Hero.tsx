@@ -28,15 +28,23 @@ export function Hero() {
         // Idle float for the level badges
         gsap.to("[data-badge]", { y: -10, duration: 2.6, ease: "sine.inOut", yoyo: true, repeat: -1, stagger: 0.6, delay: 1.6 });
 
-        // Pointer parallax on the preview stack
+        // Pointer parallax on the preview stack (throttled to ~60fps)
         const xTo = gsap.quickTo("[data-parallax]", "x", { duration: 0.8, ease: "power3.out" });
         const yTo = gsap.quickTo("[data-parallax]", "y", { duration: 0.8, ease: "power3.out" });
+        let rafId = 0;
         const onMove = (e: PointerEvent) => {
-          xTo((e.clientX / window.innerWidth - 0.5) * 24);
-          yTo((e.clientY / window.innerHeight - 0.5) * 16);
+          if (rafId) return;
+          rafId = requestAnimationFrame(() => {
+            xTo((e.clientX / window.innerWidth - 0.5) * 24);
+            yTo((e.clientY / window.innerHeight - 0.5) * 16);
+            rafId = 0;
+          });
         };
-        window.addEventListener("pointermove", onMove);
-        return () => window.removeEventListener("pointermove", onMove);
+        window.addEventListener("pointermove", onMove, { passive: true });
+        return () => {
+          window.removeEventListener("pointermove", onMove);
+          if (rafId) cancelAnimationFrame(rafId);
+        };
       });
       return () => mm.revert();
     },

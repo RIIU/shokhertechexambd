@@ -5,10 +5,13 @@ import { CheckCircle2 } from "lucide-react";
 import { requireUser } from "@/lib/server/auth";
 import { getExam, getPublishedExam } from "@/lib/server/exams";
 import { getOpenAttempt, getSubmittedLiveAttempt } from "@/lib/server/attempts";
+import { hasAccessToExam } from "@/lib/server/enrollments";
+import { getLatestUserPayment } from "@/lib/server/payments";
 import { toCandidateExam } from "@/lib/exams/grading";
 import { clientIp } from "@/lib/server/request";
 import { formatPhone } from "@/lib/phone";
 import { LiveExamClient } from "./LiveExamClient";
+import { PaidExamGate } from "@/components/exam/PaidExamGate";
 
 // Every attempt is personalised (watermark, server deadline): never cached.
 export const dynamic = "force-dynamic";
@@ -34,6 +37,13 @@ export default async function ExamPage({ params }: ExamPageProps) {
   const user = await requireUser(`/exam/${params.id}`);
   const exam = user.role === "admin" ? await getExam(params.id) : await getPublishedExam(params.id);
   if (!exam || exam.questions.length === 0) notFound();
+
+  // Check paid exam enrollment access
+  const allowed = await hasAccessToExam(exam, user);
+  if (!allowed) {
+    const latestPayment = await getLatestUserPayment(user.id, exam.id);
+    return <PaidExamGate exam={exam} user={user} initialPayment={latestPayment} />;
+  }
 
   if (exam.type === "live") {
     const done = await getSubmittedLiveAttempt(exam.id, user.id);

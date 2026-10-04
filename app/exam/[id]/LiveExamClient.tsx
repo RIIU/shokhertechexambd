@@ -4,12 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, LayoutGrid, Loader2, ShieldCheck, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Flag, LayoutGrid, LayoutList, Loader2, Send, ShieldCheck, X } from "lucide-react";
 import { AntiCheatWrapper, useAntiCheat } from "@/components/security/AntiCheatWrapper";
 import { ExamProgressBar } from "@/components/exam/ExamProgressBar";
 import { ExamRulesGate } from "@/components/exam/ExamRulesGate";
 import { ExamTimer } from "@/components/exam/ExamTimer";
-import { QuestionCard } from "@/components/exam/QuestionCard";
+import { OptionSelector, QuestionCard } from "@/components/exam/QuestionCard";
 import { QuestionPalette } from "@/components/exam/QuestionPalette";
 import { SubmitDialog } from "@/components/exam/SubmitDialog";
 import { clearExamSession, useExamSession } from "@/lib/hooks/useExamSession";
@@ -61,6 +61,7 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"all" | "single">("all");
   const submittingRef = useRef(false);
 
   const question = exam.questions[state.current];
@@ -225,40 +226,190 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
       {/* ----------------------------- Body ----------------------------- */}
       <main className="mx-auto grid max-w-7xl gap-6 px-3 pt-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section aria-live="polite">
-          <QuestionCard
-            question={question}
-            index={state.current}
-            total={total}
-            selected={state.answers[question.id] ?? null}
-            flagged={Boolean(state.flags[question.id])}
-            onSelect={(opt) => select(question.id, opt)}
-            onToggleFlag={() => toggleFlag(question.id)}
-            direction={state.direction}
-          />
+          {/* View mode toggle & quick summary */}
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-surface-border bg-obsidian-900/80 p-2 sm:p-2.5 backdrop-blur">
+            <div className="inline-flex rounded-xl bg-white/[0.04] p-1 ring-1 ring-white/10">
+              <button
+                type="button"
+                onClick={() => setViewMode("all")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
+                  viewMode === "all" ? "bg-brand-400 text-forest shadow" : "text-ink-muted hover:text-ink"
+                )}
+              >
+                <LayoutList className="h-3.5 w-3.5" />
+                <span lang="bn">সব প্রশ্ন একসাথে ({toBn(total)})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("single")}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
+                  viewMode === "single" ? "bg-brand-400 text-forest shadow" : "text-ink-muted hover:text-ink"
+                )}
+              >
+                <FileText className="h-3.5 w-3.5" />
+                <span lang="bn">একটি করে প্রশ্ন</span>
+              </button>
+            </div>
 
-          {/* Desktop navigation */}
-          <div className="mt-5 hidden items-center justify-between gap-3 lg:flex">
-            <button type="button" onClick={() => goTo(state.current - 1)} disabled={state.current === 0} className="btn-ghost disabled:opacity-40">
-              <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
-              <span lang="bn">আগের প্রশ্ন</span>
-            </button>
-            <p className="text-xs text-ink-subtle">
-              <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">1–4</kbd> select ·{" "}
-              <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">F</kbd> flag ·{" "}
-              <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">↑ ↓</kbd> option ·{" "}
-              <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">← →</kbd> question
-            </p>
-            {isLast ? (
-              <button type="button" onClick={() => setConfirmOpen(true)} className="btn-primary">
-                <span lang="bn">শেষ করো ও জমা দাও</span>
+            <div className="flex items-center gap-3">
+              <span lang="bn" className="text-xs font-medium text-ink-muted">
+                উত্তর: <strong className="text-brand-300 font-bold">{toBn(answeredCount)}</strong> / {toBn(total)}
+              </span>
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(true)}
+                className="btn-primary py-1.5 px-3 text-xs"
+              >
+                <Send className="h-3.5 w-3.5" />
+                <span lang="bn">জমা দাও</span>
               </button>
-            ) : (
-              <button type="button" onClick={() => goTo(state.current + 1)} className="btn-primary">
-                <span lang="bn">পরের প্রশ্ন</span>
-                <ChevronRight className="h-4 w-4" strokeWidth={1.5} />
-              </button>
-            )}
+            </div>
           </div>
+
+          {viewMode === "all" ? (
+            <div className="space-y-6">
+              {exam.questions.map((q, idx) => {
+                const isAnswered = Boolean(state.answers[q.id]);
+                const isFlagged = Boolean(state.flags[q.id]);
+                return (
+                  <article
+                    key={q.id}
+                    id={`q-card-${q.id}`}
+                    aria-labelledby={`q-${q.id}-title`}
+                    className={cn(
+                      "relative overflow-hidden rounded-3xl border p-5 shadow-card backdrop-blur sm:p-7 transition-all duration-200",
+                      isAnswered
+                        ? "border-brand-400/40 bg-obsidian-800/80"
+                        : isFlagged
+                        ? "border-amber-400/40 bg-obsidian-800/70"
+                        : "border-surface-border bg-obsidian-800/60"
+                    )}
+                  >
+                    <header className="relative mb-5 flex items-start justify-between gap-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-lg px-2.5 py-1 font-display text-xs font-bold ring-1",
+                            isAnswered
+                              ? "bg-brand-400/20 text-brand-300 ring-brand-400/30"
+                              : "bg-white/5 text-ink-muted ring-white/10"
+                          )}
+                        >
+                          <span lang="bn">প্রশ্ন {toBn(idx + 1)}</span>
+                          <span className="mx-1 text-ink-subtle">/</span>
+                          <span lang="bn">{toBn(total)}</span>
+                        </span>
+                        <span lang="bn" className="chip">
+                          {q.topic}
+                        </span>
+                        <span lang="bn" className="chip">
+                          মান {toBn(q.marks)}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => toggleFlag(q.id)}
+                        aria-pressed={isFlagged}
+                        className={cn(
+                          "inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium transition-all",
+                          isFlagged
+                            ? "border-state-flagged/50 bg-state-flagged/15 text-amber-300 shadow-[0_0_20px_-6px_rgba(245,158,11,0.6)]"
+                            : "border-white/10 text-ink-muted hover:border-state-flagged/40 hover:text-amber-200"
+                        )}
+                      >
+                        <Flag className={cn("h-3.5 w-3.5", isFlagged && "fill-current")} strokeWidth={1.5} />
+                        <span lang="bn">{isFlagged ? "চিহ্নিত" : "পরে দেখব"}</span>
+                      </button>
+                    </header>
+
+                    <h2
+                      id={`q-${q.id}-title`}
+                      lang="bn"
+                      className="relative mb-5 text-base font-semibold leading-relaxed text-ink sm:text-lg"
+                    >
+                      {q.text}
+                    </h2>
+
+                    <OptionSelector
+                      name={q.id}
+                      options={q.options}
+                      selected={state.answers[q.id] ?? null}
+                      onSelect={(opt) => select(q.id, opt)}
+                      labelledBy={`q-${q.id}-title`}
+                    />
+
+                    {isAnswered && (
+                      <button
+                        type="button"
+                        onClick={() => select(q.id, null)}
+                        className="relative mt-3 text-xs text-ink-subtle underline-offset-4 transition-colors hover:text-ink-muted hover:underline"
+                      >
+                        <span lang="bn">উত্তর মুছে ফেলো</span>
+                      </button>
+                    )}
+                  </article>
+                );
+              })}
+
+              <div className="rounded-3xl border border-surface-border bg-gradient-to-br from-obsidian-800 to-obsidian-900 p-6 text-center sm:p-8">
+                <h3 lang="bn" className="mb-2 text-xl font-bold text-ink">
+                  সব প্রশ্ন উত্তর করা হয়েছে?
+                </h3>
+                <p lang="bn" className="mb-6 text-sm text-ink-muted">
+                  মোট {toBn(total)}টি প্রশ্নের মধ্যে {toBn(answeredCount)}টির উত্তর দিয়েছ।{" "}
+                  {total - answeredCount > 0 ? `${toBn(total - answeredCount)}টি এখনো বাকি আছে।` : "সবগুলোর উত্তর সম্পন্ন!"}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setConfirmOpen(true)}
+                  className="btn-primary mx-auto py-3 px-8 text-base shadow-glow"
+                >
+                  <Send className="h-4 w-4" />
+                  <span lang="bn">পরীক্ষা জমা দাও</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <QuestionCard
+                question={question}
+                index={state.current}
+                total={total}
+                selected={state.answers[question.id] ?? null}
+                flagged={Boolean(state.flags[question.id])}
+                onSelect={(opt) => select(question.id, opt)}
+                onToggleFlag={() => toggleFlag(question.id)}
+                direction={state.direction}
+              />
+
+              {/* Desktop navigation */}
+              <div className="mt-5 hidden items-center justify-between gap-3 lg:flex">
+                <button type="button" onClick={() => goTo(state.current - 1)} disabled={state.current === 0} className="btn-ghost disabled:opacity-40">
+                  <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
+                  <span lang="bn">আগের প্রশ্ন</span>
+                </button>
+                <p className="text-xs text-ink-subtle">
+                  <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">1–4</kbd> select ·{" "}
+                  <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">F</kbd> flag ·{" "}
+                  <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">↑ ↓</kbd> option ·{" "}
+                  <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">← →</kbd> question
+                </p>
+                {isLast ? (
+                  <button type="button" onClick={() => setConfirmOpen(true)} className="btn-primary">
+                    <span lang="bn">শেষ করো ও জমা দাও</span>
+                  </button>
+                ) : (
+                  <button type="button" onClick={() => goTo(state.current + 1)} className="btn-primary">
+                    <span lang="bn">পরের প্রশ্ন</span>
+                    <ChevronRight className="h-4 w-4" strokeWidth={1.5} />
+                  </button>
+                )}
+              </div>
+            </>
+          )}
 
           {submitError && (
             <p lang="bn" role="alert" className="mt-4 rounded-xl bg-state-danger/10 p-3 text-sm text-rose-200 ring-1 ring-state-danger/30">
@@ -275,7 +426,13 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
               answers={state.answers}
               flags={state.flags}
               current={state.current}
-              onJump={goTo}
+              onJump={(i) => {
+                goTo(i);
+                const q = exam.questions[i];
+                if (viewMode === "all" && q) {
+                  document.getElementById(`q-card-${q.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+              }}
               onSubmit={() => setConfirmOpen(true)}
             />
           </div>
@@ -285,22 +442,29 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
       {/* ----------------------- Mobile bottom bar ----------------------- */}
       <div className="fixed inset-x-0 bottom-0 z-40 p-3 lg:hidden">
         <div className="glass flex items-center gap-2 rounded-2xl p-2 shadow-card">
-          <button
-            type="button"
-            onClick={() => goTo(state.current - 1)}
-            disabled={state.current === 0}
-            aria-label="Previous question"
-            className="btn-ghost px-3 disabled:opacity-40"
-          >
-            <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
-          </button>
+          {viewMode === "single" && (
+            <button
+              type="button"
+              onClick={() => goTo(state.current - 1)}
+              disabled={state.current === 0}
+              aria-label="Previous question"
+              className="btn-ghost px-3 disabled:opacity-40"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+            </button>
+          )}
           <button type="button" onClick={() => setPaletteOpen(true)} className="btn-ghost flex-1">
             <LayoutGrid className="h-4 w-4" strokeWidth={1.5} />
             <span lang="bn">
               {toBn(answeredCount)}/{toBn(total)} উত্তর
             </span>
           </button>
-          {isLast ? (
+          {viewMode === "all" ? (
+            <button type="button" onClick={() => setConfirmOpen(true)} className="btn-primary px-4">
+              <Send className="h-4 w-4 mr-1" />
+              <span lang="bn">জমা দাও</span>
+            </button>
+          ) : isLast ? (
             <button type="button" onClick={() => setConfirmOpen(true)} className="btn-primary px-4">
               <span lang="bn">জমা দাও</span>
             </button>
@@ -354,6 +518,10 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
                 onJump={(i) => {
                   goTo(i);
                   setPaletteOpen(false);
+                  const q = exam.questions[i];
+                  if (viewMode === "all" && q) {
+                    document.getElementById(`q-card-${q.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }
                 }}
                 onSubmit={() => {
                   setPaletteOpen(false);

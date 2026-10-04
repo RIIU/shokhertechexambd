@@ -7,7 +7,22 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const user = await getCurrentUser();
   return NextResponse.json(
-    { user: user ? { id: user.id, name: user.name, role: user.role, phone: user.phone, level: user.level, stream: user.stream } : null },
+    {
+      user: user
+        ? {
+            id: user.id,
+            name: user.name,
+            role: user.role,
+            phone: user.phone,
+            level: user.level,
+            stream: user.stream,
+            institution: user.institution,
+            avatarUrl: user.avatarUrl,
+            coverUrl: user.coverUrl,
+            bio: user.bio,
+          }
+        : null,
+    },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

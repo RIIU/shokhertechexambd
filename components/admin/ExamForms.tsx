@@ -53,6 +53,9 @@ export interface ExamMetaDefaults {
   minutes: number;
   negativeMark: number;
   maxWarnings: number;
+  showSolutions?: boolean;
+  isPaid?: boolean;
+  price?: number;
 }
 
 const BLANK: ExamMetaDefaults = {
@@ -65,6 +68,9 @@ const BLANK: ExamMetaDefaults = {
   minutes: 20,
   negativeMark: 0.25,
   maxWarnings: 3,
+  showSolutions: true,
+  isPaid: false,
+  price: 50,
 };
 
 /** Create / edit exam details. Subject list follows the chosen level + stream. */
@@ -73,6 +79,7 @@ export function ExamMetaForm({ defaults = BLANK }: { defaults?: ExamMetaDefaults
   const [state, action] = useFormState(editing ? updateExamAction : createExamAction, {});
   const [level, setLevel] = useState<Level>(defaults.level);
   const [stream, setStream] = useState<StreamId>(defaults.stream);
+  const [isPaidState, setIsPaidState] = useState<boolean>(Boolean(defaults.isPaid));
   const subjects = getSubjects(level, stream);
 
   return (
@@ -171,6 +178,69 @@ export function ExamMetaForm({ defaults = BLANK }: { defaults?: ExamMetaDefaults
         <input id="maxWarnings" name="maxWarnings" type="number" min={1} max={10} defaultValue={defaults.maxWarnings} className="field" />
         <Err state={state} name="maxWarnings" />
       </div>
+      <div className="sm:col-span-2">
+        <label className="field-label" htmlFor="showSolutions" lang="bn">
+          পরীক্ষার পর সঠিক উত্তর ও সমাধান দেখানো হবে কি না?
+        </label>
+        <select
+          id="showSolutions"
+          name="showSolutions"
+          defaultValue={defaults.showSolutions !== false ? "true" : "false"}
+          className="field"
+          lang="bn"
+        >
+          <option value="true">✅ হ্যাঁ — পরীক্ষার পর সঠিক উত্তর ও ব্যাখ্যা দেখতে পারবে</option>
+          <option value="false">🔒 না — উত্তর গোপন থাকবে (শিক্ষার্থী শুধু স্কোর ও র‍্যাংক দেখবে)</option>
+        </select>
+        <p className="mt-1 text-xs text-ink-subtle" lang="bn">
+          লাইভ বা প্রতিযোগিতামূলক পরীক্ষার সময় উত্তর বন্ধ রাখতে পারো। পরবর্তীতে চাইলে প্রকাশ করা যাবে।
+        </p>
+      </div>
+
+      <div className="sm:col-span-2 rounded-2xl border border-surface-border bg-obsidian-950/60 p-4 space-y-3">
+        <label className="field-label text-sm font-semibold" htmlFor="isPaid" lang="bn">
+          পরীক্ষার অ্যাক্সেস ও ফি (Free নাকি Paid?)
+        </label>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div>
+            <select
+              id="isPaid"
+              name="isPaid"
+              value={isPaidState ? "true" : "false"}
+              onChange={(e) => setIsPaidState(e.target.value === "true")}
+              className="field"
+              lang="bn"
+            >
+              <option value="false">🟢 ফ্রি পরীক্ষা (Free Exam — যেকেউ অংশ নিতে পারবে)</option>
+              <option value="true">💳 পেইড পরীক্ষা (Paid Live Exam — ফি প্রদান সাপেক্ষে)</option>
+            </select>
+          </div>
+          {isPaidState && (
+            <div>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-amber-400">
+                  ৳
+                </span>
+                <input
+                  id="price"
+                  name="price"
+                  type="number"
+                  min={1}
+                  max={5000}
+                  defaultValue={defaults.price || 50}
+                  placeholder="পরীক্ষার ফি (টাকা)"
+                  className="field pl-8"
+                  required={isPaidState}
+                />
+              </div>
+              <p className="mt-1 text-[11px] text-ink-subtle" lang="bn">
+                শিক্ষার্থীদের এই ফি প্রদান করে লাইভ পরীক্ষায় অংশ নিতে হবে।
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="flex items-center gap-4 sm:col-span-2">
         <Submit label={editing ? "পরিবর্তন সংরক্ষণ করো" : "পরীক্ষা তৈরি করো"} />
         <Saved state={state} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { cn } from "@/lib/utils";
@@ -16,14 +16,36 @@ interface GsapRevealProps {
 }
 
 /**
- * Staggers every descendant marked `data-reveal` into view on mount.
- * Server components can use it to get GSAP entrance motion without becoming client components.
+ * Staggers every descendant marked `data-reveal` into view when the component
+ * enters the viewport (IntersectionObserver), not on mount.
  */
 export function GsapReveal({ children, className, delay = 0, stagger = 0.08 }: GsapRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
 
   useGSAP(
     () => {
+      const el = ref.current;
+      if (!el) return;
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry?.isIntersecting) {
+            setVisible(true);
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.15 },
+      );
+      observer.observe(el);
+      return () => observer.disconnect();
+    },
+    { scope: ref },
+  );
+
+  useGSAP(
+    () => {
+      if (!visible) return;
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         gsap.from("[data-reveal]", {
@@ -39,7 +61,7 @@ export function GsapReveal({ children, className, delay = 0, stagger = 0.08 }: G
       });
       return () => mm.revert();
     },
-    { scope: ref },
+    { scope: ref, dependencies: [visible] },
   );
 
   return (

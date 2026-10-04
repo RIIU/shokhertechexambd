@@ -16,6 +16,12 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
   const exam = user.role === "admin" ? await getExam(params.id) : await getPublishedExam(params.id);
   if (!exam) return NextResponse.json({ error: "Exam not found" }, { status: 404 });
 
+  const { hasAccessToExam } = await import("@/lib/server/enrollments");
+  const allowed = await hasAccessToExam(exam, user);
+  if (!allowed) {
+    return NextResponse.json({ error: "payment-required", message: "পেইড লাইভ পরীক্ষায় অংশ নিতে ফি প্রদান প্রয়োজন।" }, { status: 403 });
+  }
+
   const res = await startAttempt(exam, user.id, { ip: clientIp(), userAgent: headers().get("user-agent")?.slice(0, 200) });
   if (!res.ok) return NextResponse.json({ error: res.error, attemptId: res.attemptId }, { status: 409 });
 

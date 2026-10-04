@@ -20,9 +20,25 @@ export default async function ResultPage({ params }: { params: { attemptId: stri
   const exam = await getExam(data.attempt.examId);
   const student = isOwner ? undefined : await getUser(data.attempt.userId);
 
+  // Admins always see solutions. Students see solutions unless showSolutions is disabled.
+  const showSolutions = viewer.role === "admin" || exam?.showSolutions !== false;
+
+  const result = showSolutions
+    ? { ...data.result, showSolutions: true }
+    : {
+        ...data.result,
+        showSolutions: false,
+        questions: data.result.questions.map((q) => ({
+          ...q,
+          correctOptionId: "" as any,
+          explanation: "",
+        })),
+      };
+
   return (
     <ResultView
-      result={data.result}
+      result={result}
+      showSolutions={showSolutions}
       canRetake={isOwner && exam?.status === "published" && exam.type !== "live"}
       studentName={student?.name}
       backHref={isOwner ? "/dashboard" : "/admin/attempts"}

@@ -15,6 +15,7 @@ export interface Store {
   getUsers(ids: string[]): Promise<User[]>;
   insertUser(user: User): Promise<"ok" | "phone-taken">;
   listUsers(): Promise<User[]>;
+  updateUser(id: string, patch: Partial<User>): Promise<void>;
   setUserBlocked(id: string, blocked: boolean): Promise<void>;
   hasAdmin(): Promise<boolean>;
 

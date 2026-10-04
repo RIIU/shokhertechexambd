@@ -37,6 +37,10 @@ function parseExamMeta(form: FormData): { data?: ExamMetaInput; fieldErrors?: Ad
   const minutes = num(form, "minutes");
   const negativeMark = num(form, "negativeMark");
   const maxWarnings = num(form, "maxWarnings");
+  const showSolutions = form.get("showSolutions") !== "false";
+  const isPaid = form.get("isPaid") === "true";
+  const priceRaw = num(form, "price");
+  const price = isPaid ? (Number.isFinite(priceRaw) && priceRaw >= 0 ? priceRaw : 50) : 0;
 
   if (titleBn.length < 3) fieldErrors.titleBn = "বাংলা শিরোনাম দাও";
   if (!isLevel(level)) fieldErrors.level = "স্তর বেছে নাও";
@@ -46,6 +50,7 @@ function parseExamMeta(form: FormData): { data?: ExamMetaInput; fieldErrors?: Ad
   if (!Number.isFinite(minutes) || minutes < 1 || minutes > 300) fieldErrors.minutes = "১ থেকে ৩০০ মিনিট";
   if (!Number.isFinite(negativeMark) || negativeMark < 0 || negativeMark > 1) fieldErrors.negativeMark = "০ থেকে ১";
   if (!Number.isInteger(maxWarnings) || maxWarnings < 1 || maxWarnings > 10) fieldErrors.maxWarnings = "১ থেকে ১০";
+  if (isPaid && price < 0) fieldErrors.price = "সঠিক ফি লেখো";
   if (Object.keys(fieldErrors).length || !isLevel(level) || !isStream(stream)) return { fieldErrors };
 
   return {
@@ -59,6 +64,9 @@ function parseExamMeta(form: FormData): { data?: ExamMetaInput; fieldErrors?: Ad
       durationSec: Math.round(minutes * 60),
       negativeMark,
       maxWarnings,
+      showSolutions,
+      isPaid,
+      price,
     },
   };
 }

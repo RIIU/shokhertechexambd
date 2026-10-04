@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BookOpenCheck, Clock, Gauge, PlayCircle, Target, Trophy } from "lucide-react";
+import { ArrowRight, BookOpenCheck, Camera, Clock, Gauge, PlayCircle, Target, Trophy } from "lucide-react";
 import { EmptyState, Panel, StatTile } from "@/components/ui/StatTile";
 import { ScoreTrendChart } from "@/components/dashboard/ScoreTrendChart";
 import { requireUser } from "@/lib/server/auth";
@@ -28,25 +28,66 @@ export default async function DashboardPage() {
       <div className="page-backdrop" />
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-radial-brand" />
 
-      <div className="container space-y-6 pb-10 pt-8 sm:pt-12">
-        {/* Greeting */}
-        <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <p className="chip mb-3">
-              <span lang="bn">
-                {LEVELS[level].nameBn} · {STREAMS[stream].nameBn}
-                {user.institution ? ` · ${user.institution}` : ""}
-              </span>
-            </p>
-            <h1 lang="bn" className="text-3xl font-bold text-ink sm:text-4xl">
-              স্বাগতম, <span className="text-gradient">{user.name}</span>
-            </h1>
+      <div className="container space-y-6 pb-10 pt-6 sm:pt-10">
+        {/* Profile Banner Card */}
+        <div className="relative overflow-hidden rounded-3xl border border-surface-border bg-obsidian-900 shadow-xl">
+          {user.coverUrl ? (
+            <div className="relative h-28 sm:h-36 w-full overflow-hidden">
+              <img src={user.coverUrl} alt="Cover" className="h-full w-full object-cover object-center" />
+              <div className="absolute inset-0 bg-gradient-to-t from-obsidian-900 via-obsidian-900/40 to-transparent" />
+            </div>
+          ) : (
+            <div className="relative h-20 sm:h-24 w-full bg-gradient-to-r from-obsidian-950 via-forest to-obsidian-900 opacity-80" />
+          )}
+
+          <div className="relative -mt-10 sm:-mt-12 flex flex-col justify-between gap-4 px-5 pb-5 sm:flex-row sm:items-end sm:px-6">
+            <div className="flex items-end gap-4">
+              <div className="relative h-20 w-20 sm:h-24 sm:w-24 shrink-0 overflow-hidden rounded-full border-4 border-obsidian-900 bg-obsidian-800 shadow-xl ring-2 ring-brand-400/30">
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover object-center" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-forest font-display text-3xl font-bold text-brand-300">
+                    {user.name.trim().charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 lang="bn" className="text-2xl font-bold text-ink sm:text-3xl">
+                    স্বাগতম, {user.name}
+                  </h1>
+                  <span className="chip text-[11px] py-0.5">
+                    <span lang="bn">{LEVELS[level].nameBn} · {STREAMS[stream].nameBn}</span>
+                  </span>
+                </div>
+                {user.institution && (
+                  <p lang="bn" className="text-xs text-ink-muted">
+                    🏛️ {user.institution}
+                  </p>
+                )}
+                {user.bio && (
+                  <p lang="bn" className="text-xs text-ink-subtle italic max-w-md">
+                    "{user.bio}"
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <Link
+                href="/profile"
+                className="btn-ghost py-2 text-xs"
+              >
+                <Camera className="h-3.5 w-3.5 text-brand-400" />
+                <span lang="bn">প্রোফাইল ও ছবি এডিট</span>
+              </Link>
+              <Link href={`/${level}/${stream}`} className="btn-primary py-2 text-xs">
+                <BookOpenCheck className="h-3.5 w-3.5" strokeWidth={1.5} />
+                <span lang="bn">নতুন পরীক্ষা</span>
+              </Link>
+            </div>
           </div>
-          <Link href={`/${level}/${stream}`} className="btn-primary self-start sm:self-auto">
-            <BookOpenCheck className="h-4 w-4" strokeWidth={1.5} />
-            <span lang="bn">নতুন পরীক্ষা দাও</span>
-          </Link>
-        </header>
+        </div>
 
         {/* In-progress attempts */}
         {data.inProgress.length > 0 && (
@@ -185,8 +226,17 @@ export default async function DashboardPage() {
                         <span lang="bn" className="block truncate text-sm font-medium text-ink">
                           {e.titleBn}
                         </span>
-                        <span lang="bn" className="block text-xs text-ink-subtle">
-                          {EXAM_TYPE_META[e.type].nameBn} · {toBn(e.questions.length)}টি প্রশ্ন · {formatMinutesBn(e.durationSec)}
+                        <span lang="bn" className="flex flex-wrap items-center gap-1.5 text-xs text-ink-subtle">
+                          <span>{EXAM_TYPE_META[e.type].nameBn} · {toBn(e.questions.length)}টি প্রশ্ন · {formatMinutesBn(e.durationSec)}</span>
+                          {e.isPaid ? (
+                            <span className="rounded bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 ring-1 ring-amber-400/30">
+                              💳 ৳{toBn(e.price ?? 50)}
+                            </span>
+                          ) : (
+                            <span className="rounded bg-emerald-400/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
+                              🟢 ফ্রি
+                            </span>
+                          )}
                         </span>
                       </span>
                     </Link>

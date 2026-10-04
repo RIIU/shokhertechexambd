@@ -16,6 +16,7 @@ import {
   LogOut,
   Radio,
   ShieldCheck,
+  User as UserIcon,
   UserPlus,
   X,
   type LucideIcon,
@@ -37,7 +38,7 @@ const LIVE_EXAM_HREF = "/exam/ssc-physics-live-01";
  * a left swipe or any navigation, and returns focus to the menu button.
  */
 export function MobileMenu() {
-  const { user, loading, menuOpen, setMenuOpen } = useAppShell();
+  const { user, loading, menuOpen, setMenuOpen, logout } = useAppShell();
   const pathname = usePathname() ?? "/";
   const closeRef = useRef<HTMLButtonElement>(null);
   const touchStart = useRef<{ x: number; y: number; at: number } | null>(null);
@@ -135,8 +136,12 @@ export function MobileMenu() {
                 ) : user ? (
                   <div className="rounded-2xl border border-surface-border bg-radial-forest p-4">
                     <div className="mb-3 flex items-center gap-3">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-400 font-display text-lg font-black text-forest">
-                        {user.name.trim().charAt(0).toUpperCase()}
+                      <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-400 font-display text-lg font-black text-forest">
+                        {user.avatarUrl ? (
+                          <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover object-center" />
+                        ) : (
+                          user.name.trim().charAt(0).toUpperCase()
+                        )}
                       </span>
                       <div className="min-w-0">
                         <p lang="bn" className="truncate font-semibold text-ink">
@@ -221,10 +226,11 @@ export function MobileMenu() {
                 <>
                   <SectionLabel>অ্যাকাউন্ট</SectionLabel>
                   <ul className="space-y-1">
+                    <Item index={4} href="/profile" icon={UserIcon} label="আমার প্রোফাইল ও ছবি" active={isActive("/profile")} onNavigate={close} />
                     {user.role === "admin" ? (
                       <>
-                        <Item index={4} href="/admin" icon={ShieldCheck} label="ওভারভিউ" active={pathname === "/admin"} onNavigate={close} />
-                        <Item index={5} href="/admin/exams" icon={FileQuestion} label="পরীক্ষা ও প্রশ্ন" active={isActive("/admin/exams")} onNavigate={close} />
+                        <Item index={5} href="/admin" icon={ShieldCheck} label="ওভারভিউ" active={pathname === "/admin"} onNavigate={close} />
+                        <Item index={6} href="/admin/exams" icon={FileQuestion} label="পরীক্ষা ও প্রশ্ন" active={isActive("/admin/exams")} onNavigate={close} />
                       </>
                     ) : (
                       <>
@@ -242,19 +248,21 @@ export function MobileMenu() {
                       </>
                     )}
                     <li>
-                      <form action={logoutAction}>
-                        <button
-                          type="submit"
-                          className="flex min-h-[48px] w-full items-center gap-3 rounded-xl px-3 text-left text-rose-300 transition-colors active:bg-state-danger/10"
-                        >
-                          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-state-danger/10">
-                            <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
-                          </span>
-                          <span lang="bn" className="text-[15px] font-medium">
-                            লগআউট
-                          </span>
-                        </button>
-                      </form>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          close();
+                          void logout();
+                        }}
+                        className="flex min-h-[48px] w-full items-center gap-3 rounded-xl px-3 text-left text-rose-300 transition-colors active:bg-state-danger/10 hover:bg-state-danger/10"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-state-danger/10">
+                          <LogOut className="h-[18px] w-[18px]" strokeWidth={1.75} />
+                        </span>
+                        <span lang="bn" className="text-[15px] font-medium">
+                          লগআউট
+                        </span>
+                      </button>
                     </li>
                   </ul>
                 </>

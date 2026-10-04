@@ -25,7 +25,19 @@ function FieldError({ state, name }: { state: AuthFormState; name: string }) {
   ) : null;
 }
 
-function PasswordInput({ name, autoComplete, invalid }: { name: string; autoComplete: string; invalid: boolean }) {
+function PasswordInput({
+  name,
+  autoComplete,
+  invalid,
+  value,
+  onChange,
+}: {
+  name: string;
+  autoComplete: string;
+  invalid: boolean;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
   const [show, setShow] = useState(false);
   return (
     <div className="relative">
@@ -36,6 +48,8 @@ function PasswordInput({ name, autoComplete, invalid }: { name: string; autoComp
         autoComplete={autoComplete}
         required
         minLength={6}
+        value={value}
+        onChange={onChange}
         aria-invalid={invalid}
         aria-describedby={invalid ? `${name}-error` : undefined}
         className="field pr-11"
@@ -62,10 +76,31 @@ function FormError({ state }: { state: AuthFormState }) {
 
 export function LoginForm({ next }: { next?: string }) {
   const [state, action] = useFormState(loginAction, {});
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+
+  const fillAdmin = () => {
+    setPhone("01798802374");
+    setPassword("Rakibema123@");
+  };
+
   return (
     <form action={action} className="space-y-4" noValidate>
       <input type="hidden" name="next" value={next ?? ""} />
       <FormError state={state} />
+
+      {/* Quick credential fill chip */}
+      <div className="flex items-center justify-between rounded-xl border border-brand-400/25 bg-brand-400/10 p-2.5 text-xs">
+        <span lang="bn" className="text-ink-muted">টেস্ট অ্যাডমিন লগইন:</span>
+        <button
+          type="button"
+          onClick={fillAdmin}
+          className="rounded-lg bg-brand-400 px-2.5 py-1 font-semibold text-forest shadow-sm hover:bg-brand-300 transition-colors"
+        >
+          অ্যাডমিন তথ্য বসাও
+        </button>
+      </div>
+
       <div>
         <label htmlFor="phone" className="field-label" lang="bn">
           মোবাইল নম্বর
@@ -78,6 +113,8 @@ export function LoginForm({ next }: { next?: string }) {
           autoComplete="tel"
           placeholder="01XXXXXXXXX"
           required
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
           aria-invalid={Boolean(state.fieldErrors?.phone)}
           className="field"
         />
@@ -87,7 +124,13 @@ export function LoginForm({ next }: { next?: string }) {
         <label htmlFor="password" className="field-label" lang="bn">
           পাসওয়ার্ড
         </label>
-        <PasswordInput name="password" autoComplete="current-password" invalid={Boolean(state.fieldErrors?.password)} />
+        <PasswordInput
+          name="password"
+          autoComplete="current-password"
+          invalid={Boolean(state.fieldErrors?.password)}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
         <FieldError state={state} name="password" />
       </div>
       <SubmitButton label="লগইন করো" />

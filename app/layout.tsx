@@ -1,11 +1,14 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import { Baloo_Da_2, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { AppShellProvider } from "@/components/layout/AppShell";
 import { Navbar } from "@/components/layout/Navbar";
-import { MobileMenu } from "@/components/layout/MobileMenu";
-import { MobileTabBar } from "@/components/layout/MobileTabBar";
 import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
+
+const MobileMenu = dynamic(() => import("@/components/layout/MobileMenu").then((m) => m.MobileMenu), { ssr: false });
+const MobileTabBar = dynamic(() => import("@/components/layout/MobileTabBar").then((m) => m.MobileTabBar), { ssr: false });
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const jakarta = Plus_Jakarta_Sans({
@@ -42,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppShellProvider>
           <Navbar />
           <MobileMenu />
-          {children}
+          <Suspense>{children}</Suspense>
           <Footer />
           <MobileTabBar />
         </AppShellProvider>

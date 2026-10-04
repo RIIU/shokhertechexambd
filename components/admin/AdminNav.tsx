@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileQuestion, Gauge, ListChecks, ShieldAlert, Users } from "lucide-react";
+import { CreditCard, FileQuestion, Gauge, ListChecks, ShieldAlert, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
   { href: "/admin", label: "ওভারভিউ", icon: Gauge },
+  { href: "/admin/payments", label: "পেমেন্ট অনুমোদন", icon: CreditCard },
   { href: "/admin/exams", label: "পরীক্ষা ও প্রশ্ন", icon: FileQuestion },
   { href: "/admin/students", label: "শিক্ষার্থী", icon: Users },
   { href: "/admin/attempts", label: "ফলাফল", icon: ListChecks },
   { href: "/admin/alerts", label: "অ্যান্টি-চিট লগ", icon: ShieldAlert },
+  { href: "/profile", label: "আমার প্রোফাইল", icon: User },
 ];
 
 export function AdminNav() {

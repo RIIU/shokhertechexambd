@@ -152,8 +152,17 @@ export function ExamTypeSheet({ subject, level, stream, onClose }: ExamTypeSheet
                                 <span lang="bn" className="block truncate text-sm font-medium text-ink">
                                   {e.titleBn}
                                 </span>
-                                <span lang="bn" className="block text-[11px] text-ink-subtle">
-                                  {toBn(e.questions)}টি প্রশ্ন · {formatMinutesBn(e.durationSec)}
+                                <span lang="bn" className="flex flex-wrap items-center gap-2 text-[11px] text-ink-subtle">
+                                  <span>{toBn(e.questions)}টি প্রশ্ন · {formatMinutesBn(e.durationSec)}</span>
+                                  {e.isPaid ? (
+                                    <span className="rounded bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 ring-1 ring-amber-400/30">
+                                      💳 ৳{toBn(e.price ?? 50)}
+                                    </span>
+                                  ) : (
+                                    <span className="rounded bg-emerald-400/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
+                                      🟢 ফ্রি
+                                    </span>
+                                  )}
                                 </span>
                               </span>
                               <ArrowRight className="h-4 w-4 shrink-0 text-brand-400 transition-transform group-hover:translate-x-1" strokeWidth={1.5} />

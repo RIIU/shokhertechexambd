@@ -1,12 +1,4 @@
-"use client";
-
-import { usePathname } from "next/navigation";
-import { isFocusRoute } from "@/lib/routes";
-
 export function Footer() {
-  const pathname = usePathname();
-  if (isFocusRoute(pathname)) return null;
-
   return (
     <footer className="mt-24 border-t border-surface-border bg-section">
       <div className="container flex flex-col items-center justify-between gap-3 py-8 text-sm text-ink-subtle sm:flex-row">

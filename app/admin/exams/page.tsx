@@ -64,7 +64,18 @@ export default async function AdminExamsPage({ searchParams }: { searchParams: {
                 </span>
               </td>
               <td className="px-4 py-3" lang="bn">
-                <Badge tone={e.type === "live" ? "danger" : "muted"}>{EXAM_TYPE_META[e.type].nameBn}</Badge>
+                <div className="flex flex-col gap-1 items-start">
+                  <Badge tone={e.type === "live" ? "danger" : "muted"}>{EXAM_TYPE_META[e.type].nameBn}</Badge>
+                  {e.isPaid ? (
+                    <span className="inline-flex items-center gap-1 rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300">
+                      💳 পেইড (৳{toBn(e.price ?? 50)})
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded bg-emerald-400/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
+                      🟢 ফ্রি
+                    </span>
+                  )}
+                </div>
               </td>
               <td className="px-4 py-3 text-ink" lang="bn">
                 {toBn(e.questions.length)}
