@@ -79,6 +79,8 @@ export async function createPaymentRequest(input: {
   method: PaymentMethod;
   senderPhone: string;
   trxId: string;
+  validUntil?: number;
+  notes?: string;
 }): Promise<PaymentRequest> {
   const req: PaymentRequest = {
     id: newId("pay"),
@@ -94,6 +96,8 @@ export async function createPaymentRequest(input: {
     trxId: input.trxId.trim().toUpperCase(),
     status: "pending",
     submittedAt: Date.now(),
+    validUntil: input.validUntil,
+    notes: input.notes,
   };
 
   // 1. Try writing to Supabase payments table
@@ -114,6 +118,8 @@ export async function createPaymentRequest(input: {
         trx_id: req.trxId,
         status: req.status,
         submitted_at: new Date(req.submittedAt).toISOString(),
+        valid_until: req.validUntil ? new Date(req.validUntil).toISOString() : null,
+        notes: req.notes ?? null,
       });
     } catch {
       // continue to fallback
@@ -159,13 +165,13 @@ export async function getLatestUserPayment(
   const user = await getUser(userId);
   if (user?.latestPayment) {
     const pay = user.latestPayment;
-    if (!examId || pay.planType === "monthly" || pay.examId === examId) {
+    if (!examId || pay.planType === "monthly" || pay.planType === "package" || pay.examId === examId) {
       return pay;
     }
   }
   if (user?.paymentRequests?.length) {
     const pay = user.paymentRequests.find(
-      (p) => !examId || p.planType === "monthly" || p.examId === examId,
+      (p) => !examId || p.planType === "monthly" || p.planType === "package" || p.examId === examId,
     );
     if (pay) return pay;
   }
@@ -265,7 +271,10 @@ export async function approvePaymentRequest(
   }
 
   const now = Date.now();
-  const validUntil = req.planType === "monthly" ? now + MONTH_MS : undefined;
+  const validUntil =
+    req.planType === "monthly" || req.planType === "package"
+      ? (req.validUntil && req.validUntil > now ? req.validUntil : now + MONTH_MS)
+      : undefined;
 
   // 2. Update status in Supabase payments table
   if (client) {
@@ -297,7 +306,7 @@ export async function approvePaymentRequest(
       latestPayment: latest,
     };
 
-    if (req.planType === "monthly") {
+    if (req.planType === "monthly" || req.planType === "package") {
       patch.subscriptionStatus = "active";
       patch.subscriptionValidUntil = validUntil;
     } else if (req.examId) {

@@ -258,7 +258,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
                 <p className="font-mono text-xs text-ink-subtle">{formatPhone(initialUser.phone)}</p>
                 {bio && (
                   <p lang="bn" className="max-w-xl text-sm text-ink-muted italic">
-                    "{bio}"
+                    &ldquo;{bio}&rdquo;
                   </p>
                 )}
               </div>

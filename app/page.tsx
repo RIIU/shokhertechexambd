@@ -1,4 +1,5 @@
 import { Hero } from "@/components/landing/Hero";
+import { PackagesSection } from "@/components/packages/PackagesSection";
 import { LevelSwitcher } from "@/components/landing/LevelSwitcher";
 import { Features } from "@/components/landing/Features";
 
@@ -6,6 +7,9 @@ export default function HomePage() {
   return (
     <main>
       <Hero />
+
+      {/* Chorcha-style Subscription & Course Packages */}
+      <PackagesSection />
 
       <section className="container py-16" aria-labelledby="level-title">
         <div className="mb-10 text-center">

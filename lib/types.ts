@@ -101,7 +101,7 @@ export interface ExamMeta {
 
 export type PaymentMethod = "bkash" | "nagad" | "rocket" | "upay" | "demo";
 export type PaymentStatus = "pending" | "approved" | "rejected";
-export type PlanType = "monthly" | "exam";
+export type PlanType = "monthly" | "exam" | "package";
 
 export interface PaymentRequest {
   id: string;

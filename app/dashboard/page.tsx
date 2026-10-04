@@ -67,7 +67,7 @@ export default async function DashboardPage() {
                 )}
                 {user.bio && (
                   <p lang="bn" className="text-xs text-ink-subtle italic max-w-md">
-                    "{user.bio}"
+                    &ldquo;{user.bio}&rdquo;
                   </p>
                 )}
               </div>

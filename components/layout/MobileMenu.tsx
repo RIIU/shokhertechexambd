@@ -16,6 +16,7 @@ import {
   LogOut,
   Radio,
   ShieldCheck,
+  Sparkles,
   User as UserIcon,
   UserPlus,
   X,
@@ -191,10 +192,23 @@ export function MobileMenu() {
               <SectionLabel>মেনু</SectionLabel>
               <ul className="space-y-1">
                 <Item index={0} href="/" icon={Home} label="হোম" active={isActive("/")} onNavigate={close} />
+                <Item
+                  index={1}
+                  href="/#packages"
+                  icon={Sparkles}
+                  label="প্যাকেজসমূহ"
+                  active={false}
+                  onNavigate={close}
+                  badge={
+                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-400/20 px-2 py-0.5 text-[10px] font-bold text-brand-300">
+                      অফার
+                    </span>
+                  }
+                />
                 {(["ssc", "hsc"] as const).map((level, i) => (
                   <LevelItem
                     key={level}
-                    index={i + 1}
+                    index={i + 2}
                     level={level}
                     open={expanded === level}
                     onToggle={() => setExpanded((cur) => (cur === level ? null : level))}

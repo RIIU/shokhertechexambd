@@ -458,7 +458,7 @@ export function PaidExamGate({ exam, user, initialPayment }: PaidExamGateProps) 
                 </div>
 
                 <ol className="list-decimal list-inside space-y-1.5 text-ink-muted leading-relaxed">
-                  <li>তোমার {paymentMethod.toUpperCase()} মোবাইল অ্যাপ ওপেন করে <strong>"Send Money"</strong> অপশনে যাও।</li>
+                  <li>তোমার {paymentMethod.toUpperCase()} মোবাইল অ্যাপ ওপেন করে <strong>&ldquo;Send Money&rdquo;</strong> অপশনে যাও।</li>
                   <li>প্রাপক নম্বর দাও: <strong className="font-mono text-brand-300 font-bold">{personalNumber}</strong> (Personal)।</li>
                   <li>টাকার পরিমাণ লেখো: <strong className="text-amber-300 font-bold">৳{toBn(currentPrice)}</strong> টাকা।</li>
                   <li>রেফারেন্স হিসেবে তোমার মোবাইল নম্বর দিয়ে পিন চেপে সেন্ড মানি সম্পন্ন করো।</li>

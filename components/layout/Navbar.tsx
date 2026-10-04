@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/", label: "হোম" },
+  { href: "/#packages", label: "প্যাকেজসমূহ" },
   { href: "/ssc", label: "এসএসসি" },
   { href: "/hsc", label: "এইচএসসি" },
   { href: "/ssc/science", label: "বিষয়সমূহ" },
