@@ -20,7 +20,7 @@ export const PROBLEM_HINTS: Record<ProblemCode, string> = {
   SESSION_SECRET_MISSING: "SESSION_SECRET সেট করা নেই (৩২+ অক্ষর লাগবে)। এনভায়রনমেন্ট ভেরিয়েবলে বসিয়ে আবার চালু/ডিপ্লয় করো।",
   PUBLISHABLE_KEY_USED: "SUPABASE_SECRET_KEY-তে publishable key দেওয়া হয়েছে। Supabase → API Keys থেকে sb_secret_… key দাও।",
   TABLES_MISSING:
-    "Supabase-এ টেবিল তৈরি হয়নি। SQL Editor-এ supabase/migrations/20261003000000_init.sql ফাইলের পুরোটা Run করো।",
+    "Supabase-এ টেবিল তৈরি হয়নি। SQL Editor-এ supabase/setup.sql ফাইলের পুরোটা Run করো।",
   INVALID_KEY: "Supabase key ভুল বা বাতিল। Supabase → Project Settings → API Keys থেকে সঠিক secret key দাও।",
   SUPABASE_UNREACHABLE: "Supabase-এ সংযোগ হচ্ছে না। SUPABASE_URL ঠিক আছে কিনা দেখো (https://xxxx.supabase.co), আর প্রজেক্ট pause হয়ে আছে কিনা।",
   READONLY_FILESYSTEM: "সার্ভারে ফাইল লেখা যাচ্ছে না। Supabase সেট করো (SUPABASE_URL + SUPABASE_SECRET_KEY)।",
