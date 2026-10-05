@@ -4,6 +4,7 @@ import { GsapReveal } from "@/components/ui/GsapReveal";
 import { SubjectGrid } from "./SubjectGrid";
 import { LEVELS, STREAMS, STREAM_IDS, getSubjects } from "@/lib/data/catalog";
 import { examIndex } from "@/lib/server/exams";
+import { classifyError } from "@/lib/server/diagnose";
 import { cn, toBn } from "@/lib/utils";
 import type { Level, StreamId } from "@/lib/types";
 
@@ -16,7 +17,16 @@ interface StreamSubjectsViewProps {
 export async function StreamSubjectsView({ level, stream }: StreamSubjectsViewProps) {
   const lvl = LEVELS[level];
   const str = STREAMS[stream];
-  const index = await examIndex(level, stream);
+  // The subject grid is static catalog data; only the exam counts need the database.
+  // If it's unreachable, still render the subjects instead of crashing the page.
+  let index: Awaited<ReturnType<typeof examIndex>> = {};
+  let examsUnavailable = false;
+  try {
+    index = await examIndex(level, stream);
+  } catch (err) {
+    examsUnavailable = true;
+    console.error(`[${level}/${stream}] ${classifyError(err)}`, err);
+  }
   const subjects = getSubjects(level, stream).map((s) => ({ ...s, available: index[s.id] }));
   const totalExams = Object.values(index).reduce((sum, byType) => sum + Object.values(byType).reduce((n, l) => n + (l?.length ?? 0), 0), 0);
   const liveNow = subjects.filter((s) => s.available?.live?.length).length;
@@ -93,6 +103,12 @@ export async function StreamSubjectsView({ level, stream }: StreamSubjectsViewPr
               </div>
             ))}
           </dl>
+
+          {examsUnavailable && (
+            <p data-reveal role="status" lang="bn" className="mt-6 max-w-xl rounded-2xl border border-state-danger/30 bg-state-danger/[0.06] px-4 py-3 text-sm text-rose-200">
+              এই মুহূর্তে পরীক্ষার তালিকা লোড করা যাচ্ছে না। একটু পরে পেজটি আবার রিফ্রেশ করো।
+            </p>
+          )}
         </GsapReveal>
       </section>
 
