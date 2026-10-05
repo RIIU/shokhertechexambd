@@ -1,4 +1,4 @@
-# ShokherTech Exam BD
+# Shokher Tech Academy
 
 Anti-cheat online exam portal for Bangladesh's **SSC & HSC** students: chapter practice, model tests, live exams and instant analytics, in a deep-green, lime-accented UI whose colors are taken from pixxen.com.
 

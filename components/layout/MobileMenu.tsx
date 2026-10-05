@@ -113,9 +113,9 @@ export function MobileMenu() {
             {/* Header */}
             <div className="flex h-14 shrink-0 items-center justify-between border-b border-forest pl-4">
               <Link href="/" className="flex items-center gap-2.5" onClick={close}>
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-400 font-display text-xs font-black text-forest">ST</span>
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-400 font-display text-xs font-black text-forest">STA</span>
                 <span className="font-display text-base font-bold text-ink">
-                  ShokherTech<span className="text-brand-400">.</span>
+                  Shokher Tech Academy<span className="text-brand-400">.</span>
                 </span>
               </Link>
               <button
@@ -194,10 +194,10 @@ export function MobileMenu() {
                 <Item index={0} href="/" icon={Home} label="হোম" active={isActive("/")} onNavigate={close} />
                 <Item
                   index={1}
-                  href="/#packages"
+                  href="/packages"
                   icon={Sparkles}
                   label="প্যাকেজসমূহ"
-                  active={false}
+                  active={isActive("/packages")}
                   onNavigate={close}
                   badge={
                     <span className="inline-flex items-center gap-1 rounded-full bg-brand-400/20 px-2 py-0.5 text-[10px] font-bold text-brand-300">
@@ -229,9 +229,17 @@ export function MobileMenu() {
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400" />
                         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-400" />
                       </span>
-                      Live
+                    Live
                     </span>
                   }
+                />
+                <Item
+                  index={4}
+                  href="/subjects"
+                  icon={BookOpen}
+                  label="বিষয়সমূহ"
+                  active={isActive("/subjects")}
+                  onNavigate={close}
                 />
               </ul>
 
@@ -288,8 +296,8 @@ export function MobileMenu() {
               <p lang="bn" className="relative z-10 text-xs text-ink-subtle">
                 এসএসসি ও এইচএসসি অনলাইন পরীক্ষা
               </p>
-              <p aria-hidden="true" className="pointer-events-none -mb-3 select-none font-display text-[64px] font-black leading-none tracking-tighter text-forest/60">
-                ShokherTech
+              <p aria-hidden="true" className="pointer-events-none -mb-3 select-none font-display text-[48px] font-black leading-none tracking-tighter text-forest/60">
+                Shokher Tech
               </p>
             </div>
           </motion.nav>

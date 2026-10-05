@@ -22,13 +22,14 @@ export async function examIndex(level: Level, stream: StreamId) {
   const exams = await listExams({ level, stream, publishedOnly: true });
   const index: Record<string, SubjectExams> = {};
   for (const e of exams) {
+    if (!e || !e.subjectId || !e.type) continue;
     const bySubject = (index[e.subjectId] ??= {});
     (bySubject[e.type] ??= []).push({
       id: e.id,
-      titleBn: e.titleBn,
-      questions: e.questions.length,
-      durationSec: e.durationSec,
-      isPaid: e.isPaid,
+      titleBn: e.titleBn || "",
+      questions: e.questions?.length ?? 0,
+      durationSec: e.durationSec ?? 0,
+      isPaid: Boolean(e.isPaid),
       price: e.price,
     });
   }
