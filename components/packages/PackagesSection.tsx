@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
@@ -222,6 +223,7 @@ export function PackagesSection() {
           <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
             {COURSE_PACKAGES.map((pkg, i) => {
               const isPopular = pkg.popular;
+              const targetHref = pkg.stream && pkg.stream !== "all" ? `/${pkg.level}/${pkg.stream}` : `/${pkg.level}`;
 
               return (
                 <motion.div
@@ -239,18 +241,26 @@ export function PackagesSection() {
                   {/* Badge */}
                   {pkg.badge && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-obsidian-950 shadow-md ring-2 ring-obsidian-900">
+                      <Link
+                        href={targetHref}
+                        className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-obsidian-950 shadow-md ring-2 ring-obsidian-900 hover:bg-amber-300 transition-colors"
+                      >
                         {pkg.badge}
-                      </span>
+                      </Link>
                     </div>
                   )}
 
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-2 pt-1">
-                      <h3 lang="bn" className="text-xl font-bold text-ink">
-                        {pkg.nameBn}
-                      </h3>
-                      <span className="rounded-full bg-surface-pill px-2.5 py-0.5 text-[11px] text-ink-subtle">
+                      <Link
+                        href={targetHref}
+                        lang="bn"
+                        className="text-xl font-bold text-ink hover:text-brand-300 transition-colors flex items-center gap-1.5 group/title"
+                      >
+                        <span>{pkg.nameBn}</span>
+                        <ArrowRight className="h-4 w-4 text-ink-muted opacity-0 -translate-x-1 group-hover/title:opacity-100 group-hover/title:translate-x-0 transition-all" />
+                      </Link>
+                      <span className="rounded-full bg-surface-pill px-2.5 py-0.5 text-[11px] text-ink-subtle shrink-0">
                         {pkg.durationLabelBn}
                       </span>
                     </div>
@@ -289,19 +299,28 @@ export function PackagesSection() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPackage(pkg)}
-                    className={cn(
-                      "w-full py-3.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all",
-                      isPopular
-                        ? "btn-primary shadow-glow-sm hover:scale-[1.02]"
-                        : "btn-ghost hover:border-amber-400 hover:text-amber-300",
-                    )}
-                  >
-                    <span lang="bn">কোর্স প্যাকেজটি নাও</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
+                  <div className="space-y-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedPackage(pkg)}
+                      className={cn(
+                        "w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all",
+                        isPopular
+                          ? "btn-primary shadow-glow-sm hover:scale-[1.02]"
+                          : "btn-ghost hover:border-amber-400 hover:text-amber-300",
+                      )}
+                    >
+                      <span lang="bn">কোর্স প্যাকেজটি নাও (৳{toBn(pkg.price)})</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                    <Link
+                      href={targetHref}
+                      className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 text-brand-300 hover:text-brand-200 hover:bg-brand-400/10 border border-brand-400/20 transition-all"
+                    >
+                      <span lang="bn">{pkg.stream === "science" ? "বিজ্ঞান বিষয় ও পরীক্ষাগুলো দেখো" : "বিষয় ও পরীক্ষাসমূহ দেখো"}</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
                 </motion.div>
               );
             })}

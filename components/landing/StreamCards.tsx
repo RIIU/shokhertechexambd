@@ -33,7 +33,7 @@ export function StreamCards({ level }: { level: Level }) {
             <Link
               href={`/${level}/${id}`}
               className={cn(
-                "group relative flex h-full flex-col overflow-hidden rounded-3xl border border-surface-border bg-obsidian-800/70 p-6 shadow-card backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14]",
+                "group relative block cursor-pointer select-none flex h-full flex-col overflow-hidden rounded-3xl border border-surface-border bg-obsidian-800/70 p-6 shadow-card backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400",
                 accent.glow,
               )}
             >
