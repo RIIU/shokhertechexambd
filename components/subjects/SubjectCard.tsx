@@ -42,7 +42,7 @@ export function SubjectCard({ subject, onOpen }: SubjectCardProps) {
         "group relative flex h-full w-full flex-col overflow-hidden rounded-3xl p-5 text-left shadow-card transition-all duration-300 hover:-translate-y-1 will-change-transform",
         live
           ? "border-animated animate-border-spin shadow-glow"
-          : cn("border border-surface-border bg-obsidian-900 hover:border-leaf-600", accent.glow),
+          : cn("border border-surface-border bg-white hover:border-leaf-600", accent.glow),
       )}
     >
       {/* Cursor spotlight */}

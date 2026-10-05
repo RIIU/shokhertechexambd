@@ -25,7 +25,7 @@ export function paletteStatus(id: string, answers: Answers, flags: Record<string
 const STATUS_STYLE: Record<PaletteStatus, string> = {
   answered: "border-brand-400/60 bg-brand-400/15 text-brand-200",
   flagged: "border-state-flagged/60 bg-state-flagged/15 text-amber-200",
-  unanswered: "border-white/10 bg-white/[0.02] text-ink-muted hover:border-white/25 hover:text-ink",
+  unanswered: "border-ink/10 bg-ink/[0.02] text-ink-muted hover:border-ink/25 hover:text-ink",
 };
 
 const LEGEND: { status: PaletteStatus; label: string; dot: string }[] = [
@@ -61,7 +61,7 @@ export function QuestionPalette({ questions, answers, flags, current, onJump, on
 
       <ul className="grid grid-cols-3 gap-2">
         {LEGEND.map((l) => (
-          <li key={l.status} className="rounded-xl border border-surface-border bg-white/[0.02] px-2 py-2 text-center">
+          <li key={l.status} className="rounded-xl border border-surface-border bg-ink/[0.02] px-2 py-2 text-center">
             <span className="mb-1 flex items-center justify-center gap-1.5 text-[11px] text-ink-muted">
               <span className={cn("h-2 w-2 rounded-full", l.dot)} />
               <span lang="bn">{l.label}</span>
@@ -93,7 +93,7 @@ export function QuestionPalette({ questions, answers, flags, current, onJump, on
                 {isCurrent && (
                   <motion.span
                     layoutId="palette-current"
-                    className="absolute -inset-[3px] rounded-[14px] border-2 border-white shadow-[0_0_16px_-2px_rgba(255,255,255,0.55)]"
+                    className="absolute -inset-[3px] rounded-[14px] border-2 border-ink"
                     transition={{ type: "spring", stiffness: 450, damping: 32 }}
                   />
                 )}

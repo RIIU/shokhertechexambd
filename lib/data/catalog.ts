@@ -183,3 +183,8 @@ export function isLevel(value: string): value is Level {
 export function isStream(value: string): value is StreamId {
   return value in STREAMS;
 }
+
+/** A subject by id within a level and stream (exams store only the id). */
+export function findSubject(level: Level, stream: StreamId, subjectId: string): Subject | undefined {
+  return SUBJECTS[level]?.[stream]?.find((s) => s.id === subjectId);
+}

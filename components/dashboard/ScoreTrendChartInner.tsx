@@ -29,24 +29,24 @@ export default function ScoreTrendChartInner({ data }: { data: Point[] }) {
     <div className="h-56 w-full font-bangla">
       <ResponsiveContainer>
         <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -18 }}>
-          <CartesianGrid stroke="#29473C" strokeDasharray="3 4" vertical={false} />
-          <XAxis dataKey="n" tickLine={false} axisLine={false} tick={{ fill: "#759187", fontSize: 12 }} tickFormatter={(v: number) => toBn(v)} />
+          <CartesianGrid stroke="#EAECF0" strokeDasharray="3 4" vertical={false} />
+          <XAxis dataKey="n" tickLine={false} axisLine={false} tick={{ fill: "#667085", fontSize: 12 }} tickFormatter={(v: number) => toBn(v)} />
           <YAxis
             domain={[0, 100]}
             ticks={[0, 25, 50, 75, 100]}
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#759187", fontSize: 12 }}
+            tick={{ fill: "#667085", fontSize: 12 }}
             tickFormatter={(v: number) => `${toBn(v)}%`}
           />
-          <Tooltip content={<TrendTooltip />} cursor={{ stroke: "#A7BDB5", strokeOpacity: 0.3 }} />
+          <Tooltip content={<TrendTooltip />} cursor={{ stroke: "#98A2B3", strokeOpacity: 0.4 }} />
           <Line
             type="monotone"
             dataKey="percent"
-            stroke="#99FE00"
+            stroke="#08804A"
             strokeWidth={2}
-            dot={{ r: 4, fill: "#99FE00", stroke: "#002417", strokeWidth: 2 }}
-            activeDot={{ r: 6, fill: "#99FE00", stroke: "#002417", strokeWidth: 2 }}
+            dot={{ r: 4, fill: "#08804A", stroke: "#FFFFFF", strokeWidth: 2 }}
+            activeDot={{ r: 6, fill: "#08804A", stroke: "#FFFFFF", strokeWidth: 2 }}
             animationDuration={600}
           />
         </LineChart>

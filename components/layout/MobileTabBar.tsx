@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { BookOpen, Home, LayoutDashboard, LogIn, Menu, Radio, ShieldCheck, type LucideIcon } from "lucide-react";
 import { useAppShell } from "./AppShell";
-import { isFocusRoute } from "@/lib/routes";
+import { LIVE_EXAM_HREF, isFocusRoute } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 /**
@@ -38,7 +38,7 @@ export function MobileTabBar() {
       <div aria-hidden="true" className="h-[calc(88px+env(safe-area-inset-bottom))] md:hidden" />
       <nav
         aria-label="Quick navigation"
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-forest bg-obsidian-800/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-surface-border bg-obsidian-800/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
       >
         <ul className="grid h-16 grid-cols-5">
           {tabs.map((t, i) =>
@@ -63,7 +63,7 @@ export function MobileTabBar() {
             ) : (
               <li key={`centre-${i}`} className="flex items-start justify-center">
                 <Link
-                  href="/exam/ssc-physics-live-01"
+                  href={LIVE_EXAM_HREF}
                   aria-label="লাইভ পরীক্ষা"
                   className="-mt-5 flex h-14 w-14 flex-col items-center justify-center rounded-2xl bg-brand-400 text-forest shadow-glow ring-4 ring-obsidian-800 transition-transform active:scale-95"
                 >

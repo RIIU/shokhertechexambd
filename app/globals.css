@@ -11,10 +11,10 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
-    --bg: #002417;
-    --surface: #042e1b;
-    --brand: #99fe00;
+    color-scheme: light;
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --brand: #08804a;
   }
 
   html {
@@ -41,8 +41,8 @@
   }
 
   ::selection {
-    background: #99fe00;
-    color: #002417;
+    background: #d1fadf;
+    color: #05603a;
   }
 
   :focus-visible {
@@ -57,16 +57,20 @@
   }
 
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border border-surface-border bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0)_100%)] px-3 py-1 text-xs font-medium text-ink-muted;
+    @apply inline-flex items-center gap-1.5 rounded-full border border-surface-border bg-white px-3 py-1 text-xs font-medium text-ink-muted;
   }
 
   .btn-primary {
-    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-brand-400 px-5 py-2.5 text-sm font-semibold text-forest shadow-glow transition-all duration-200 hover:bg-brand-300 hover:shadow-glow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-brand-400 px-5 py-2.5 text-sm font-semibold text-white shadow-glow transition-all duration-200 hover:bg-brand-300 hover:shadow-glow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-ghost {
-    /* pixxen secondary button: white outline, fills white on hover */
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white bg-transparent px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-white hover:text-forest disabled:hover:bg-transparent disabled:hover:text-ink;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-surface-border bg-white px-4 py-2.5 text-sm font-medium text-ink shadow-glow-sm transition-colors hover:border-ink/20 hover:bg-surface-hover disabled:hover:bg-white;
+  }
+
+  /* Plain white card: the basic building block of the light theme. */
+  .card {
+    @apply rounded-2xl border border-surface-border bg-white shadow-card;
   }
 }
 
@@ -83,12 +87,12 @@
 
 @layer components {
   .field {
-    @apply w-full rounded-xl border border-surface-border bg-obsidian-900 px-4 py-3 text-sm text-ink placeholder:text-ink-subtle transition-colors focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-400/30;
+    @apply w-full rounded-xl border border-surface-border bg-white px-4 py-3 text-sm text-ink placeholder:text-ink-subtle transition-colors focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-400/15;
   }
   .field-label {
     @apply mb-1.5 block text-sm font-medium text-ink;
   }
   .field-error {
-    @apply mt-1.5 text-xs text-rose-300;
+    @apply mt-1.5 text-xs text-rose-600;
   }
 }

@@ -29,7 +29,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: { q
   return (
     <>
       <AdminHeader title="শিক্ষার্থী" subtitle={`মোট ${toBn(users.filter((u) => u.role === "student").length)} জন`} />
-      <form className="mb-4 flex max-w-md items-center gap-2 rounded-2xl border border-surface-border bg-obsidian-900 px-4 py-2.5" role="search">
+      <form className="mb-4 flex max-w-md items-center gap-2 rounded-2xl border border-surface-border bg-white px-4 py-2.5" role="search">
         <Search className="h-4 w-4 text-ink-subtle" />
         <input
           name="q"

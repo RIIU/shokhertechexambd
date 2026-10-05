@@ -22,7 +22,7 @@ export function AdminHeader({ title, subtitle, action }: { title: string; subtit
 /** Responsive table wrapper: scrolls sideways on phones instead of breaking the page. */
 export function Table({ head, children, empty }: { head: string[]; children: ReactNode; empty?: string }) {
   return (
-    <div className="overflow-x-auto rounded-3xl border border-surface-border bg-obsidian-900">
+    <div className="overflow-x-auto rounded-3xl border border-surface-border bg-white">
       <table className="w-full min-w-[640px] text-left text-sm">
         <thead>
           <tr className="border-b border-surface-border text-xs text-ink-subtle">

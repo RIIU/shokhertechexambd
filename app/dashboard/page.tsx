@@ -30,14 +30,14 @@ export default async function DashboardPage() {
 
       <div className="container space-y-6 pb-10 pt-6 sm:pt-10">
         {/* Profile Banner Card */}
-        <div className="relative overflow-hidden rounded-3xl border border-surface-border bg-obsidian-900 shadow-xl">
+        <div className="relative overflow-hidden rounded-3xl border border-surface-border bg-white shadow-xl">
           {user.coverUrl ? (
             <div className="relative h-28 sm:h-36 w-full overflow-hidden">
               <img src={user.coverUrl} alt="Cover" className="h-full w-full object-cover object-center" />
               <div className="absolute inset-0 bg-gradient-to-t from-obsidian-900 via-obsidian-900/40 to-transparent" />
             </div>
           ) : (
-            <div className="relative h-20 sm:h-24 w-full bg-gradient-to-r from-obsidian-950 via-forest to-obsidian-900 opacity-80" />
+            <div className="relative h-20 sm:h-24 w-full bg-gradient-to-r from-brand-400 via-leaf-400 to-emerald-300 opacity-80" />
           )}
 
           <div className="relative -mt-10 sm:-mt-12 flex flex-col justify-between gap-4 px-5 pb-5 sm:flex-row sm:items-end sm:px-6">
@@ -46,7 +46,7 @@ export default async function DashboardPage() {
                 {user.avatarUrl ? (
                   <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover object-center" />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-forest font-display text-3xl font-bold text-brand-300">
+                  <div className="flex h-full w-full items-center justify-center bg-brand-50 font-display text-3xl font-bold text-brand-300">
                     {user.name.trim().charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
                 <li key={r.attemptId}>
                   <Link
                     href={`/exam/${r.examId}`}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-surface-border bg-obsidian-900 px-4 py-3 hover:border-amber-400/50"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-surface-border bg-white px-4 py-3 hover:border-amber-400/50"
                   >
                     <span lang="bn" className="truncate text-sm text-ink">
                       {r.titleBn}

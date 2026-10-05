@@ -45,7 +45,7 @@ export default async function AdminOverviewPage() {
           </div>
           <Link
             href="/admin/payments"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-4 py-2 text-xs font-bold text-obsidian-950 hover:bg-amber-300 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-4 py-2 text-xs font-bold text-ink hover:bg-amber-300 transition-colors shadow-sm"
           >
             <span>পেমেন্ট যাচাই ও অনুমোদন</span>
             <ArrowRight className="h-3.5 w-3.5" />

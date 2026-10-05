@@ -231,7 +231,9 @@ export const cleanExamTitle = (raw: string): string =>
 
 const toExam = (r: ExamRow): StoredExam => {
   const hiddenInTitle = r.title_en?.includes(HIDE_SOLUTIONS_TAG) ?? false;
-  const showSolutions = r.show_solutions !== undefined ? Boolean(r.show_solutions) : !hiddenInTitle;
+  // The title tag is what insertExam/updateExam write, so it wins; the
+  // show_solutions column (from the migration) is never written and defaults to true.
+  const showSolutions = hiddenInTitle ? false : r.show_solutions !== undefined ? Boolean(r.show_solutions) : true;
 
   let isPaid = r.is_paid !== undefined ? Boolean(r.is_paid) : false;
   let price = r.price !== undefined ? Number(r.price) : 0;

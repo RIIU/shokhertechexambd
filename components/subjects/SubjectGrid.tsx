@@ -114,7 +114,7 @@ export function SubjectGrid({ subjects, level, stream }: SubjectGridProps) {
           ))}
         </ul>
       ) : (
-        <p lang="bn" className="rounded-3xl border border-dashed border-white/10 py-16 text-center text-ink-muted">
+        <p lang="bn" className="rounded-3xl border border-dashed border-ink/10 py-16 text-center text-ink-muted">
           &ldquo;{query}&rdquo; নামে কোনো বিষয় পাওয়া যায়নি।
         </p>
       )}

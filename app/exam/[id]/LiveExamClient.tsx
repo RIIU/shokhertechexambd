@@ -227,8 +227,8 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
       <main className="mx-auto grid max-w-7xl gap-6 px-3 pt-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section aria-live="polite">
           {/* View mode toggle & quick summary */}
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-surface-border bg-obsidian-900/80 p-2 sm:p-2.5 backdrop-blur">
-            <div className="inline-flex rounded-xl bg-white/[0.04] p-1 ring-1 ring-white/10">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-surface-border bg-white/80 p-2 sm:p-2.5 backdrop-blur">
+            <div className="inline-flex rounded-xl bg-ink/[0.04] p-1 ring-1 ring-ink/10">
               <button
                 type="button"
                 onClick={() => setViewMode("all")}
@@ -294,7 +294,7 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
                             "inline-flex items-center rounded-lg px-2.5 py-1 font-display text-xs font-bold ring-1",
                             isAnswered
                               ? "bg-brand-400/20 text-brand-300 ring-brand-400/30"
-                              : "bg-white/5 text-ink-muted ring-white/10"
+                              : "bg-ink/5 text-ink-muted ring-ink/10"
                           )}
                         >
                           <span lang="bn">প্রশ্ন {toBn(idx + 1)}</span>
@@ -316,8 +316,8 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
                         className={cn(
                           "inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium transition-all",
                           isFlagged
-                            ? "border-state-flagged/50 bg-state-flagged/15 text-amber-300 shadow-[0_0_20px_-6px_rgba(245,158,11,0.6)]"
-                            : "border-white/10 text-ink-muted hover:border-state-flagged/40 hover:text-amber-200"
+                            ? "border-state-flagged/50 bg-state-flagged/15 text-amber-700"
+                            : "border-ink/10 text-ink-muted hover:border-state-flagged/40 hover:text-amber-200"
                         )}
                       >
                         <Flag className={cn("h-3.5 w-3.5", isFlagged && "fill-current")} strokeWidth={1.5} />
@@ -392,10 +392,10 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
                   <span lang="bn">আগের প্রশ্ন</span>
                 </button>
                 <p className="text-xs text-ink-subtle">
-                  <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">1–4</kbd> select ·{" "}
-                  <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">F</kbd> flag ·{" "}
-                  <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">↑ ↓</kbd> option ·{" "}
-                  <kbd className="rounded border border-white/10 px-1.5 py-0.5 font-mono">← →</kbd> question
+                  <kbd className="rounded border border-ink/10 px-1.5 py-0.5 font-mono">1–4</kbd> select ·{" "}
+                  <kbd className="rounded border border-ink/10 px-1.5 py-0.5 font-mono">F</kbd> flag ·{" "}
+                  <kbd className="rounded border border-ink/10 px-1.5 py-0.5 font-mono">↑ ↓</kbd> option ·{" "}
+                  <kbd className="rounded border border-ink/10 px-1.5 py-0.5 font-mono">← →</kbd> question
                 </p>
                 {isLast ? (
                   <button type="button" onClick={() => setConfirmOpen(true)} className="btn-primary">
@@ -480,7 +480,7 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
       <AnimatePresence>
         {paletteOpen && (
           <motion.div
-            className="fixed inset-0 z-[60] bg-obsidian-950/70 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-[60] bg-scrim/70 backdrop-blur-sm lg:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -499,14 +499,14 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={{ top: 0, bottom: 0.6 }}
               onDragEnd={(_, info) => info.offset.y > 120 && setPaletteOpen(false)}
-              className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-4xl border-t border-white/10 bg-obsidian-800 p-5 pb-8 scrollbar-thin"
+              className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-4xl border-t border-ink/10 bg-obsidian-800 p-5 pb-8 scrollbar-thin"
             >
-              <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-white/15" />
+              <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-ink/15" />
               <button
                 type="button"
                 onClick={() => setPaletteOpen(false)}
                 aria-label="Close"
-                className="absolute right-4 top-4 rounded-lg p-1.5 text-ink-muted hover:bg-white/5"
+                className="absolute right-4 top-4 rounded-lg p-1.5 text-ink-muted hover:bg-ink/5"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -561,7 +561,7 @@ function StrikeMeter() {
       <ShieldCheck className={cn("h-4 w-4", danger ? "text-state-danger" : "text-brand-400")} strokeWidth={1.5} />
       <div className="flex gap-1" aria-label={`Warnings ${strikes} of ${maxWarnings}`}>
         {Array.from({ length: maxWarnings }, (_, i) => (
-          <span key={i} className={cn("h-1.5 w-3 rounded-full", i < strikes ? "bg-state-danger" : "bg-white/15")} />
+          <span key={i} className={cn("h-1.5 w-3 rounded-full", i < strikes ? "bg-state-danger" : "bg-ink/15")} />
         ))}
       </div>
     </div>

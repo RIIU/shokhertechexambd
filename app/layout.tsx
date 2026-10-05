@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
-import { Baloo_Da_2, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Hind_Siliguri, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { AppShellProvider } from "@/components/layout/AppShell";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -17,14 +17,22 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   display: "swap",
 });
-// Bangla face (Google Fonts, SIL Open Font License). Variable font: weights 400–800.
-const bangla = Baloo_Da_2({
+// Bangla face (Google Fonts, SIL Open Font License): clean, highly legible.
+const bangla = Hind_Siliguri({
   subsets: ["bengali"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-bangla",
   display: "swap",
 });
 
+// Absolute base for og:image and share links: an explicit site URL, else
+// Vercel's production domain, else local dev.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Shokher Tech Academy · SSC & HSC Online Exam",
     template: "%s · Shokher Tech Academy",
@@ -34,13 +42,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#002417",
-  colorScheme: "dark",
+  themeColor: "#FFFFFF",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="bn" className={`dark ${inter.variable} ${jakarta.variable} ${bangla.variable}`}>
+    <html lang="bn" className={`${inter.variable} ${jakarta.variable} ${bangla.variable}`}>
       <body>
         <AppShellProvider>
           <Navbar />

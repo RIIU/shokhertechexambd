@@ -21,7 +21,7 @@ import {
 import { useAppShell, type SessionUser } from "./AppShell";
 import { LEVELS, STREAMS } from "@/lib/data/catalog";
 import { formatPhone } from "@/lib/phone";
-import { isFocusRoute } from "@/lib/routes";
+import { LIVE_EXAM_HREF, isFocusRoute } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -62,9 +62,9 @@ function UserDropdown({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex items-center gap-2.5 border-l border-forest px-4 text-sm text-ink transition-colors hover:bg-surface-pill"
+        className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-sm text-ink transition-colors hover:bg-surface-hover"
       >
-        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-forest font-display text-xs font-bold text-brand-300 ring-1 ring-brand-400/40">
+        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-50 font-display text-xs font-bold text-brand-300 ring-1 ring-brand-400/40">
           {user.avatarUrl ? (
             <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover object-center" />
           ) : (
@@ -93,12 +93,12 @@ function UserDropdown({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full z-50 mt-1.5 w-64 rounded-2xl border border-surface-border bg-obsidian-900/95 p-2 shadow-2xl backdrop-blur-xl"
+            className="absolute right-0 top-full z-50 mt-1.5 w-64 rounded-2xl border border-surface-border bg-white p-2 shadow-lift"
           >
             {/* User details card */}
-            <div className="mb-2 rounded-xl border border-white/5 bg-white/[0.03] p-3">
+            <div className="mb-2 rounded-xl border border-ink/5 bg-ink/[0.03] p-3">
               <div className="flex items-center gap-2.5 mb-2">
-                <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-brand-400/40 bg-forest font-display text-xs font-bold text-brand-300">
+                <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-brand-400/40 bg-brand-50 font-display text-xs font-bold text-brand-300">
                   {user.avatarUrl ? (
                     <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover object-center" />
                   ) : (
@@ -144,7 +144,7 @@ function UserDropdown({
                 <Link
                   href="/profile"
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-white/5 hover:text-ink"
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-ink/5 hover:text-ink"
                 >
                   <UserIcon className="h-4 w-4 text-amber-400" />
                   <span lang="bn">আমার প্রোফাইল ও ছবি</span>
@@ -154,7 +154,7 @@ function UserDropdown({
                 <Link
                   href={home.href}
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-white/5 hover:text-ink"
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-ink/5 hover:text-ink"
                 >
                   {user.role === "admin" ? (
                     <ShieldCheck className="h-4 w-4 text-brand-400" />
@@ -169,7 +169,7 @@ function UserDropdown({
                   <Link
                     href={`/${user.level}/${user.stream}`}
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-white/5 hover:text-ink"
+                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-ink/5 hover:text-ink"
                   >
                     <BookOpen className="h-4 w-4 text-teal-400" />
                     <span lang="bn">আমার বিষয়সমূহ</span>
@@ -181,7 +181,7 @@ function UserDropdown({
                   <Link
                     href="/admin/exams"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-white/5 hover:text-ink"
+                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-muted transition-colors hover:bg-ink/5 hover:text-ink"
                   >
                     <FileQuestion className="h-4 w-4 text-teal-400" />
                     <span lang="bn">পরীক্ষা ও প্রশ্ন</span>
@@ -190,7 +190,7 @@ function UserDropdown({
               )}
             </ul>
 
-            <div className="my-1.5 h-px bg-white/5" />
+            <div className="my-1.5 h-px bg-ink/5" />
 
             {/* Instant Logout */}
             <button
@@ -227,29 +227,29 @@ export function Navbar() {
     .sort((a, b) => b.length - a.length)[0];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-forest bg-obsidian-800">
-      <nav className="flex h-14 items-stretch justify-between sm:h-16">
-        <div className="flex items-stretch">
+    <header className="sticky top-0 z-50 border-b border-surface-border bg-white/85 backdrop-blur-lg supports-[backdrop-filter]:bg-white/75">
+      <nav className="container flex h-16 items-center justify-between gap-3">
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-expanded={menuOpen}
             aria-label="মেনু খোলো"
-            className="flex w-14 items-center justify-center bg-forest text-ink transition-colors hover:bg-leaf-600 sm:w-16 md:hidden"
+            className="-ml-2 flex h-10 w-10 items-center justify-center rounded-xl text-ink transition-colors hover:bg-surface-hover md:hidden"
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-          <Link href="/" className="flex items-center gap-2.5 px-3 sm:px-6 lg:px-8">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-400 font-display text-sm font-black text-forest">
+          <Link href="/" className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-400 font-display text-xs font-extrabold tracking-tight text-white">
               STA
             </span>
-            <span className="font-display text-sm font-bold tracking-tight text-ink sm:text-base md:text-lg whitespace-nowrap">
-              Shokher Tech Academy<span className="text-brand-400">.</span>
+            <span className="whitespace-nowrap font-display text-sm font-bold tracking-tight text-ink sm:text-base">
+              Shokher Tech<span className="hidden sm:inline"> Academy</span>
             </span>
           </Link>
         </div>
 
-        <ul className="hidden items-center gap-1 md:flex">
+        <ul className="hidden items-center gap-1 rounded-2xl bg-surface-hover/70 p-1 md:flex">
           {LINKS.map((l) => {
             const active = l.href === activeHref;
             return (
@@ -258,14 +258,14 @@ export function Navbar() {
                   href={l.href}
                   lang="bn"
                   className={cn(
-                    "relative rounded-lg px-3.5 py-2 text-sm transition-colors",
+                    "relative block rounded-xl px-3.5 py-1.5 text-sm font-medium transition-colors",
                     active ? "text-ink" : "text-ink-muted hover:text-ink",
                   )}
                 >
                   {active && (
                     <motion.span
                       layoutId="nav-active"
-                      className="absolute inset-0 rounded-lg bg-surface-pill ring-1 ring-surface-border"
+                      className="absolute inset-0 rounded-xl bg-white shadow-card ring-1 ring-surface-border"
                       transition={{ type: "spring", stiffness: 400, damping: 32 }}
                     />
                   )}
@@ -276,16 +276,15 @@ export function Navbar() {
           })}
         </ul>
 
-        <div className="flex items-stretch">
-          {/* Account slot: Interactive real-time user dropdown or login link */}
+        <div className="flex items-center gap-2">
           {!loading && (
-            <div className="hidden items-stretch md:flex">
+            <div className="hidden items-center md:flex">
               {user ? (
                 <UserDropdown user={user} home={home} onLogout={logout} />
               ) : (
                 <Link
                   href={`/login?next=${encodeURIComponent(pathname ?? "/")}`}
-                  className="flex items-center gap-2 border-l border-forest px-5 text-sm text-ink transition-colors hover:bg-surface-pill"
+                  className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-hover"
                 >
                   <LogIn className="h-4 w-4" />
                   <span lang="bn">লগইন</span>
@@ -293,11 +292,15 @@ export function Navbar() {
               )}
             </div>
           )}
-          <Link
-            href={user ? "/exam/ssc-physics-live-01" : "/register"}
-            className="flex items-center gap-2 bg-brand-400 px-4 text-sm font-semibold text-forest transition-colors hover:bg-brand-300 sm:px-6 lg:px-10"
-          >
-            {user ? <Radio className="h-4 w-4" strokeWidth={1.75} /> : <UserPlus className="h-4 w-4" strokeWidth={1.75} />}
+          <Link href={user ? LIVE_EXAM_HREF : "/register"} className="btn-primary h-10 rounded-xl px-4 sm:px-5">
+            {user ? (
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/70" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+              </span>
+            ) : (
+              <UserPlus className="h-4 w-4" strokeWidth={1.75} />
+            )}
             <span lang="bn" className="hidden min-[380px]:inline">
               {user ? "লাইভ পরীক্ষা" : "ফ্রি রেজিস্ট্রেশন"}
             </span>

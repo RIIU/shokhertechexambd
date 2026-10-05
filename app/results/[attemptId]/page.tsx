@@ -5,6 +5,8 @@ import { requireUser } from "@/lib/server/auth";
 import { getResult } from "@/lib/server/attempts";
 import { getExam } from "@/lib/server/exams";
 import { getUser } from "@/lib/server/users";
+import { sharePath } from "@/lib/server/share";
+import { EXAM_TYPE_META, LEVELS, STREAMS, findSubject } from "@/lib/data/catalog";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Result", robots: { index: false } };
@@ -38,6 +40,20 @@ export default async function ResultPage({ params }: { params: { attemptId: stri
   return (
     <ResultView
       result={result}
+      meta={
+        exam
+          ? {
+              subjectBn: findSubject(exam.level, exam.stream, exam.subjectId)?.nameBn,
+              levelBn: LEVELS[exam.level].nameBn,
+              streamBn: STREAMS[exam.stream].nameBn,
+              typeBn: EXAM_TYPE_META[exam.type].nameBn,
+              negativeMark: exam.negativeMark,
+            }
+          : undefined
+      }
+      sharePath={isOwner ? sharePath(data.attempt.id) : undefined}
+      sharer={isOwner ? { name: viewer.name, institution: viewer.institution } : undefined}
+      leaderboardHref={exam?.status === "published" ? `/leaderboard/${exam.id}` : undefined}
       showSolutions={showSolutions}
       canRetake={isOwner && exam?.status === "published" && exam.type !== "live"}
       studentName={student?.name}

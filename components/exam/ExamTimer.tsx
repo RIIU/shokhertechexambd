@@ -18,7 +18,10 @@ interface ExamTimerProps {
 const RADIUS = 18;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-export function ExamTimer({ endsAt, durationSec, onExpire, dangerAt = 300, warnAt = 600, compact }: ExamTimerProps) {
+export function ExamTimer({ endsAt, durationSec, onExpire, dangerAt: dangerAtProp, warnAt: warnAtProp, compact }: ExamTimerProps) {
+  // Short exams would start in the warning state with fixed 10/5-minute marks.
+  const warnAt = warnAtProp ?? Math.min(600, Math.round(durationSec * 0.25));
+  const dangerAt = dangerAtProp ?? Math.min(300, Math.round(durationSec * 0.1));
   const [left, setLeft] = useState(() => Math.max(0, Math.ceil((endsAt - Date.now()) / 1000)));
   const expired = useRef(false);
   const onExpireRef = useRef(onExpire);
@@ -42,9 +45,9 @@ export function ExamTimer({ endsAt, durationSec, onExpire, dangerAt = 300, warnA
   const progress = durationSec > 0 ? left / durationSec : 0;
 
   const tone = {
-    ok: { text: "text-brand-300", stroke: "#99FE00", ring: "border-brand-400/25 shadow-glow-sm" },
-    warn: { text: "text-amber-300", stroke: "#FBBF24", ring: "border-amber-400/40" },
-    danger: { text: "text-rose-300", stroke: "#F43F5E", ring: "border-state-danger/60 animate-danger-pulse" },
+    ok: { text: "text-ink", stroke: "#08804A", ring: "border-surface-border" },
+    warn: { text: "text-amber-300", stroke: "#D97706", ring: "border-amber-400/40 bg-amber-50" },
+    danger: { text: "text-rose-300", stroke: "#E11D48", ring: "border-state-danger/40 bg-rose-50 animate-danger-pulse" },
   }[state];
 
   return (
@@ -59,7 +62,7 @@ export function ExamTimer({ endsAt, durationSec, onExpire, dangerAt = 300, warnA
     >
       <div className="relative h-11 w-11 shrink-0">
         <svg viewBox="0 0 44 44" className="h-11 w-11 -rotate-90">
-          <circle cx="22" cy="22" r={RADIUS} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
+          <circle cx="22" cy="22" r={RADIUS} fill="none" stroke="#EAECF0" strokeWidth="3" />
           <circle
             cx="22"
             cy="22"

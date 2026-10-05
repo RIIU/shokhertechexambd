@@ -5,6 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ArrowRight, Flag, Radio, ShieldCheck, Timer } from "lucide-react";
+import { LIVE_EXAM_HREF } from "@/lib/routes";
 import { cn, toBn } from "@/lib/utils";
 
 gsap.registerPlugin(useGSAP);
@@ -55,8 +56,6 @@ export function Hero() {
     <section ref={root} className="relative isolate overflow-hidden bg-hero">
       <div className="page-backdrop" />
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[680px] bg-radial-brand" />
-      {/* pixxen-style soft green glow on the right edge */}
-      <div className="pointer-events-none absolute -right-48 top-1/3 -z-10 h-[560px] w-[560px] rounded-full bg-[radial-gradient(closest-side,rgba(34,120,48,0.6),transparent)]" />
       <div className="pointer-events-none absolute -left-40 top-60 -z-10 h-[420px] w-[420px] rounded-full bg-radial-glow blur-2xl" />
 
       <div className="container grid items-center gap-14 pb-20 pt-12 sm:pt-20 lg:grid-cols-[1.1fr_1fr]">
@@ -70,7 +69,7 @@ export function Hero() {
             <span lang="bn">এসএসসি ও এইচএসসি ২০২৬ প্রস্তুতি</span>
           </span>
 
-          <h1 lang="bn" className="mb-6 text-[2.6rem] font-bold leading-[1.15] tracking-tight sm:text-6xl lg:text-7xl">
+          <h1 lang="bn" className="mb-6 text-[2.5rem] font-bold leading-[1.15] tracking-tight sm:text-6xl lg:text-[4.25rem]">
             {HEADLINE.map((w, i) => (
               <span key={`${w}-${i}`} className="inline-block overflow-hidden pb-2 align-bottom">
                 <span data-word className={cn("inline-block", i >= 3 ? "text-gradient" : "text-ink")}>
@@ -87,7 +86,7 @@ export function Hero() {
           </p>
 
           <div data-hero-sub className="mb-10 flex flex-wrap gap-3">
-            <Link href="/exam/ssc-physics-live-01" className="btn-primary px-6 py-3 text-base">
+            <Link href={LIVE_EXAM_HREF} className="btn-primary px-6 py-3 text-base">
               <Radio className="h-5 w-5" strokeWidth={1.5} />
               <span lang="bn">লাইভ পরীক্ষা দাও</span>
             </Link>
@@ -111,7 +110,7 @@ export function Hero() {
         <div className="relative mx-auto w-full max-w-md lg:max-w-none" data-parallax>
           <span
             data-badge
-            className="absolute -left-4 -top-6 z-10 rounded-2xl border border-brand-400/40 bg-obsidian-800/90 px-4 py-2.5 shadow-glow backdrop-blur sm:-left-10"
+            className="absolute -left-4 -top-6 z-10 rounded-2xl border border-surface-border bg-white px-4 py-2.5 shadow-lift sm:-left-8"
           >
             <span className="block font-display text-lg font-black text-brand-300">SSC</span>
             <span lang="bn" className="block text-[11px] text-ink-muted">
@@ -120,7 +119,7 @@ export function Hero() {
           </span>
           <span
             data-badge
-            className="absolute -bottom-6 -right-2 z-10 rounded-2xl border border-leaf-400/40 bg-obsidian-800/90 px-4 py-2.5 shadow-glow-leaf backdrop-blur sm:-right-8"
+            className="absolute -bottom-6 right-2 z-10 rounded-2xl border border-surface-border bg-white px-4 py-2.5 shadow-lift sm:-right-4"
           >
             <span className="block font-display text-lg font-black text-leaf-300">HSC</span>
             <span lang="bn" className="block text-[11px] text-ink-muted">
@@ -139,7 +138,7 @@ export function Hero() {
 function ExamPreview() {
   const palette = ["a", "a", "f", "a", "u", "c", "u", "u", "a", "u", "u", "u"] as const;
   return (
-    <div data-preview className="border-animated animate-border-spin rounded-4xl p-5 shadow-glow-lg sm:p-6">
+    <div data-preview className="border-animated animate-border-spin rounded-4xl p-5 shadow-lift sm:p-6">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-300">
@@ -157,7 +156,7 @@ function ExamPreview() {
         </span>
       </div>
 
-      <div className="mb-4 h-1 overflow-hidden rounded-full bg-white/5">
+      <div className="mb-4 h-1 overflow-hidden rounded-full bg-ink/5">
         <div className="h-full w-7/12 rounded-full bg-brand-gradient" />
       </div>
 
@@ -182,7 +181,7 @@ function ExamPreview() {
               lang="bn"
               className={cn(
                 "flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold",
-                sel ? "bg-brand-400 text-forest" : "border border-white/15",
+                sel ? "bg-brand-400 text-forest" : "border border-ink/15",
               )}
             >
               {l}
@@ -202,8 +201,8 @@ function ExamPreview() {
                 "flex h-6 w-6 items-center justify-center rounded-md border text-[10px] font-semibold",
                 s === "a" && "border-brand-400/60 bg-brand-400/15 text-brand-200",
                 s === "f" && "border-state-flagged/60 bg-state-flagged/15 text-amber-200",
-                s === "c" && "border-white text-ink shadow-[0_0_10px_-2px_rgba(255,255,255,0.55)]",
-                s === "u" && "border-white/10 text-ink-subtle",
+                s === "c" && "border-ink text-ink ring-2 ring-ink/10",
+                s === "u" && "border-ink/10 text-ink-subtle",
               )}
             >
               {toBn(i + 1)}

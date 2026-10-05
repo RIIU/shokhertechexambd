@@ -14,10 +14,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <Link
           href="/profile"
-          className="mb-4 hidden items-center gap-3 rounded-2xl border border-surface-border bg-obsidian-900 p-3 transition-colors hover:border-brand-400/60 lg:flex group"
+          className="mb-4 hidden items-center gap-3 rounded-2xl border border-surface-border bg-white p-3 transition-colors hover:border-brand-400/60 lg:flex group"
           title="প্রোফাইল ও ছবি পরিবর্তন করো"
         >
-          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-brand-400/40 bg-forest font-display text-sm font-bold text-brand-300">
+          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-brand-400/40 bg-brand-50 font-display text-sm font-bold text-brand-300">
             {admin.avatarUrl ? (
               <img src={admin.avatarUrl} alt={admin.name} className="h-full w-full object-cover object-center" />
             ) : (
