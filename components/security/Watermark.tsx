@@ -31,11 +31,11 @@ function renderTile(lines: string[], stamp: string, opacity: number): string {
   all.forEach((line, i) => {
     const y = (i - (all.length - 1) / 2) * 20;
     ctx.font = `${i === 0 ? 600 : 500} ${i === 0 ? 15 : 12}px Inter, system-ui, sans-serif`;
-    // Light outline + dark fill keeps the mark readable on any background in a photo.
+    // Dark outline + light fill keeps the mark readable on any background in a photo.
     ctx.lineWidth = 3;
-    ctx.strokeStyle = `rgba(255,255,255,${opacity})`;
+    ctx.strokeStyle = `rgba(0,0,0,${opacity * 0.6})`;
     ctx.strokeText(line, 0, y);
-    ctx.fillStyle = `rgba(16,24,40,${opacity * 0.6})`;
+    ctx.fillStyle = `rgba(255,255,255,${opacity})`;
     ctx.fillText(line, 0, y);
   });
 

@@ -18,7 +18,7 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html lang="bn" >
+    <html lang="bn" className="dark">
       <head>
         <title>সার্ভারে সমস্যা হয়েছে · Shokher Tech Academy</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -27,8 +27,8 @@ export default function GlobalError({
         style={{
           margin: 0,
           padding: 0,
-          backgroundColor: "#F6F7F9",
-          color: "#101828",
+          backgroundColor: "#02140d",
+          color: "#f0fdf4",
           fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           display: "flex",
           minHeight: "100vh",
@@ -41,11 +41,11 @@ export default function GlobalError({
             maxWidth: "520px",
             margin: "24px",
             padding: "36px 28px",
-            backgroundColor: "#FFFFFF",
-            border: "1px solid #E4E7EC",
+            backgroundColor: "#062318",
+            border: "1px solid rgba(153, 254, 0, 0.2)",
             borderRadius: "24px",
             textAlign: "center",
-            boxShadow: "0 12px 24px -12px rgba(16,24,40,0.18)",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.5)",
           }}
         >
           <div
@@ -53,8 +53,8 @@ export default function GlobalError({
               width: "56px",
               height: "56px",
               borderRadius: "16px",
-              backgroundColor: "#ECFDF3",
-              color: "#08804A",
+              backgroundColor: "rgba(153, 254, 0, 0.12)",
+              color: "#99fe00",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -70,7 +70,7 @@ export default function GlobalError({
             style={{
               fontSize: "24px",
               fontWeight: 800,
-              color: "#101828",
+              color: "#ffffff",
               marginBottom: "8px",
               lineHeight: 1.3,
             }}
@@ -81,7 +81,7 @@ export default function GlobalError({
           <p
             style={{
               fontSize: "14px",
-              color: "#475467",
+              color: "#94a3b8",
               marginBottom: "20px",
               lineHeight: 1.6,
             }}
@@ -94,11 +94,11 @@ export default function GlobalError({
               style={{
                 marginBottom: "24px",
                 padding: "8px 12px",
-                backgroundColor: "#F2F4F7",
+                backgroundColor: "rgba(0,0,0,0.3)",
                 borderRadius: "8px",
                 fontSize: "12px",
                 fontFamily: "monospace",
-                color: "#667085",
+                color: "#64748b",
               }}
             >
               Error Digest: {error.digest}
@@ -118,8 +118,8 @@ export default function GlobalError({
               onClick={() => reset()}
               style={{
                 padding: "12px 24px",
-                backgroundColor: "#08804A",
-                color: "#FFFFFF",
+                backgroundColor: "#99fe00",
+                color: "#02140d",
                 fontWeight: 700,
                 fontSize: "14px",
                 borderRadius: "12px",
@@ -136,11 +136,11 @@ export default function GlobalError({
               style={{
                 padding: "12px 24px",
                 backgroundColor: "transparent",
-                color: "#101828",
+                color: "#f0fdf4",
                 fontWeight: 600,
                 fontSize: "14px",
                 borderRadius: "12px",
-                border: "1px solid #E4E7EC",
+                border: "1px solid rgba(255,255,255,0.15)",
                 textDecoration: "none",
                 display: "inline-block",
               }}

@@ -6,16 +6,16 @@ import { toBn } from "@/lib/utils";
 import type { ExamResult } from "@/lib/types";
 
 /*
- * Status colors (good / critical / neutral) on the white card: green and rose
- * clear 3:1; the neutral gray is lighter, so every slice also carries an icon
- * + text label and a 2px white gap between slices.
+ * Status colors (good / critical / neutral), validated against the #042E1B card
+ * surface: all clear 3:1 contrast. Gray-vs-rose is in the 6–8 ΔE protan band, so
+ * every slice also carries an icon + text label and a 2px surface gap.
  */
 const STATUS: { key: "correct" | "wrong" | "skipped"; label: string; color: string; icon: LucideIcon }[] = [
-  { key: "correct", label: "সঠিক", color: "#12B76A", icon: CheckCircle2 },
-  { key: "wrong", label: "ভুল", color: "#E11D48", icon: XCircle },
-  { key: "skipped", label: "উত্তর দেওয়া হয়নি", color: "#D0D5DD", icon: MinusCircle },
+  { key: "correct", label: "সঠিক", color: "#99FE00", icon: CheckCircle2 },
+  { key: "wrong", label: "ভুল", color: "#F43F5E", icon: XCircle },
+  { key: "skipped", label: "উত্তর দেওয়া হয়নি", color: "#64748B", icon: MinusCircle },
 ];
-const SURFACE = "#FFFFFF";
+const SURFACE = "#042E1B";
 
 function ChartTooltip({ active, payload }: { active?: boolean; payload?: { name?: string; value?: number; payload?: Record<string, unknown> }[] }) {
   const p = payload?.[0];
@@ -73,9 +73,9 @@ export function AccuracyDonut({ result }: { result: ExamResult }) {
       <figcaption className="w-full">
         <ul className="space-y-2">
           {STATUS.map(({ key, label, color, icon: Icon }) => (
-            <li key={key} className="flex items-center justify-between gap-4 rounded-xl border border-surface-border px-3 py-2.5">
+            <li key={key} className="flex items-center justify-between gap-4 rounded-xl border border-surface-border bg-white/[0.02] px-3 py-2.5">
               <span className="flex items-center gap-2 text-sm text-ink-muted">
-                <Icon className="h-4 w-4" style={{ color: key === "skipped" ? "#98A2B3" : color }} strokeWidth={1.75} />
+                <Icon className="h-4 w-4" style={{ color }} strokeWidth={1.75} />
                 <span lang="bn">{label}</span>
               </span>
               <span lang="bn" className="font-display text-lg font-bold text-ink">
@@ -108,16 +108,16 @@ export function TopicBars({ result }: { result: ExamResult }) {
               width={130}
               tickLine={false}
               axisLine={false}
-              tick={{ fill: "#475467", fontSize: 13 }}
+              tick={{ fill: "#A7BDB5", fontSize: 13 }}
             />
-            <Tooltip cursor={{ fill: "rgba(16,24,40,0.03)" }} content={<ChartTooltip />} />
+            <Tooltip cursor={{ fill: "rgba(255,255,255,0.03)" }} content={<ChartTooltip />} />
             <Bar
               dataKey="value"
               name="সঠিক উত্তরের হার"
-              fill="#12B76A"
+              fill="#99FE00"
               radius={[0, 4, 4, 0]}
-              background={{ fill: "#F2F4F7", radius: 4 }}
-              label={{ position: "right", fill: "#344054", fontSize: 12, formatter: (v: number) => `${toBn(v)}%` }}
+              background={{ fill: "rgba(255,255,255,0.04)", radius: 4 }}
+              label={{ position: "right", fill: "#E5E7EB", fontSize: 12, formatter: (v: number) => `${toBn(v)}%` }}
               animationDuration={900}
             />
           </BarChart>

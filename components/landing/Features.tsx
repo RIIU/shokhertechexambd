@@ -16,13 +16,13 @@ const FEATURES: { icon: LucideIcon; title: string; body: string; className?: str
 
 export function Features() {
   return (
-    <section className="container py-14 sm:py-16" aria-labelledby="features-title">
+    <section className="container py-24" aria-labelledby="features-title">
       <div className="mb-12 max-w-2xl">
         <span className="chip mb-4">
           <Zap className="h-3.5 w-3.5 text-brand-400" strokeWidth={1.5} />
           Platform
         </span>
-        <h2 id="features-title" lang="bn" className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+        <h2 id="features-title" lang="bn" className="text-3xl font-bold text-ink sm:text-5xl">
           পরীক্ষার হলের মতো নিয়ম, <span className="text-gradient">ঘরে বসেই</span>
         </h2>
       </div>
@@ -31,7 +31,7 @@ export function Features() {
           <li
             key={title}
             className={cn(
-              "group relative overflow-hidden rounded-2xl border border-surface-border bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift",
+              "group relative overflow-hidden rounded-3xl border border-surface-border bg-obsidian-900 p-6 shadow-card transition-all duration-300 hover:border-brand-400/25 hover:shadow-glow",
               className,
             )}
           >

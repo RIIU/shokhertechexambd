@@ -20,7 +20,7 @@ export function SubmitDialog({ open, answered, flagged, total, submitting, onCan
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[80] flex items-end justify-center bg-scrim/75 p-4 backdrop-blur-sm sm:items-center"
+          className="fixed inset-0 z-[80] flex items-end justify-center bg-obsidian-950/75 p-4 backdrop-blur-sm sm:items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -50,7 +50,7 @@ export function SubmitDialog({ open, answered, flagged, total, submitting, onCan
                 { label: "চিহ্নিত", value: flagged, cls: "text-amber-300" },
                 { label: "বাকি", value: unanswered, cls: "text-ink" },
               ].map((s) => (
-                <div key={s.label} className="rounded-2xl border border-surface-border bg-ink/[0.02] py-3">
+                <div key={s.label} className="rounded-2xl border border-surface-border bg-white/[0.02] py-3">
                   <dt lang="bn" className="text-[11px] text-ink-muted">
                     {s.label}
                   </dt>

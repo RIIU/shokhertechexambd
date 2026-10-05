@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "এসএসসি ও এইচএসসি অনলাইন পরীক্ষা: অনুশীলন, মডেল টেস্ট ও লাইভ পরীক্ষা",
     start_url: "/",
     display: "standalone",
-    background_color: "#F6F7F9",
-    theme_color: "#FFFFFF",
+    background_color: "#002417",
+    theme_color: "#002417",
     lang: "bn",
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },

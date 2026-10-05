@@ -69,8 +69,8 @@ export function QuestionCard({
             className={cn(
               "inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium transition-all",
               flagged
-                ? "border-state-flagged/50 bg-state-flagged/15 text-amber-700"
-                : "border-ink/10 text-ink-muted hover:border-state-flagged/40 hover:text-amber-200",
+                ? "border-state-flagged/50 bg-state-flagged/15 text-amber-300 shadow-[0_0_20px_-6px_rgba(245,158,11,0.6)]"
+                : "border-white/10 text-ink-muted hover:border-state-flagged/40 hover:text-amber-200",
             )}
           >
             <Flag className={cn("h-3.5 w-3.5", flagged && "fill-current")} strokeWidth={1.5} />
@@ -163,7 +163,7 @@ export function OptionSelector({ name, options, selected, onSelect, labelledBy }
               "group relative flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-colors duration-200",
               isSelected
                 ? "border-brand-400/70 bg-brand-400/[0.08] shadow-glow"
-                : "border-surface-border bg-ink/[0.02] hover:border-brand-400/30 hover:bg-ink/[0.04]",
+                : "border-surface-border bg-white/[0.02] hover:border-brand-400/30 hover:bg-white/[0.04]",
             )}
           >
             {/* Radio indicator */}
@@ -172,7 +172,7 @@ export function OptionSelector({ name, options, selected, onSelect, labelledBy }
                 "relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border font-bangla text-base font-bold transition-colors",
                 isSelected
                   ? "border-brand-400 bg-brand-400 text-forest"
-                  : "border-ink/15 text-ink-muted group-hover:border-brand-400/50 group-hover:text-brand-300",
+                  : "border-white/15 text-ink-muted group-hover:border-brand-400/50 group-hover:text-brand-300",
               )}
             >
               <AnimatePresence mode="wait" initial={false}>

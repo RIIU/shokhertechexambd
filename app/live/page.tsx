@@ -50,7 +50,7 @@ export default async function LivePage({ searchParams }: { searchParams: { level
     <main className="relative">
       <div className="page-backdrop" />
       <section className="container pb-8 pt-10 sm:pt-14">
-        <span className="chip mb-5 border-rose-500/20 bg-rose-50 text-rose-600">
+        <span className="chip mb-5 border-rose-500/20 bg-rose-500/10 text-rose-300">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500 opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />
@@ -74,7 +74,7 @@ export default async function LivePage({ searchParams }: { searchParams: { level
                 lang="bn"
                 className={cn(
                   "rounded-lg px-4 py-1.5 text-sm font-medium transition-colors",
-                  f.key === level ? "bg-white text-ink shadow-card ring-1 ring-surface-border" : "text-ink-muted hover:text-ink",
+                  f.key === level ? "bg-surface-pill text-ink shadow-card ring-1 ring-surface-border" : "text-ink-muted hover:text-ink",
                 )}
               >
                 {f.label}

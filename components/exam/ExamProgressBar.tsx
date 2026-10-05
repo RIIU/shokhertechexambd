@@ -12,7 +12,7 @@ export function ExamProgressBar({ answered, total }: ExamProgressBarProps) {
   const pct = total > 0 ? (answered / total) * 100 : 0;
   return (
     <div
-      className="fixed inset-x-0 top-0 z-50 h-1 bg-ink/5"
+      className="fixed inset-x-0 top-0 z-50 h-1 bg-white/5"
       role="progressbar"
       aria-label="Exam completion"
       aria-valuemin={0}
@@ -25,7 +25,7 @@ export function ExamProgressBar({ answered, total }: ExamProgressBarProps) {
         animate={{ width: `${pct}%` }}
         transition={{ type: "spring", stiffness: 120, damping: 20 }}
       >
-        <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-ink/60 to-transparent animate-shimmer" />
+        <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/60 to-transparent animate-shimmer" />
       </motion.div>
     </div>
   );

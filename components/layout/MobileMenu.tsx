@@ -26,11 +26,10 @@ import { logoutAction } from "@/app/(auth)/actions";
 import { useAppShell } from "./AppShell";
 import { LEVELS, STREAMS, STREAM_IDS } from "@/lib/data/catalog";
 import { formatPhone } from "@/lib/phone";
-import { isFocusRoute } from "@/lib/routes";
+import { LIVE_EXAM_HREF, isFocusRoute } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import type { Level } from "@/lib/types";
 
-import { LIVE_EXAM_HREF } from "@/lib/routes";
 
 /**
  * Mobile navigation menu: full screen on phones under 480px (like pixxen.com), a 400px
@@ -81,7 +80,7 @@ export function MobileMenu() {
             aria-label="Close menu"
             tabIndex={-1}
             onClick={close}
-            className="absolute inset-0 bg-scrim/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-obsidian-950/70 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -89,7 +88,7 @@ export function MobileMenu() {
 
           <motion.nav
             aria-label="Mobile"
-            className="absolute inset-y-0 left-0 flex w-full flex-col overflow-hidden bg-obsidian-800 min-[480px]:w-[400px] min-[480px]:border-r min-[480px]:border-surface-border min-[480px]:shadow-card"
+            className="absolute inset-y-0 left-0 flex w-full flex-col overflow-hidden bg-obsidian-800 min-[480px]:w-[400px] min-[480px]:border-r min-[480px]:border-forest min-[480px]:shadow-card"
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
@@ -111,7 +110,7 @@ export function MobileMenu() {
             }}
           >
             {/* Header */}
-            <div className="flex h-14 shrink-0 items-center justify-between border-b border-surface-border pl-4">
+            <div className="flex h-14 shrink-0 items-center justify-between border-b border-forest pl-4">
               <Link href="/" className="flex items-center gap-2.5" onClick={close}>
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-400 font-display text-xs font-black text-forest">STA</span>
                 <span className="font-display text-base font-bold text-ink">
@@ -123,7 +122,7 @@ export function MobileMenu() {
                 type="button"
                 onClick={close}
                 aria-label="Close menu"
-                className="flex h-14 w-14 items-center justify-center bg-brand-50 text-ink transition-colors active:bg-surface-hover"
+                className="flex h-14 w-14 items-center justify-center bg-forest text-ink transition-colors active:bg-leaf-600"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -292,7 +291,7 @@ export function MobileMenu() {
             </div>
 
             {/* Footer: pixxen-style oversized wordmark */}
-            <div className="relative shrink-0 overflow-hidden border-t border-surface-border bg-section px-4 pb-[max(env(safe-area-inset-bottom),12px)] pt-3">
+            <div className="relative shrink-0 overflow-hidden border-t border-forest bg-section px-4 pb-[max(env(safe-area-inset-bottom),12px)] pt-3">
               <p lang="bn" className="relative z-10 text-xs text-ink-subtle">
                 এসএসসি ও এইচএসসি অনলাইন পরীক্ষা
               </p>

@@ -42,7 +42,7 @@ export function ExamTypeSheet({ subject, level, stream, onClose }: ExamTypeSheet
     <AnimatePresence>
       {subject && (
         <motion.div
-          className="fixed inset-0 z-[60] flex items-end justify-end bg-scrim/70 backdrop-blur-sm sm:items-stretch"
+          className="fixed inset-0 z-[60] flex items-end justify-end bg-obsidian-950/70 backdrop-blur-sm sm:items-stretch"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -64,7 +64,7 @@ export function ExamTypeSheet({ subject, level, stream, onClose }: ExamTypeSheet
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="absolute right-4 top-4 z-10 rounded-xl p-2 text-ink-muted hover:bg-ink/5 hover:text-ink"
+              className="absolute right-4 top-4 z-10 rounded-xl p-2 text-ink-muted hover:bg-white/5 hover:text-ink"
             >
               <X className="h-5 w-5" />
             </button>

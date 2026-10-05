@@ -17,7 +17,8 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   display: "swap",
 });
-// Bangla face (Google Fonts, SIL Open Font License): clean, highly legible.
+// Bangla: Ador Noirrit from the Bangla web font CDN (see the <link> below),
+// with Hind Siliguri (Google Fonts, OFL) as the self-hosted fallback.
 const bangla = Hind_Siliguri({
   subsets: ["bengali"],
   weight: ["400", "500", "600", "700"],
@@ -42,13 +43,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
-  colorScheme: "light",
+  themeColor: "#002417",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="bn" className={`${inter.variable} ${jakarta.variable} ${bangla.variable}`}>
+    <html lang="bn" className={`dark ${inter.variable} ${jakarta.variable} ${bangla.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.maateen.me" crossOrigin="" />
+        <link rel="stylesheet" href="https://fonts.maateen.me/ador-noirrit/font.css" />
+      </head>
       <body>
         <AppShellProvider>
           <Navbar />

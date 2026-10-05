@@ -22,7 +22,7 @@ export function StatTile({
     amber: "bg-amber-400/10 text-amber-300 ring-amber-400/25",
   }[tone];
   return (
-    <div className="rounded-3xl border border-surface-border bg-white p-5">
+    <div className="rounded-3xl border border-surface-border bg-obsidian-900 p-5">
       <div className="mb-4 flex items-center gap-2.5">
         <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl ring-1", toneCls)}>
           <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
@@ -45,7 +45,7 @@ export function StatTile({
 
 export function Panel({ title, action, children, className }: { title: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-3xl border border-surface-border bg-white p-5 sm:p-6", className)}>
+    <section className={cn("rounded-3xl border border-surface-border bg-obsidian-900 p-5 sm:p-6", className)}>
       <div className="mb-5 flex items-center justify-between gap-3">
         <h2 lang="bn" className="text-lg font-semibold text-ink">
           {title}

@@ -361,7 +361,7 @@ export function AntiCheatWrapper({
       <AnimatePresence>
         {warning && (
           <motion.div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim/80 p-4 backdrop-blur-md"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-obsidian-950/80 p-4 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -377,7 +377,7 @@ export function AntiCheatWrapper({
               transition={{ type: "spring", stiffness: 380, damping: 28 }}
               className="relative w-full max-w-md overflow-hidden rounded-3xl border border-state-danger/40 bg-obsidian-800 p-6 text-center shadow-glow-danger"
             >
-              <div className="pointer-events-none absolute inset-x-0 -top-24 h-48 bg-[radial-gradient(closest-side,rgba(244,63,94,0.15),transparent)]" />
+              <div className="pointer-events-none absolute inset-x-0 -top-24 h-48 bg-[radial-gradient(closest-side,rgba(244,63,94,0.35),transparent)]" />
               <div className="relative mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-state-danger/15 ring-1 ring-state-danger/40">
                 <span className="absolute inset-0 rounded-2xl bg-state-danger/30 animate-pulse-ring" />
                 {terminated ? (
@@ -406,7 +406,7 @@ export function AntiCheatWrapper({
                     key={i}
                     className={cn(
                       "h-1.5 w-10 rounded-full transition-colors",
-                      i < strikes ? "bg-state-danger shadow-glow-danger" : "bg-ink/10",
+                      i < strikes ? "bg-state-danger shadow-glow-danger" : "bg-white/10",
                     )}
                   />
                 ))}

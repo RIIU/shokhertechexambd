@@ -23,16 +23,18 @@ export interface ResultCardData {
 const W = 1200;
 const H = 630;
 const C = {
-  bg: "#F6F7F9",
-  card: "#FFFFFF",
-  border: "#E4E7EC",
-  ink: "#101828",
-  muted: "#475467",
-  subtle: "#667085",
-  brand: "#08804A",
-  brandLight: "#12B76A",
-  brandTint: "#ECFDF3",
-  track: "#EAECF0",
+  bg: "#001B11",
+  card: "#012819",
+  border: "#29473C",
+  ink: "#FFFFFF",
+  muted: "#A7BDB5",
+  subtle: "#759187",
+  brand: "#99FE00",
+  brandLight: "#19CC61",
+  brandTint: "rgba(153,254,0,0.12)",
+  onBrand: "#065136",
+  panel: "#042E1B",
+  track: "rgba(255,255,255,0.08)",
 };
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -77,7 +79,7 @@ export async function drawResultCard(d: ResultCardData): Promise<Blob> {
   ctx.fillStyle = C.bg;
   ctx.fillRect(0, 0, W, H);
   ctx.save();
-  ctx.shadowColor = "rgba(16,24,40,0.10)";
+  ctx.shadowColor = "rgba(0,10,5,0.6)";
   ctx.shadowBlur = 30;
   ctx.shadowOffsetY = 10;
   roundRect(ctx, 40, 40, W - 80, H - 80, 32);
@@ -93,7 +95,7 @@ export async function drawResultCard(d: ResultCardData): Promise<Blob> {
   roundRect(ctx, 88, 84, 52, 52, 14);
   ctx.fillStyle = C.brand;
   ctx.fill();
-  ctx.fillStyle = "#FFFFFF";
+  ctx.fillStyle = C.onBrand;
   ctx.font = `800 18px ${family}`;
   ctx.textAlign = "center";
   ctx.fillText("STA", 114, 117);
@@ -130,7 +132,7 @@ export async function drawResultCard(d: ResultCardData): Promise<Blob> {
     const x = 88 + i * 214;
     const y = 360;
     roundRect(ctx, x, y, 196, 120, 18);
-    ctx.fillStyle = C.bg;
+    ctx.fillStyle = C.panel;
     ctx.fill();
     ctx.fillStyle = C.subtle;
     ctx.font = `500 20px ${family}`;
@@ -165,8 +167,8 @@ export async function drawResultCard(d: ResultCardData): Promise<Blob> {
   ctx.stroke();
   if (pct > 0) {
     const grad = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
-    grad.addColorStop(0, C.brandLight);
-    grad.addColorStop(1, C.brand);
+    grad.addColorStop(0, C.brand);
+    grad.addColorStop(1, C.brandLight);
     ctx.strokeStyle = grad;
     ctx.beginPath();
     ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pct);

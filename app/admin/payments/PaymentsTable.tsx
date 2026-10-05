@@ -104,14 +104,14 @@ export function PaymentsTable({ initialRequests }: PaymentsTableProps) {
       {/* Controls Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 rounded-2xl border border-surface-border bg-white p-1">
+        <div className="flex items-center gap-1.5 rounded-2xl border border-surface-border bg-obsidian-900 p-1">
           <button
             type="button"
             onClick={() => setActiveTab("pending")}
             className={cn(
               "flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all",
               activeTab === "pending"
-                ? "bg-amber-400 font-bold text-ink shadow-sm"
+                ? "bg-amber-400 font-bold text-obsidian-950 shadow-sm"
                 : "text-ink-muted hover:text-ink",
             )}
           >
@@ -121,7 +121,7 @@ export function PaymentsTable({ initialRequests }: PaymentsTableProps) {
                 className={cn(
                   "rounded-full px-2 py-0.5 text-[11px] font-bold",
                   activeTab === "pending"
-                    ? "bg-white text-amber-700"
+                    ? "bg-obsidian-950 text-amber-300"
                     : "bg-amber-400/20 text-amber-300",
                 )}
               >
@@ -145,7 +145,7 @@ export function PaymentsTable({ initialRequests }: PaymentsTableProps) {
               className={cn(
                 "rounded-full px-2 py-0.5 text-[11px] font-bold",
                 activeTab === "approved"
-                  ? "bg-emerald-50 text-emerald-700"
+                  ? "bg-forest text-emerald-300"
                   : "bg-emerald-400/20 text-emerald-300",
               )}
             >
@@ -213,7 +213,7 @@ export function PaymentsTable({ initialRequests }: PaymentsTableProps) {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-3xl border border-surface-border bg-white">
+      <div className="overflow-x-auto rounded-3xl border border-surface-border bg-obsidian-900">
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead>
             <tr className="border-b border-surface-border text-xs text-ink-subtle">

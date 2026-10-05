@@ -42,7 +42,7 @@ export function PackagesSection() {
   return (
     <section id="packages" className="relative isolate py-20 overflow-hidden" aria-labelledby="packages-title">
       {/* Background ambient lighting */}
-      <div className="pointer-events-none absolute left-1/2 top-10 -translate-x-1/2 -z-10 h-[520px] w-full max-w-7xl bg-[radial-gradient(ellipse_at_center,rgba(18,183,106,0.07),transparent_70%)]" />
+      <div className="pointer-events-none absolute left-1/2 top-10 -translate-x-1/2 -z-10 h-[520px] w-full max-w-7xl bg-[radial-gradient(ellipse_at_center,rgba(153,254,0,0.08),transparent_70%)]" />
 
       <div className="container space-y-12">
         {/* Section Header */}
@@ -129,10 +129,10 @@ export function PackagesSection() {
                   className={cn(
                     "relative flex flex-col justify-between rounded-3xl border p-6 transition-all duration-300 hover:-translate-y-1.5",
                     isPopular
-                      ? "border-brand-400/80 bg-gradient-to-b from-brand-50 via-white to-white ring-4 ring-brand-400/10 shadow-lift"
+                      ? "border-brand-400/80 bg-gradient-to-b from-brand-950/40 via-obsidian-900 to-obsidian-900 ring-2 ring-brand-400/50 shadow-glow"
                       : isBestValue
-                        ? "border-amber-400/60 bg-gradient-to-b from-amber-50 via-white to-white ring-1 ring-amber-400/20 shadow-card"
-                        : "border-surface-border bg-obsidian-900/80 hover:border-ink/20 shadow-card",
+                        ? "border-amber-400/60 bg-gradient-to-b from-amber-950/30 via-obsidian-900 to-obsidian-900 ring-1 ring-amber-400/30 shadow-card"
+                        : "border-surface-border bg-obsidian-900/80 hover:border-white/20 shadow-card",
                   )}
                 >
                   {/* Top Badge */}
@@ -143,7 +143,7 @@ export function PackagesSection() {
                           "inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-[11px] font-extrabold uppercase tracking-wider shadow-md",
                           isPopular
                             ? "bg-brand-400 text-forest ring-2 ring-obsidian-900"
-                            : "bg-amber-400 text-ink ring-2 ring-obsidian-900",
+                            : "bg-amber-400 text-obsidian-950 ring-2 ring-obsidian-900",
                         )}
                       >
                         {pkg.badge}
@@ -234,8 +234,8 @@ export function PackagesSection() {
                   className={cn(
                     "relative flex flex-col justify-between rounded-3xl border p-6 sm:p-7 transition-all duration-300 hover:-translate-y-1.5",
                     isPopular
-                      ? "border-amber-400/80 bg-gradient-to-b from-amber-50 via-white to-white ring-4 ring-amber-400/10 shadow-lift"
-                      : "border-surface-border bg-obsidian-900/80 hover:border-ink/20 shadow-card",
+                      ? "border-amber-400/80 bg-gradient-to-b from-amber-950/40 via-obsidian-900 to-obsidian-900 ring-2 ring-amber-400/50 shadow-glow"
+                      : "border-surface-border bg-obsidian-900/80 hover:border-white/20 shadow-card",
                   )}
                 >
                   {/* Badge */}
@@ -243,7 +243,7 @@ export function PackagesSection() {
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                       <Link
                         href={targetHref}
-                        className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-ink shadow-md ring-2 ring-obsidian-900 hover:bg-amber-300 transition-colors"
+                        className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-obsidian-950 shadow-md ring-2 ring-obsidian-900 hover:bg-amber-300 transition-colors"
                       >
                         {pkg.badge}
                       </Link>
@@ -328,7 +328,7 @@ export function PackagesSection() {
         )}
 
         {/* Payment Gateways & Trust Banner */}
-        <div className="rounded-3xl border border-surface-border bg-white/60 p-6 sm:p-8 shadow-card max-w-4xl mx-auto backdrop-blur">
+        <div className="rounded-3xl border border-surface-border bg-obsidian-900/60 p-6 sm:p-8 shadow-card max-w-4xl mx-auto backdrop-blur">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-center md:text-left space-y-1">
               <p className="text-xs uppercase tracking-wider text-ink-subtle font-bold">
@@ -399,7 +399,7 @@ export function PackagesSection() {
               return (
                 <div
                   key={idx}
-                  className="rounded-2xl border border-surface-border bg-white/70 overflow-hidden transition-colors"
+                  className="rounded-2xl border border-surface-border bg-obsidian-900/70 overflow-hidden transition-colors"
                 >
                   <button
                     type="button"
@@ -420,7 +420,7 @@ export function PackagesSection() {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-0 text-xs sm:text-sm text-ink-muted leading-relaxed border-t border-ink/5">
+                        <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-0 text-xs sm:text-sm text-ink-muted leading-relaxed border-t border-white/5">
                           <p lang="bn">{faq.aBn}</p>
                         </div>
                       </motion.div>

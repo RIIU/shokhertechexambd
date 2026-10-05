@@ -70,7 +70,7 @@ export default async function AdminPaymentsPage() {
         </div>
 
         {/* Total Inquiries */}
-        <div className="rounded-3xl border border-surface-border bg-white p-4 sm:p-5">
+        <div className="rounded-3xl border border-surface-border bg-obsidian-900 p-4 sm:p-5">
           <div className="flex items-center justify-between text-xs text-ink-subtle">
             <span lang="bn">মোট ট্রানজেকশন</span>
             <CreditCard className="h-4 w-4 text-ink-muted" />

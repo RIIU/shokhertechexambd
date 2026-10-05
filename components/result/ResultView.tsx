@@ -148,7 +148,7 @@ export function ResultView({
         </Link>
 
         {reason && (
-          <p lang="bn" role="status" className="mb-6 flex items-center gap-2 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800 ring-1 ring-amber-500/20">
+          <p lang="bn" role="status" className="mb-6 flex items-center gap-2 rounded-2xl bg-amber-400/10 p-4 text-sm text-amber-300 ring-1 ring-amber-500/20">
             <AlertTriangle className="h-4 w-4 shrink-0" strokeWidth={1.75} />
             {reason}
           </p>
@@ -180,7 +180,7 @@ export function ResultView({
               <h1 lang="bn" className="mb-4 text-2xl font-bold leading-snug tracking-tight text-ink sm:text-3xl">
                 {result.titleBn}
               </h1>
-              <div className="mb-5 flex items-start gap-3 rounded-2xl bg-brand-50 p-4 ring-1 ring-brand-400/15">
+              <div className="mb-5 flex items-start gap-3 rounded-2xl bg-brand-400/10 p-4 ring-1 ring-brand-400/15">
                 <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" strokeWidth={1.75} />
                 <div>
                   <p lang="bn" className="font-semibold text-brand-200">
@@ -315,7 +315,7 @@ export function ResultView({
                       className={cn("relative rounded-lg px-3.5 py-1.5 text-sm font-medium", filter === f.id ? "text-ink" : "text-ink-muted hover:text-ink")}
                     >
                       {filter === f.id && (
-                        <motion.span layoutId="exp-filter" className="absolute inset-0 rounded-lg bg-white shadow-card ring-1 ring-surface-border" />
+                        <motion.span layoutId="exp-filter" className="absolute inset-0 rounded-lg bg-surface-pill shadow-card ring-1 ring-surface-border" />
                       )}
                       <span lang="bn" className="relative">
                         {f.label} <span className="text-ink-subtle">{toBn(count)}</span>
@@ -329,7 +329,7 @@ export function ResultView({
 
           {!solutionsAllowed ? (
             <div className="card p-8 text-center sm:p-12">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 ring-1 ring-amber-500/20">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/10 text-amber-300 ring-1 ring-amber-500/20">
                 <Lock className="h-6 w-6" strokeWidth={1.75} />
               </div>
               <h3 lang="bn" className="mb-2 text-lg font-bold text-ink">
@@ -350,9 +350,9 @@ export function ResultView({
                     lang="bn"
                     className={cn(
                       "flex h-9 w-9 items-center justify-center rounded-lg text-xs font-semibold ring-1 transition-transform hover:-translate-y-0.5",
-                      q.status === "correct" && "bg-brand-50 text-brand-200 ring-brand-400/25",
-                      q.status === "wrong" && "bg-rose-50 text-rose-700 ring-rose-500/25",
-                      q.status === "skipped" && "bg-white text-ink-subtle ring-surface-border",
+                      q.status === "correct" && "bg-brand-400/10 text-brand-200 ring-brand-400/25",
+                      q.status === "wrong" && "bg-rose-500/10 text-rose-300 ring-rose-500/25",
+                      q.status === "skipped" && "bg-obsidian-900 text-ink-subtle ring-surface-border",
                     )}
                     title={STATUS_META[q.status].label}
                   >
@@ -379,7 +379,7 @@ function ScoreRing({ pct, children }: { pct: number; children: React.ReactNode }
   return (
     <div className="relative h-44 w-44 shrink-0">
       <svg viewBox="0 0 160 160" className="h-full w-full -rotate-90" aria-hidden="true">
-        <circle cx="80" cy="80" r={r} fill="none" stroke="#EAECF0" strokeWidth="10" />
+        <circle cx="80" cy="80" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
         <motion.circle
           cx="80"
           cy="80"
@@ -395,8 +395,8 @@ function ScoreRing({ pct, children }: { pct: number; children: React.ReactNode }
         />
         <defs>
           <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#12B76A" />
-            <stop offset="100%" stopColor="#08804A" />
+            <stop offset="0%" stopColor="#99FE00" />
+            <stop offset="100%" stopColor="#19CC61" />
           </linearGradient>
         </defs>
       </svg>
@@ -424,7 +424,7 @@ function InsightCard({
         <span
           className={cn(
             "flex h-7 w-7 items-center justify-center rounded-lg ring-1",
-            tone === "good" ? "bg-brand-50 text-brand-400 ring-brand-400/20" : "bg-amber-50 text-amber-600 ring-amber-500/20",
+            tone === "good" ? "bg-brand-400/10 text-brand-400 ring-brand-400/20" : "bg-amber-400/10 text-amber-300 ring-amber-500/20",
           )}
         >
           <Icon className="h-4 w-4" strokeWidth={1.75} />
@@ -439,7 +439,7 @@ function InsightCard({
               lang="bn"
               className={cn(
                 "rounded-lg px-2.5 py-1 text-xs ring-1",
-                tone === "good" ? "bg-brand-50/60 text-brand-200 ring-brand-400/15" : "bg-amber-50/70 text-amber-800 ring-amber-500/15",
+                tone === "good" ? "bg-brand-400/10 text-brand-200 ring-brand-400/15" : "bg-amber-400/10 text-amber-300 ring-amber-500/15",
               )}
             >
               {t.topic} <span className="opacity-70">· {toBn(t.pct)}%</span>
@@ -456,8 +456,8 @@ function InsightCard({
 }
 
 const STATUS_META: Record<QuestionResult["status"], { icon: typeof CheckCircle2; label: string; cls: string }> = {
-  correct: { icon: CheckCircle2, label: "সঠিক", cls: "text-brand-200 bg-brand-50 ring-brand-400/20" },
-  wrong: { icon: XCircle, label: "ভুল", cls: "text-rose-700 bg-rose-50 ring-rose-500/20" },
+  correct: { icon: CheckCircle2, label: "সঠিক", cls: "text-brand-200 bg-brand-400/10 ring-brand-400/20" },
+  wrong: { icon: XCircle, label: "ভুল", cls: "text-rose-300 bg-rose-500/10 ring-rose-500/20" },
   skipped: { icon: MinusCircle, label: "উত্তর দেওয়া হয়নি", cls: "text-ink-muted bg-surface-hover ring-surface-border" },
 };
 
@@ -490,8 +490,8 @@ function ExplanationCard({ q, number }: { q: QuestionResult; number: number }) {
               key={o.id}
               className={cn(
                 "flex items-center gap-3 rounded-xl border p-3 text-sm",
-                isCorrect && "border-brand-400/40 bg-brand-50 text-ink",
-                isWrongPick && "border-rose-500/30 bg-rose-50 text-ink",
+                isCorrect && "border-brand-400/40 bg-brand-400/10 text-ink",
+                isWrongPick && "border-rose-500/30 bg-rose-500/10 text-ink",
                 !isCorrect && !isWrongPick && "border-surface-border text-ink-muted",
               )}
             >
@@ -499,7 +499,7 @@ function ExplanationCard({ q, number }: { q: QuestionResult; number: number }) {
                 lang="bn"
                 className={cn(
                   "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold",
-                  isCorrect ? "bg-brand-400 text-white" : isWrongPick ? "bg-rose-600 text-white" : "border border-surface-border bg-white",
+                  isCorrect ? "bg-brand-400 text-forest" : isWrongPick ? "bg-rose-600 text-white" : "border border-surface-border bg-obsidian-900",
                 )}
               >
                 {OPTION_LABEL_BN[o.id]}
@@ -508,14 +508,14 @@ function ExplanationCard({ q, number }: { q: QuestionResult; number: number }) {
                 {o.text}
               </span>
               {isCorrect && <CheckCircle2 className="h-4 w-4 text-brand-400" aria-label="সঠিক উত্তর" />}
-              {isWrongPick && <XCircle className="h-4 w-4 text-rose-600" aria-label="তোমার উত্তর" />}
+              {isWrongPick && <XCircle className="h-4 w-4 text-rose-300" aria-label="তোমার উত্তর" />}
             </li>
           );
         })}
       </ul>
       {q.explanation && (
         <div className="flex gap-3 rounded-xl bg-surface-soft p-4 ring-1 ring-surface-border">
-          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" strokeWidth={1.75} />
+          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" strokeWidth={1.75} />
           <p lang="bn" className="text-sm leading-relaxed text-ink-muted">
             {q.explanation}
           </p>

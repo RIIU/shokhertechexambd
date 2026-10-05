@@ -104,7 +104,7 @@ export async function StreamSubjectsView({ level, stream }: StreamSubjectsViewPr
                       "rounded-xl border px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all",
                       id === stream
                         ? "border-brand-400/50 bg-brand-400/10 text-brand-200 shadow-glow-sm font-bold"
-                        : "border-ink/10 text-ink-muted hover:border-ink/20 hover:text-ink",
+                        : "border-white/10 text-ink-muted hover:border-white/20 hover:text-ink",
                     )}
                   >
                     <span lang="bn">{STREAMS[id].nameBn}</span>

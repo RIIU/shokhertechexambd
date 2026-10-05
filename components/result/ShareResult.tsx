@@ -110,7 +110,7 @@ export function ShareResult({ sharePath, title, score, total, rank, participants
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 40, opacity: 0 }}
               transition={{ type: "spring", stiffness: 380, damping: 34 }}
-              className="w-full max-w-md rounded-t-3xl bg-white p-5 shadow-lift sm:rounded-3xl sm:p-6"
+              className="w-full max-w-md rounded-t-3xl bg-obsidian-900 p-5 shadow-lift sm:rounded-3xl sm:p-6"
             >
               <div className="mb-4 flex items-center justify-between">
                 <h2 id="share-title" lang="bn" className="text-lg font-bold text-ink">

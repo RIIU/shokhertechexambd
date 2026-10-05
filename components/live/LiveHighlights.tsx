@@ -33,7 +33,7 @@ export async function LiveHighlights() {
     <section className="container py-14 sm:py-16" aria-labelledby="live-title">
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
-          <p className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-rose-600">
+          <p className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-rose-300">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500 opacity-60" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />

@@ -159,7 +159,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
     });
   };
 
-  const defaultCoverGradient = "bg-gradient-to-r from-brand-400 via-leaf-400 to-emerald-300";
+  const defaultCoverGradient = "bg-gradient-to-r from-obsidian-950 via-forest to-obsidian-900";
 
   return (
     <div className="space-y-8">
@@ -168,7 +168,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
       <input ref={avatarFileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
 
       {/* Main Profile Card with Cover and Avatar */}
-      <div className="overflow-hidden rounded-3xl border border-surface-border bg-white shadow-2xl">
+      <div className="overflow-hidden rounded-3xl border border-surface-border bg-obsidian-900 shadow-2xl">
         {/* Cover Photo Header */}
         <div className="relative h-48 sm:h-64 w-full overflow-hidden bg-obsidian-950">
           {coverUrl ? (
@@ -196,7 +196,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
           <button
             type="button"
             onClick={() => setCoverModalOpen(true)}
-            className="absolute right-4 top-4 flex items-center gap-2 rounded-xl border border-ink/20 bg-obsidian-900/80 px-3.5 py-2 text-xs font-semibold text-ink backdrop-blur-md transition-all hover:bg-obsidian-900 hover:border-brand-400"
+            className="absolute right-4 top-4 flex items-center gap-2 rounded-xl border border-white/20 bg-obsidian-900/80 px-3.5 py-2 text-xs font-semibold text-ink backdrop-blur-md transition-all hover:bg-obsidian-900 hover:border-brand-400"
           >
             <ImageIcon className="h-4 w-4 text-brand-400" />
             <span lang="bn">কভার পরিবর্তন</span>
@@ -217,7 +217,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
                       className="h-full w-full object-cover object-center"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-brand-50 font-display text-4xl sm:text-5xl font-bold text-brand-300">
+                    <div className="flex h-full w-full items-center justify-center bg-forest font-display text-4xl sm:text-5xl font-bold text-brand-300">
                       {name.trim().charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -294,7 +294,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
       )}
 
       {/* Profile Details Edit Form */}
-      <div className="rounded-3xl border border-surface-border bg-white p-6 sm:p-8">
+      <div className="rounded-3xl border border-surface-border bg-obsidian-900 p-6 sm:p-8">
         <div className="mb-6 flex items-center justify-between border-b border-surface-border pb-4">
           <div>
             <h3 lang="bn" className="text-lg font-bold text-ink">
@@ -468,7 +468,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
       </div>
 
       {/* Security & Password Change Card */}
-      <div className="rounded-3xl border border-surface-border bg-white p-6 sm:p-8">
+      <div className="rounded-3xl border border-surface-border bg-obsidian-900 p-6 sm:p-8">
         <div className="mb-6 flex items-center justify-between border-b border-surface-border pb-4">
           <div>
             <h3 lang="bn" className="text-lg font-bold text-ink">
@@ -583,8 +583,8 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
 
       {/* Cover Photo Selection Modal */}
       {coverModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/80 backdrop-blur-md">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-surface-border bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/80 backdrop-blur-md">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-surface-border bg-obsidian-900 p-6 shadow-2xl">
             <div className="mb-5 flex items-center justify-between border-b border-surface-border pb-3">
               <h3 lang="bn" className="text-lg font-bold text-ink flex items-center gap-2">
                 <ImageIcon className="h-5 w-5 text-brand-400" />
@@ -621,7 +621,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
                     )}
                   >
                     <img src={preset.url} alt={preset.nameEn} className="h-full w-full object-cover" />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-scrim/80 to-transparent p-2">
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-obsidian-950/90 to-transparent p-2">
                       <p lang="bn" className="truncate text-xs font-semibold text-ink">
                         {preset.nameBn}
                       </p>
@@ -696,8 +696,8 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
 
       {/* Avatar Photo Selection Modal */}
       {avatarModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/80 backdrop-blur-md">
-          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-surface-border bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/80 backdrop-blur-md">
+          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-surface-border bg-obsidian-900 p-6 shadow-2xl">
             <div className="mb-5 flex items-center justify-between border-b border-surface-border pb-3">
               <h3 lang="bn" className="text-lg font-bold text-ink flex items-center gap-2">
                 <Camera className="h-5 w-5 text-brand-400" />
@@ -730,7 +730,7 @@ export function ProfileForm({ initialUser }: ProfileFormProps) {
                       "flex flex-col items-center gap-2 rounded-2xl border p-3 transition-all",
                       avatarUrl === preset.url
                         ? "border-brand-400 bg-brand-400/10 ring-2 ring-brand-400/50"
-                        : "border-surface-border hover:border-brand-400/50 hover:bg-ink/[0.02]",
+                        : "border-surface-border hover:border-brand-400/50 hover:bg-white/[0.02]",
                     )}
                   >
                     <div className="h-16 w-16 overflow-hidden rounded-full ring-2 ring-brand-400/40">

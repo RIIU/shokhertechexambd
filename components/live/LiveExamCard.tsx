@@ -38,12 +38,12 @@ export function LiveExamCard({ exam, subject, participants, topScore, mine, sign
           </div>
         </div>
         {mine ? (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-200 ring-1 ring-brand-400/15">
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-400/10 px-2.5 py-1 text-[11px] font-semibold text-brand-200 ring-1 ring-brand-400/15">
             <CheckCircle2 className="h-3.5 w-3.5" />
             <span lang="bn">দিয়েছ</span>
           </span>
         ) : (
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-600 ring-1 ring-rose-500/15">
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-300 ring-1 ring-rose-500/15">
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500 opacity-60" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-500" />
@@ -82,14 +82,14 @@ export function LiveExamCard({ exam, subject, participants, topScore, mine, sign
         </span>
         {topScore !== undefined && participants > 0 && (
           <span className="inline-flex items-center gap-1.5">
-            <Trophy className="h-3.5 w-3.5 text-amber-500" strokeWidth={1.75} />
+            <Trophy className="h-3.5 w-3.5 text-amber-400" strokeWidth={1.75} />
             <span lang="bn">
               সর্বোচ্চ {toBn(topScore)}/{toBn(totalMarks)}
             </span>
           </span>
         )}
         {exam.isPaid && (
-          <span lang="bn" className="rounded-md bg-amber-50 px-1.5 py-0.5 font-semibold text-amber-700 ring-1 ring-amber-500/20">
+          <span lang="bn" className="rounded-md bg-amber-400/10 px-1.5 py-0.5 font-semibold text-amber-300 ring-1 ring-amber-500/20">
             ৳{toBn(exam.price ?? 50)}
           </span>
         )}
@@ -126,7 +126,7 @@ export function LiveExamCard({ exam, subject, participants, topScore, mine, sign
           href={`/leaderboard/${exam.id}`}
           aria-label="লিডারবোর্ড"
           title="লিডারবোর্ড"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-surface-border bg-white text-ink-muted transition-colors hover:bg-surface-hover hover:text-ink"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-surface-border bg-obsidian-900 text-ink-muted transition-colors hover:bg-surface-hover hover:text-ink"
         >
           <Trophy className="h-4 w-4" strokeWidth={1.75} />
         </Link>

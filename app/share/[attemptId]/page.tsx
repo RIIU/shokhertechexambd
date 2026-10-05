@@ -63,13 +63,13 @@ export default async function SharePage(props: Props) {
           <div className="flex flex-col items-center gap-8 p-6 text-center sm:flex-row sm:p-10 sm:text-left">
             <div className="relative h-44 w-44 shrink-0">
               <svg viewBox="0 0 160 160" className="h-full w-full -rotate-90" aria-hidden="true">
-                <circle cx="80" cy="80" r={r} fill="none" stroke="#EAECF0" strokeWidth="10" />
+                <circle cx="80" cy="80" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
                 <circle
                   cx="80"
                   cy="80"
                   r={r}
                   fill="none"
-                  stroke="#08804A"
+                  stroke="#99FE00"
                   strokeWidth="10"
                   strokeLinecap="round"
                   strokeDasharray={c}
@@ -98,7 +98,7 @@ export default async function SharePage(props: Props) {
                 <span className="font-semibold text-ink">{name}</span>
                 {institution && <span> · {institution}</span>}
               </p>
-              <span lang="bn" className="inline-flex rounded-full bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-200 ring-1 ring-brand-400/15">
+              <span lang="bn" className="inline-flex rounded-full bg-brand-400/10 px-3 py-1 text-sm font-semibold text-brand-200 ring-1 ring-brand-400/15">
                 {verdict.title}
                 {result.participants > 1 && <span className="font-normal text-ink-muted">&nbsp;· {toBn(percentile)}% শিক্ষার্থীর চেয়ে এগিয়ে</span>}
               </span>

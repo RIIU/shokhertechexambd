@@ -77,8 +77,8 @@ export function PackageCheckoutModal({ packageItem, onClose, user }: PackageChec
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/80 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-xl my-8 overflow-hidden rounded-3xl border border-surface-border bg-white shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-obsidian-950/80 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-xl my-8 overflow-hidden rounded-3xl border border-surface-border bg-obsidian-900 shadow-2xl">
         {/* Close button */}
         <button
           type="button"
@@ -90,7 +90,7 @@ export function PackageCheckoutModal({ packageItem, onClose, user }: PackageChec
         </button>
 
         {/* Modal Header */}
-        <div className="border-b border-surface-border bg-gradient-to-r from-brand-50 via-white to-amber-50 p-6 sm:p-7">
+        <div className="border-b border-surface-border bg-gradient-to-r from-brand-900/40 via-obsidian-900 to-amber-900/30 p-6 sm:p-7">
           <div className="flex items-center gap-2 mb-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-400/20 px-3 py-1 text-xs font-semibold text-brand-300 ring-1 ring-brand-400/40">
               <Sparkles className="h-3.5 w-3.5" />

@@ -38,7 +38,7 @@ export function MobileTabBar() {
       <div aria-hidden="true" className="h-[calc(88px+env(safe-area-inset-bottom))] md:hidden" />
       <nav
         aria-label="Quick navigation"
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-surface-border bg-obsidian-800/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-forest bg-obsidian-800/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-lg md:hidden"
       >
         <ul className="grid h-16 grid-cols-5">
           {tabs.map((t, i) =>

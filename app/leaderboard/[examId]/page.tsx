@@ -66,7 +66,7 @@ export default async function LeaderboardPage({ params }: { params: { examId: st
           </ol>
 
           {me && (
-            <div className="card mb-4 flex items-center justify-between gap-4 border-brand-400/30 bg-brand-50/60 px-5 py-4">
+            <div className="card mb-4 flex items-center justify-between gap-4 border-brand-400/30 bg-brand-400/10 px-5 py-4">
               <p lang="bn" className="text-sm text-ink-muted">
                 তোমার অবস্থান <span className="font-display text-lg font-bold text-ink">#{toBn(me.rank)}</span>
                 <span className="text-ink-subtle"> / {toBn(rows.length)}</span>
@@ -97,7 +97,7 @@ export default async function LeaderboardPage({ params }: { params: { examId: st
               </thead>
               <tbody className="divide-y divide-surface-border">
                 {rows.slice(0, SHOWN).map((r) => (
-                  <tr key={r.attemptId} className={cn(r.userId === viewer.id ? "bg-brand-50/60" : "hover:bg-surface-soft")}>
+                  <tr key={r.attemptId} className={cn(r.userId === viewer.id ? "bg-brand-400/10" : "hover:bg-surface-hover")}>
                     <td lang="bn" className="px-4 py-3 font-display font-semibold text-ink-muted">
                       {toBn(r.rank)}
                     </td>
@@ -138,7 +138,7 @@ export default async function LeaderboardPage({ params }: { params: { examId: st
 function Avatar({ row, size }: { row: LeaderboardRow; size: "sm" | "lg" }) {
   const cls = size === "lg" ? "h-14 w-14 text-lg" : "h-8 w-8 text-xs";
   return (
-    <span className={cn("flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-50 font-semibold text-brand-200 ring-1 ring-surface-border", cls)}>
+    <span className={cn("flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-400/10 font-semibold text-brand-200 ring-1 ring-surface-border", cls)}>
       {row.avatarUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={row.avatarUrl} alt="" className="h-full w-full object-cover" />
@@ -152,13 +152,13 @@ function Avatar({ row, size }: { row: LeaderboardRow; size: "sm" | "lg" }) {
 function PodiumCard({ row, place, isMe }: { row: LeaderboardRow; place: number; isMe: boolean }) {
   const tone =
     place === 1
-      ? { icon: Crown, ring: "ring-amber-400/40", badge: "bg-amber-400 text-white", pad: "pt-7 pb-6" }
+      ? { icon: Crown, ring: "ring-amber-400/40", badge: "bg-amber-400 text-obsidian-950", pad: "pt-7 pb-6" }
       : place === 2
-        ? { icon: Medal, ring: "ring-slate-300", badge: "bg-slate-400 text-white", pad: "pt-5 pb-5" }
-        : { icon: Medal, ring: "ring-orange-300/60", badge: "bg-orange-400 text-white", pad: "pt-5 pb-5" };
+        ? { icon: Medal, ring: "ring-slate-400/40", badge: "bg-slate-300 text-obsidian-950", pad: "pt-5 pb-5" }
+        : { icon: Medal, ring: "ring-orange-400/40", badge: "bg-orange-400 text-obsidian-950", pad: "pt-5 pb-5" };
   const Icon = tone.icon;
   return (
-    <li className={cn("card relative flex flex-col items-center px-2 text-center ring-1", tone.ring, tone.pad, isMe && "bg-brand-50/60")}>
+    <li className={cn("card relative flex flex-col items-center px-2 text-center ring-1", tone.ring, tone.pad, isMe && "bg-brand-400/10")}>
       <span className={cn("absolute -top-3 flex h-6 min-w-6 items-center justify-center gap-1 rounded-full px-2 text-xs font-bold", tone.badge)}>
         <Icon className="h-3.5 w-3.5" />
         <span lang="bn">{toBn(place)}</span>

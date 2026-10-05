@@ -115,7 +115,7 @@ export function PaidExamGate({ exam, user, initialPayment }: PaidExamGateProps) 
         {/* Back Link */}
         <Link
           href={`/${exam.level}/${exam.stream}`}
-          className="inline-flex items-center gap-2 rounded-xl border border-surface-border bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-ink-muted backdrop-blur transition-colors hover:border-brand-400 hover:text-ink"
+          className="inline-flex items-center gap-2 rounded-xl border border-surface-border bg-obsidian-900/80 px-3.5 py-1.5 text-xs font-semibold text-ink-muted backdrop-blur transition-colors hover:border-brand-400 hover:text-ink"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span lang="bn">বিষয় তালিকায় ফিরে যাও</span>
@@ -124,7 +124,7 @@ export function PaidExamGate({ exam, user, initialPayment }: PaidExamGateProps) 
         {/* Hero Card */}
         <div className="overflow-hidden rounded-3xl border border-amber-400/30 bg-obsidian-900 shadow-2xl">
           {/* Top Banner */}
-          <div className="bg-gradient-to-r from-amber-50 via-white to-amber-50 p-6 sm:p-8 border-b border-surface-border">
+          <div className="bg-gradient-to-r from-amber-500/20 via-obsidian-900 to-amber-500/10 p-6 sm:p-8 border-b border-surface-border">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold text-amber-300 ring-1 ring-amber-400/40">
                 <CreditCard className="h-3.5 w-3.5" />
@@ -147,19 +147,19 @@ export function PaidExamGate({ exam, user, initialPayment }: PaidExamGateProps) 
 
           {/* Exam Details Grid */}
           <div className="grid grid-cols-2 gap-3 p-6 sm:grid-cols-4 sm:p-8 border-b border-surface-border bg-obsidian-950/40">
-            <div className="rounded-2xl border border-surface-border bg-white p-3.5 text-center">
+            <div className="rounded-2xl border border-surface-border bg-obsidian-900 p-3.5 text-center">
               <Clock className="mx-auto h-5 w-5 text-brand-400 mb-1" />
               <p lang="bn" className="text-xs text-ink-subtle">সময়</p>
               <p lang="bn" className="font-bold text-ink text-sm sm:text-base">{formatMinutesBn(exam.durationSec)}</p>
             </div>
 
-            <div className="rounded-2xl border border-surface-border bg-white p-3.5 text-center">
+            <div className="rounded-2xl border border-surface-border bg-obsidian-900 p-3.5 text-center">
               <FileQuestion className="mx-auto h-5 w-5 text-teal-400 mb-1" />
               <p lang="bn" className="text-xs text-ink-subtle">প্রশ্ন সংখ্যা</p>
               <p lang="bn" className="font-bold text-ink text-sm sm:text-base">{toBn(exam.questions?.length ?? 0)}টি</p>
             </div>
 
-            <div className="rounded-2xl border border-surface-border bg-white p-3.5 text-center">
+            <div className="rounded-2xl border border-surface-border bg-obsidian-900 p-3.5 text-center">
               <ShieldAlert className="mx-auto h-5 w-5 text-rose-400 mb-1" />
               <p lang="bn" className="text-xs text-ink-subtle">নেগেটিভ মার্ক</p>
               <p lang="bn" className="font-bold text-ink text-sm sm:text-base">-{toBn(exam.negativeMark)}</p>
@@ -193,7 +193,7 @@ export function PaidExamGate({ exam, user, initialPayment }: PaidExamGateProps) 
                 </div>
 
                 {/* Submitted Request Card */}
-                <div className="rounded-2xl border border-surface-border bg-white/90 p-4 max-w-md mx-auto text-left space-y-2.5 text-xs">
+                <div className="rounded-2xl border border-surface-border bg-obsidian-900/90 p-4 max-w-md mx-auto text-left space-y-2.5 text-xs">
                   <div className="flex items-center justify-between border-b border-surface-border pb-2">
                     <span className="text-ink-subtle">প্ল্যান:</span>
                     <span className="font-bold text-ink" lang="bn">
@@ -279,7 +279,7 @@ export function PaidExamGate({ exam, user, initialPayment }: PaidExamGateProps) 
                   >
                     <div className="absolute top-3 right-3">
                       {planType === "monthly" ? (
-                        <div className="h-5 w-5 rounded-full bg-amber-400 flex items-center justify-center text-ink">
+                        <div className="h-5 w-5 rounded-full bg-amber-400 flex items-center justify-center text-obsidian-950">
                           <Check className="h-3.5 w-3.5 stroke-[3]" />
                         </div>
                       ) : (

@@ -26,7 +26,7 @@ export default async function ProfilePage() {
         <div className="flex items-center justify-between">
           <Link
             href={backHref}
-            className="inline-flex items-center gap-2 rounded-xl border border-surface-border bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-ink-muted backdrop-blur transition-colors hover:border-brand-400 hover:text-ink"
+            className="inline-flex items-center gap-2 rounded-xl border border-surface-border bg-obsidian-900/80 px-3.5 py-1.5 text-xs font-semibold text-ink-muted backdrop-blur transition-colors hover:border-brand-400 hover:text-ink"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span lang="bn">{backLabel}-এ ফিরে যাও</span>
