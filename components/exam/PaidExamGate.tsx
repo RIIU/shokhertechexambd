@@ -156,7 +156,7 @@ export function PaidExamGate({ exam, user, initialPayment }: PaidExamGateProps) 
             <div className="rounded-2xl border border-surface-border bg-obsidian-900 p-3.5 text-center">
               <FileQuestion className="mx-auto h-5 w-5 text-teal-400 mb-1" />
               <p lang="bn" className="text-xs text-ink-subtle">প্রশ্ন সংখ্যা</p>
-              <p lang="bn" className="font-bold text-ink text-sm sm:text-base">{toBn(exam.questions.length)}টি</p>
+              <p lang="bn" className="font-bold text-ink text-sm sm:text-base">{toBn(exam.questions?.length ?? 0)}টি</p>
             </div>
 
             <div className="rounded-2xl border border-surface-border bg-obsidian-900 p-3.5 text-center">

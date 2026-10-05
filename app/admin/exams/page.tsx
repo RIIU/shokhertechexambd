@@ -78,7 +78,7 @@ export default async function AdminExamsPage({ searchParams }: { searchParams: {
                 </div>
               </td>
               <td className="px-4 py-3 text-ink" lang="bn">
-                {toBn(e.questions.length)}
+                {toBn(e.questions?.length ?? 0)}
               </td>
               <td className="px-4 py-3 text-ink-muted" lang="bn">
                 {formatMinutesBn(e.durationSec)}

@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: ExamPageProps): Promise<Metad
 export default async function ExamPage({ params }: ExamPageProps) {
   const user = await requireUser(`/exam/${params.id}`);
   const exam = user.role === "admin" ? await getExam(params.id) : await getPublishedExam(params.id);
-  if (!exam || exam.questions.length === 0) notFound();
+  if (!exam || !exam.questions || exam.questions.length === 0) notFound();
 
   // Check paid exam enrollment access
   const allowed = await hasAccessToExam(exam, user);

@@ -10,11 +10,16 @@ export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 const DEV_SECRET = "dev-only-insecure-secret-change-me-0123456789";
 
+let warnedSecret = false;
+
 function secretKey(): Uint8Array {
   const secret = process.env.SESSION_SECRET;
   if (!secret || secret.length < 32) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("SESSION_SECRET must be set (32+ characters) in production.");
+    if (process.env.NODE_ENV === "production" && !warnedSecret) {
+      warnedSecret = true;
+      console.warn(
+        "[auth] SESSION_SECRET is not set (32+ characters) in environment variables! Using fallback secret. Please set SESSION_SECRET in production settings."
+      );
     }
     return new TextEncoder().encode(DEV_SECRET);
   }

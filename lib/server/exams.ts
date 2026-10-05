@@ -66,7 +66,7 @@ export async function setExamStatus(id: string, status: ExamStatus): Promise<"ok
   const s = await store();
   const exam = await s.getExam(id);
   if (!exam) return "ok";
-  if (status === "published" && exam.questions.length === 0) return "no-questions";
+  if (status === "published" && (!exam.questions || exam.questions.length === 0)) return "no-questions";
   await s.updateExam(id, { status, updatedAt: Date.now() });
   return "ok";
 }

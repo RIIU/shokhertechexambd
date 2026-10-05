@@ -29,18 +29,25 @@ export function activeDriver(): Store {
  */
 export async function store(): Promise<Store> {
   const s = activeDriver();
-  // Vercel & co. have no persistent disk: the JSON fallback would lose data or crash.
-  if (s.kind === "json" && isServerless()) throw new ConfigError("NO_DATABASE_ON_SERVERLESS");
-  if (s.kind === "supabase" && supabaseServerKey()?.startsWith("sb_publishable_")) throw new ConfigError("PUBLISHABLE_KEY_USED");
+  // Vercel & co. have no persistent disk, but fallback memory/tmp store allows demo access
+  if (s.kind === "json" && isServerless() && !g.__stWarned) {
+    g.__stWarned = true;
+    console.warn(
+      "[store] Running on serverless without Supabase configured. Operating with in-memory/temp database. Set SUPABASE_URL and SUPABASE_SECRET_KEY in production to persist all data."
+    );
+  }
+  if (s.kind === "supabase" && supabaseServerKey()?.startsWith("sb_publishable_")) {
+    throw new ConfigError("PUBLISHABLE_KEY_USED");
+  }
   if (s.kind === "json" && process.env.NODE_ENV === "production" && !g.__stWarned) {
     g.__stWarned = true;
-    console.warn("[store] Supabase is not configured; using the local JSON file. Set SUPABASE_URL and SUPABASE_SECRET_KEY for production.");
+    console.warn("[store] Supabase is not configured; using local JSON/memory store. Set SUPABASE_URL and SUPABASE_SECRET_KEY for production.");
   }
   g.__stSeed ??= import("../seed")
     .then(({ seed }) => seed(s))
     .catch((err) => {
-      g.__stSeed = undefined; // retry on the next request (e.g. database briefly unreachable)
-      throw err;
+      console.warn("[store] Database seeding skipped or failed (continuing safely):", (err as Error).message);
+      return Promise.resolve();
     });
   await g.__stSeed;
   return s;

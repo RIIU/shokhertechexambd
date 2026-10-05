@@ -227,7 +227,7 @@ export default async function DashboardPage() {
                           {e.titleBn}
                         </span>
                         <span lang="bn" className="flex flex-wrap items-center gap-1.5 text-xs text-ink-subtle">
-                          <span>{EXAM_TYPE_META[e.type].nameBn} · {toBn(e.questions.length)}টি প্রশ্ন · {formatMinutesBn(e.durationSec)}</span>
+                          <span>{(EXAM_TYPE_META[e.type]?.nameBn ?? "")} · {toBn(e.questions?.length ?? 0)}টি প্রশ্ন · {formatMinutesBn(e.durationSec)}</span>
                           {e.isPaid ? (
                             <span className="rounded bg-amber-400/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-300 ring-1 ring-amber-400/30">
                               💳 ৳{toBn(e.price ?? 50)}

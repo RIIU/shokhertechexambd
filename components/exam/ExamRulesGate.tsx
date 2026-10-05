@@ -50,7 +50,7 @@ export function ExamRulesGate({ exam, resuming, starting, error, onStart }: Exam
 
         <dl className="mb-8 grid grid-cols-3 gap-3">
           {[
-            { k: "প্রশ্ন", v: toBn(exam.questions.length) },
+            { k: "প্রশ্ন", v: toBn(exam.questions?.length ?? 0) },
             { k: "পূর্ণমান", v: toBn(exam.totalMarks) },
             { k: "সময়", v: formatMinutesBn(exam.durationSec) },
           ].map((s) => (
