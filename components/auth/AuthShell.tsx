@@ -10,8 +10,8 @@ export function AuthShell({ title, subtitle, children, footer }: { title: string
       <div className="w-full max-w-md">
         <div className="rounded-3xl border border-surface-border bg-radial-forest p-6 shadow-card sm:p-8">
           <Link href="/" className="mb-6 inline-flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-400 font-display text-sm font-black text-forest">ST</span>
-            <span className="font-display font-bold text-ink">ShokherTech<span className="text-brand-400">.</span></span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-400 font-display text-sm font-black text-forest">STA</span>
+            <span className="font-display font-bold text-ink">Shokher Tech Academy<span className="text-brand-400">.</span></span>
           </Link>
           <h1 lang="bn" className="mb-1 text-2xl font-bold text-ink">
             {title}

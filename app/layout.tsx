@@ -26,8 +26,8 @@ const bangla = Baloo_Da_2({
 
 export const metadata: Metadata = {
   title: {
-    default: "ShokherTech Exam BD · SSC & HSC Online Exam",
-    template: "%s · ShokherTech Exam BD",
+    default: "Shokher Tech Academy · SSC & HSC Online Exam",
+    template: "%s · Shokher Tech Academy",
   },
   description:
     "Live MCQ exams, chapter practice and model tests for SSC & HSC students in Bangladesh, with a strict anti-cheat environment and instant analytics.",

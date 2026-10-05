@@ -1,8 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { ArrowUpRight, BookMarked, Layers } from "lucide-react";
 import { SubjectIcon } from "./SubjectIcon";
 import { ACCENT_STYLES } from "@/lib/accent";
@@ -14,21 +12,16 @@ interface SubjectCardProps {
   onOpen: (subject: Subject) => void;
 }
 
-gsap.registerPlugin(useGSAP);
-
 /**
- * Subject tile with a cursor-following spotlight, 3D tilt (GSAP quickTo) and
- * an animated conic border when a live exam is running for the subject.
+ * Subject tile with a cursor-following spotlight and smooth CSS transitions.
  */
 export function SubjectCard({ subject, onOpen }: SubjectCardProps) {
   const ref = useRef<HTMLButtonElement>(null);
-  const accent = ACCENT_STYLES[subject.accent];
+  const accent = ACCENT_STYLES[subject.accent] ?? ACCENT_STYLES.brand;
   const live = Boolean(subject.available?.live?.length);
   const examCount = Object.values(subject.available ?? {}).reduce((n, list) => n + (list?.length ?? 0), 0);
 
-  const { contextSafe } = useGSAP({ scope: ref });
-
-  const onMove = contextSafe((e: React.PointerEvent<HTMLButtonElement>) => {
+  const onMove = (e: React.PointerEvent<HTMLButtonElement>) => {
     const el = ref.current;
     if (!el || e.pointerType !== "mouse") return;
     const rect = el.getBoundingClientRect();
@@ -36,26 +29,7 @@ export function SubjectCard({ subject, onOpen }: SubjectCardProps) {
     const y = (e.clientY - rect.top) / rect.height;
     el.style.setProperty("--mx", `${x * 100}%`);
     el.style.setProperty("--my", `${y * 100}%`);
-    gsap.to(el, {
-      rotateY: (x - 0.5) * 10,
-      rotateX: (0.5 - y) * 10,
-      transformPerspective: 900,
-      duration: 0.4,
-      ease: "power3.out",
-      overwrite: "auto",
-    });
-  });
-
-  const onEnter = contextSafe(() => {
-    gsap.to(".subject-icon", { scale: 1.12, rotate: -8, duration: 0.45, ease: "back.out(3)" });
-    gsap.to(".subject-arrow", { x: 3, y: -3, opacity: 1, duration: 0.3, ease: "power2.out" });
-  });
-
-  const onLeave = contextSafe(() => {
-    gsap.to(ref.current, { rotateX: 0, rotateY: 0, duration: 0.6, ease: "elastic.out(1, 0.5)" });
-    gsap.to(".subject-icon", { scale: 1, rotate: 0, duration: 0.4, ease: "power3.out" });
-    gsap.to(".subject-arrow", { x: 0, y: 0, opacity: 0.4, duration: 0.3 });
-  });
+  };
 
   return (
     <button
@@ -63,11 +37,9 @@ export function SubjectCard({ subject, onOpen }: SubjectCardProps) {
       type="button"
       onClick={() => onOpen(subject)}
       onPointerMove={onMove}
-      onPointerEnter={onEnter}
-      onPointerLeave={onLeave}
       data-subject-card
       className={cn(
-        "group relative flex h-full w-full flex-col overflow-hidden rounded-3xl p-5 text-left shadow-card transition-shadow duration-300 [transform-style:preserve-3d] will-change-transform",
+        "group relative flex h-full w-full flex-col overflow-hidden rounded-3xl p-5 text-left shadow-card transition-all duration-300 hover:-translate-y-1 will-change-transform",
         live
           ? "border-animated animate-border-spin shadow-glow"
           : cn("border border-surface-border bg-obsidian-900 hover:border-leaf-600", accent.glow),
@@ -85,7 +57,7 @@ export function SubjectCard({ subject, onOpen }: SubjectCardProps) {
       <div className="relative mb-6 flex items-start justify-between">
         <span
           className={cn(
-            "subject-icon flex h-12 w-12 items-center justify-center rounded-2xl ring-1",
+            "subject-icon flex h-12 w-12 items-center justify-center rounded-2xl ring-1 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6",
             accent.bg,
             accent.text,
             accent.ring,
@@ -103,7 +75,7 @@ export function SubjectCard({ subject, onOpen }: SubjectCardProps) {
               <span lang="bn">লাইভ চলছে</span>
             </span>
           ) : (
-            <ArrowUpRight className="subject-arrow h-5 w-5 text-ink-muted opacity-40" strokeWidth={1.5} />
+            <ArrowUpRight className="subject-arrow h-5 w-5 text-ink-muted opacity-40 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100 group-hover:text-brand-300" strokeWidth={1.5} />
           )}
           {subject.compulsory && (
             <span lang="bn" className="text-[10px] font-medium text-ink-subtle">

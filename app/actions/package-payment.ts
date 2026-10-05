@@ -22,7 +22,7 @@ export async function submitPackagePaymentAction(
 
   const packageId = String(formData.get("packageId") ?? "").trim();
   const packageName = String(formData.get("packageName") ?? "প্রিপারেশন প্যাকেজ").trim();
-  const amount = Number(formData.get("amount") ?? 249);
+  const amount = Number(formData.get("amount") ?? 99);
   const durationDays = Number(formData.get("durationDays") ?? 30);
   const paymentMethod = (String(formData.get("paymentMethod") ?? "bkash")) as PaymentMethod;
   const senderPhone = String(formData.get("senderPhone") ?? "").trim();
@@ -54,6 +54,7 @@ export async function submitPackagePaymentAction(
     });
 
     revalidatePath("/");
+    revalidatePath("/packages");
     revalidatePath("/dashboard");
     revalidatePath("/profile");
 
@@ -82,6 +83,7 @@ export async function submitPackagePaymentAction(
   });
 
   revalidatePath("/");
+  revalidatePath("/packages");
   revalidatePath("/dashboard");
 
   return { ok: true, status: "pending" };

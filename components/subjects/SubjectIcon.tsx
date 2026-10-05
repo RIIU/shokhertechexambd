@@ -48,6 +48,6 @@ const ICONS: Record<SubjectIconKey, LucideIcon> = {
 };
 
 export function SubjectIcon({ icon, ...props }: { icon: SubjectIconKey } & LucideProps) {
-  const Icon = ICONS[icon];
+  const Icon = ICONS[icon] || BookOpen;
   return <Icon strokeWidth={1.5} {...props} />;
 }

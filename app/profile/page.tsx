@@ -6,7 +6,7 @@ import { ProfileForm } from "@/components/profile/ProfileForm";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "আমার প্রোফাইল | ShokherTech Exam BD",
+  title: "আমার প্রোফাইল | Shokher Tech Academy",
   description: "ব্যবহারকারীর প্রোফাইল তথ্য, কভার ও প্রোফাইল ছবি সম্পাদনা",
 };
 

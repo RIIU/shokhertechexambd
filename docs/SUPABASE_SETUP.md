@@ -9,8 +9,10 @@
 
 ## ২. টেবিল তৈরি করো
 1. বাঁদিকের মেনু থেকে **SQL Editor** খোলো।
-2. এই রিপোর `supabase/migrations/20261003000000_init.sql` ফাইলের পুরোটা কপি করে পেস্ট করো, তারপর **Run** চাপো।
-3. **Table Editor**-এ গেলে `users`, `exams`, `questions`, `attempts`, `violations` এই ৫টি টেবিল দেখা যাবে।
+2. এই রিপোর `supabase/setup.sql` ফাইলের পুরোটা কপি করে পেস্ট করো, তারপর **Run** চাপো। (এতে `supabase/migrations/` ফোল্ডারের সব ফাইল ক্রমানুসারে একসাথে আছে।)
+3. **Table Editor**-এ গেলে `users`, `exams`, `questions`, `attempts`, `violations`, `payments`, `enrollments` এই ৭টি টেবিল দেখা যাবে।
+
+> আগে শুধু `init.sql` চালিয়ে থাকলেও `setup.sql` একবার Run করো। পুরোনো ডেটা মুছবে না, শুধু নতুন কলাম আর টেবিল যোগ হবে।
 
 ফাইলটা দুবার চালালেও কোনো সমস্যা নেই, কিছু ডুপ্লিকেট হবে না।
 
@@ -52,7 +54,7 @@ Vercel প্রজেক্টের **Settings → Environment Variables**-এ
 
 | কোড | মানে | সমাধান |
 |---|---|---|
-| `TABLES_MISSING` | টেবিল তৈরি হয়নি | ধাপ ২-এর SQL পুরোটা Run করো |
+| `TABLES_MISSING` | টেবিল তৈরি হয়নি | ধাপ ২: `supabase/setup.sql` পুরোটা Run করো |
 | `NO_DATABASE_ON_SERVERLESS` | Vercel-এ Supabase ভেরিয়েবল নেই | `SUPABASE_URL`, `SUPABASE_SECRET_KEY` বসিয়ে Redeploy |
 | `SESSION_SECRET_MISSING` | `SESSION_SECRET` নেই বা ৩২ অক্ষরের কম | লম্বা র‍্যান্ডম স্ট্রিং বসিয়ে Redeploy |
 | `PUBLISHABLE_KEY_USED` | secret-এর জায়গায় publishable key | `sb_secret_…` key দাও |

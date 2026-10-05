@@ -4,6 +4,7 @@ import { GsapReveal } from "@/components/ui/GsapReveal";
 import { SubjectGrid } from "./SubjectGrid";
 import { LEVELS, STREAMS, STREAM_IDS, getSubjects } from "@/lib/data/catalog";
 import { examIndex } from "@/lib/server/exams";
+import { classifyError } from "@/lib/server/diagnose";
 import { cn, toBn } from "@/lib/utils";
 import type { Level, StreamId } from "@/lib/types";
 
@@ -16,7 +17,16 @@ interface StreamSubjectsViewProps {
 export async function StreamSubjectsView({ level, stream }: StreamSubjectsViewProps) {
   const lvl = LEVELS[level];
   const str = STREAMS[stream];
-  const index = await examIndex(level, stream);
+  // The subject grid is static catalog data; only the exam counts need the database.
+  // If it's unreachable, still render the subjects instead of crashing the page.
+  let index: Awaited<ReturnType<typeof examIndex>> = {};
+  let examsUnavailable = false;
+  try {
+    index = await examIndex(level, stream);
+  } catch (err) {
+    examsUnavailable = true;
+    console.error(`[${level}/${stream}] ${classifyError(err)}`, err);
+  }
   const subjects = getSubjects(level, stream).map((s) => ({ ...s, available: index[s.id] }));
   const totalExams = Object.values(index).reduce((sum, byType) => sum + Object.values(byType).reduce((n, l) => n + (l?.length ?? 0), 0), 0);
   const liveNow = subjects.filter((s) => s.available?.live?.length).length;
@@ -62,22 +72,46 @@ export async function StreamSubjectsView({ level, stream }: StreamSubjectsViewPr
             {str.taglineBn}। যেকোনো বিষয় বেছে নাও, তারপর অনুশীলন, মডেল টেস্ট বা লাইভ পরীক্ষা শুরু করো।
           </p>
 
-          <div data-reveal className="mb-10 flex flex-wrap gap-2">
-            {STREAM_IDS.map((id) => (
-              <Link
-                key={id}
-                href={`/${level}/${id}`}
-                aria-current={id === stream ? "page" : undefined}
-                className={cn(
-                  "rounded-xl border px-4 py-2 text-sm font-medium transition-all",
-                  id === stream
-                    ? "border-brand-400/50 bg-brand-400/10 text-brand-200 shadow-glow-sm"
-                    : "border-white/10 text-ink-muted hover:border-white/20 hover:text-ink",
-                )}
-              >
-                <span lang="bn">{STREAMS[id].nameBn}</span>
-              </Link>
-            ))}
+          {/* Level & Stream Switcher */}
+          <div data-reveal className="mb-10 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs uppercase tracking-wider text-ink-subtle font-semibold mr-1">স্তর:</span>
+              <div className="glass inline-flex rounded-xl p-1">
+                {(["ssc", "hsc"] as const).map((l) => (
+                  <Link
+                    key={l}
+                    href={`/${l}/${stream}`}
+                    className={cn(
+                      "rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-bold transition-all",
+                      l === level ? "bg-brand-400 text-forest shadow-glow-sm" : "text-ink-muted hover:text-ink",
+                    )}
+                  >
+                    <span lang="bn">{LEVELS[l].nameBn}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs uppercase tracking-wider text-ink-subtle font-semibold mr-1">বিভাগ:</span>
+              <div className="flex flex-wrap gap-2">
+                {STREAM_IDS.map((id) => (
+                  <Link
+                    key={id}
+                    href={`/${level}/${id}`}
+                    aria-current={id === stream ? "page" : undefined}
+                    className={cn(
+                      "rounded-xl border px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all",
+                      id === stream
+                        ? "border-brand-400/50 bg-brand-400/10 text-brand-200 shadow-glow-sm font-bold"
+                        : "border-white/10 text-ink-muted hover:border-white/20 hover:text-ink",
+                    )}
+                  >
+                    <span lang="bn">{STREAMS[id].nameBn}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
 
           <dl data-reveal className="grid max-w-xl grid-cols-3 gap-3">
@@ -93,6 +127,12 @@ export async function StreamSubjectsView({ level, stream }: StreamSubjectsViewPr
               </div>
             ))}
           </dl>
+
+          {examsUnavailable && (
+            <p data-reveal role="status" lang="bn" className="mt-6 max-w-xl rounded-2xl border border-state-danger/30 bg-state-danger/[0.06] px-4 py-3 text-sm text-rose-200">
+              এই মুহূর্তে পরীক্ষার তালিকা লোড করা যাচ্ছে না। একটু পরে পেজটি আবার রিফ্রেশ করো।
+            </p>
+          )}
         </GsapReveal>
       </section>
 
