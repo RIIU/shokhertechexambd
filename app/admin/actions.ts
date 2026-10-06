@@ -14,6 +14,7 @@ import {
   type QuestionInput,
 } from "@/lib/server/exams";
 import { setUserBlocked } from "@/lib/server/users";
+import { parseQuestions } from "@/lib/question-import";
 import { EXAM_TYPES, getSubjects, isLevel, isStream } from "@/lib/data/catalog";
 import type { ExamType, OptionId } from "@/lib/types";
 
@@ -41,6 +42,12 @@ function parseExamMeta(form: FormData): { data?: ExamMetaInput; fieldErrors?: Ad
   const isPaid = form.get("isPaid") === "true";
   const priceRaw = num(form, "price");
   const price = isPaid ? (Number.isFinite(priceRaw) && priceRaw >= 0 ? priceRaw : 50) : 0;
+  const when = (key: string) => {
+    const v = Number(str(form, key));
+    return str(form, key) && Number.isFinite(v) && v > 0 ? v : undefined;
+  };
+  const startsAt = type === "live" ? when("startsAt") : undefined;
+  const closesAt = type === "live" ? when("closesAt") : undefined;
 
   if (titleBn.length < 3) fieldErrors.titleBn = "বাংলা শিরোনাম দাও";
   if (!isLevel(level)) fieldErrors.level = "স্তর বেছে নাও";
@@ -51,6 +58,7 @@ function parseExamMeta(form: FormData): { data?: ExamMetaInput; fieldErrors?: Ad
   if (!Number.isFinite(negativeMark) || negativeMark < 0 || negativeMark > 1) fieldErrors.negativeMark = "০ থেকে ১";
   if (!Number.isInteger(maxWarnings) || maxWarnings < 1 || maxWarnings > 10) fieldErrors.maxWarnings = "১ থেকে ১০";
   if (isPaid && price < 0) fieldErrors.price = "সঠিক ফি লেখো";
+  if (startsAt && closesAt && closesAt <= startsAt) fieldErrors.closesAt = "শেষের সময় শুরুর পরে হতে হবে";
   if (Object.keys(fieldErrors).length || !isLevel(level) || !isStream(stream)) return { fieldErrors };
 
   return {
@@ -67,6 +75,8 @@ function parseExamMeta(form: FormData): { data?: ExamMetaInput; fieldErrors?: Ad
       showSolutions,
       isPaid,
       price,
+      startsAt,
+      closesAt,
     },
   };
 }
@@ -139,6 +149,19 @@ export async function addQuestionAction(_prev: AdminFormState, form: FormData): 
     marks,
   };
   await addQuestion(examId, input);
+  revalidateExamPages(examId);
+  return { ok: Date.now() };
+}
+
+/** Adds many questions pasted as text (format: lib/question-import.ts). All or nothing on errors. */
+export async function bulkAddQuestionsAction(_prev: AdminFormState, form: FormData): Promise<AdminFormState> {
+  await requireAdmin();
+  const examId = str(form, "examId");
+  const { questions, errors } = parseQuestions(String(form.get("bulk") ?? ""), { topic: str(form, "topic") || undefined });
+  if (errors.length) return { error: `${errors.length}টি প্রশ্নে সমস্যা আছে, ঠিক করে আবার চেষ্টা করো।` };
+  if (!questions.length) return { error: "কোনো প্রশ্ন পাওয়া যায়নি।" };
+  if (questions.length > 200) return { error: "একবারে সর্বোচ্চ ২০০টি প্রশ্ন যোগ করা যায়।" };
+  for (const q of questions) await addQuestion(examId, q);
   revalidateExamPages(examId);
   return { ok: Date.now() };
 }

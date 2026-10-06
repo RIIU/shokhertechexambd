@@ -5,6 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ArrowRight, Flag, Radio, ShieldCheck, Timer } from "lucide-react";
+import { LIVE_EXAM_HREF } from "@/lib/routes";
 import { cn, toBn } from "@/lib/utils";
 
 gsap.registerPlugin(useGSAP);
@@ -87,7 +88,7 @@ export function Hero() {
           </p>
 
           <div data-hero-sub className="mb-10 flex flex-wrap gap-3">
-            <Link href="/exam/ssc-physics-live-01" className="btn-primary px-6 py-3 text-base">
+            <Link href={LIVE_EXAM_HREF} className="btn-primary px-6 py-3 text-base">
               <Radio className="h-5 w-5" strokeWidth={1.5} />
               <span lang="bn">লাইভ পরীক্ষা দাও</span>
             </Link>
@@ -120,7 +121,7 @@ export function Hero() {
           </span>
           <span
             data-badge
-            className="absolute -bottom-6 -right-2 z-10 rounded-2xl border border-leaf-400/40 bg-obsidian-800/90 px-4 py-2.5 shadow-glow-leaf backdrop-blur sm:-right-8"
+            className="absolute -bottom-6 right-2 z-10 rounded-2xl border border-leaf-400/40 bg-obsidian-800/90 px-4 py-2.5 shadow-glow-leaf backdrop-blur sm:-right-4"
           >
             <span className="block font-display text-lg font-black text-leaf-300">HSC</span>
             <span lang="bn" className="block text-[11px] text-ink-muted">

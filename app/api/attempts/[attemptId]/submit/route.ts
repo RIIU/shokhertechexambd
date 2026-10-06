@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/server/auth";
 import { getExam } from "@/lib/server/exams";
 import { getUserAttempt, submitAttempt } from "@/lib/server/attempts";
 import { parseSubmitPayload } from "@/lib/exams/grading";
+import { DEVICE_COOKIE, isAttemptDevice, isStrict } from "@/lib/server/strict-exam";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +30,13 @@ export async function POST(request: Request, { params }: { params: { attemptId: 
   }
   const payload = parseSubmitPayload(body, exam);
   if (!payload) return NextResponse.json({ error: "Malformed submission" }, { status: 422 });
+
+  // Answers are the ones saved question by question on the server (every exam is served that way).
+  if (isStrict(exam) && !isAttemptDevice(attempt.id, cookies().get(`${DEVICE_COOKIE}_${attempt.id}`)?.value)) {
+    return NextResponse.json({ error: "other-device" }, { status: 423 });
+  }
+  const saved = attempt.answers ?? {};
+  payload.answers = Object.fromEntries(exam.questions.map((q) => [q.id, saved[q.id] ?? null]));
 
   const res = await submitAttempt(attempt.id, user.id, exam, payload);
   if (!res.ok) {

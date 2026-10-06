@@ -16,6 +16,10 @@ export async function getUser(id: string): Promise<User | undefined> {
   return (await store()).getUser(id);
 }
 
+export async function getUsers(ids: string[]): Promise<User[]> {
+  return (await store()).getUsers(ids);
+}
+
 export async function createStudent(input: {
   name: string;
   phone: string;

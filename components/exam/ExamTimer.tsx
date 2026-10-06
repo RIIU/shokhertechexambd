@@ -18,7 +18,10 @@ interface ExamTimerProps {
 const RADIUS = 18;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-export function ExamTimer({ endsAt, durationSec, onExpire, dangerAt = 300, warnAt = 600, compact }: ExamTimerProps) {
+export function ExamTimer({ endsAt, durationSec, onExpire, dangerAt: dangerAtProp, warnAt: warnAtProp, compact }: ExamTimerProps) {
+  // Short exams would start in the warning state with fixed 10/5-minute marks.
+  const warnAt = warnAtProp ?? Math.min(600, Math.round(durationSec * 0.25));
+  const dangerAt = dangerAtProp ?? Math.min(300, Math.round(durationSec * 0.1));
   const [left, setLeft] = useState(() => Math.max(0, Math.ceil((endsAt - Date.now()) / 1000)));
   const expired = useRef(false);
   const onExpireRef = useRef(onExpire);

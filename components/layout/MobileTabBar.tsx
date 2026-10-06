@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { BookOpen, Home, LayoutDashboard, LogIn, Menu, Radio, ShieldCheck, type LucideIcon } from "lucide-react";
 import { useAppShell } from "./AppShell";
-import { isFocusRoute } from "@/lib/routes";
+import { LIVE_EXAM_HREF, isFocusRoute } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 /**
@@ -17,7 +17,6 @@ export function MobileTabBar() {
   const pathname = usePathname() ?? "/";
   if (isFocusRoute(pathname)) return null;
 
-  const subjectsHref = user?.level && user.stream ? `/${user.level}/${user.stream}` : "/ssc";
   const account: { href: string; label: string; icon: LucideIcon } = !user
     ? { href: `/login?next=${encodeURIComponent(pathname)}`, label: "লগইন", icon: LogIn }
     : user.role === "admin"
@@ -27,7 +26,7 @@ export function MobileTabBar() {
   const on = (prefix: string) => (prefix === "/" ? pathname === "/" : pathname.startsWith(prefix));
   const tabs = [
     { href: "/", label: "হোম", icon: Home, active: on("/") },
-    { href: subjectsHref, label: "বিষয়", icon: BookOpen, active: on("/ssc") || on("/hsc") },
+    { href: "/practice", label: "প্র্যাকটিস", icon: BookOpen, active: on("/practice") },
     null, // centre button
     { href: account.href, label: account.label, icon: account.icon, active: on("/dashboard") || on("/admin") || on("/login") || on("/results") },
   ];
@@ -63,7 +62,7 @@ export function MobileTabBar() {
             ) : (
               <li key={`centre-${i}`} className="flex items-start justify-center">
                 <Link
-                  href="/exam/ssc-physics-live-01"
+                  href={LIVE_EXAM_HREF}
                   aria-label="লাইভ পরীক্ষা"
                   className="-mt-5 flex h-14 w-14 flex-col items-center justify-center rounded-2xl bg-brand-400 text-forest shadow-glow ring-4 ring-obsidian-800 transition-transform active:scale-95"
                 >

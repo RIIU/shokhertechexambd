@@ -12,7 +12,6 @@ import {
   LogIn,
   LogOut,
   Menu,
-  Radio,
   ShieldCheck,
   User as UserIcon,
   UserPlus,
@@ -21,15 +20,15 @@ import {
 import { useAppShell, type SessionUser } from "./AppShell";
 import { LEVELS, STREAMS } from "@/lib/data/catalog";
 import { formatPhone } from "@/lib/phone";
-import { isFocusRoute } from "@/lib/routes";
+import { LIVE_EXAM_HREF, isFocusRoute } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/", label: "হোম" },
-  { href: "/packages", label: "প্যাকেজসমূহ" },
-  { href: "/ssc", label: "এসএসসি" },
-  { href: "/hsc", label: "এইচএসসি" },
+  { href: "/practice", label: "প্র্যাকটিস" },
+  { href: "/live", label: "লাইভ পরীক্ষা" },
   { href: "/subjects", label: "বিষয়সমূহ" },
+  { href: "/packages", label: "প্যাকেজ" },
 ];
 
 function UserDropdown({
@@ -62,7 +61,7 @@ function UserDropdown({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex items-center gap-2.5 border-l border-forest px-4 text-sm text-ink transition-colors hover:bg-surface-pill"
+        className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-sm text-ink transition-colors hover:bg-surface-pill"
       >
         <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-forest font-display text-xs font-bold text-brand-300 ring-1 ring-brand-400/40">
           {user.avatarUrl ? (
@@ -227,29 +226,30 @@ export function Navbar() {
     .sort((a, b) => b.length - a.length)[0];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-forest bg-obsidian-800">
-      <nav className="flex h-14 items-stretch justify-between sm:h-16">
-        <div className="flex items-stretch">
+    <header className="sticky top-0 z-50 border-b border-surface-border bg-obsidian-800/90 backdrop-blur-lg">
+      <nav className="container flex h-16 items-center justify-between gap-3">
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-expanded={menuOpen}
             aria-label="মেনু খোলো"
-            className="flex w-14 items-center justify-center bg-forest text-ink transition-colors hover:bg-leaf-600 sm:w-16 md:hidden"
+            className="-ml-2 flex h-10 w-10 items-center justify-center rounded-xl text-ink transition-colors hover:bg-surface-pill md:hidden"
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-          <Link href="/" className="flex items-center gap-2.5 px-3 sm:px-6 lg:px-8">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-400 font-display text-sm font-black text-forest">
+          <Link href="/" className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-400 font-display text-xs font-black tracking-tight text-forest">
               STA
             </span>
-            <span className="font-display text-sm font-bold tracking-tight text-ink sm:text-base md:text-lg whitespace-nowrap">
-              Shokher Tech Academy<span className="text-brand-400">.</span>
+            <span className="whitespace-nowrap font-display text-sm font-bold tracking-tight text-ink sm:text-base">
+              Shokher Tech<span className="hidden sm:inline"> Academy</span>
+              <span className="text-brand-400">.</span>
             </span>
           </Link>
         </div>
 
-        <ul className="hidden items-center gap-1 md:flex">
+        <ul className="hidden items-center gap-1 rounded-2xl border border-surface-border bg-obsidian-900/60 p-1 md:flex">
           {LINKS.map((l) => {
             const active = l.href === activeHref;
             return (
@@ -258,14 +258,14 @@ export function Navbar() {
                   href={l.href}
                   lang="bn"
                   className={cn(
-                    "relative rounded-lg px-3.5 py-2 text-sm transition-colors",
+                    "relative block rounded-xl px-3.5 py-1.5 text-sm font-medium transition-colors",
                     active ? "text-ink" : "text-ink-muted hover:text-ink",
                   )}
                 >
                   {active && (
                     <motion.span
                       layoutId="nav-active"
-                      className="absolute inset-0 rounded-lg bg-surface-pill ring-1 ring-surface-border"
+                      className="absolute inset-0 rounded-xl bg-surface-pill ring-1 ring-surface-border"
                       transition={{ type: "spring", stiffness: 400, damping: 32 }}
                     />
                   )}
@@ -276,16 +276,15 @@ export function Navbar() {
           })}
         </ul>
 
-        <div className="flex items-stretch">
-          {/* Account slot: Interactive real-time user dropdown or login link */}
+        <div className="flex items-center gap-2">
           {!loading && (
-            <div className="hidden items-stretch md:flex">
+            <div className="hidden items-center md:flex">
               {user ? (
                 <UserDropdown user={user} home={home} onLogout={logout} />
               ) : (
                 <Link
                   href={`/login?next=${encodeURIComponent(pathname ?? "/")}`}
-                  className="flex items-center gap-2 border-l border-forest px-5 text-sm text-ink transition-colors hover:bg-surface-pill"
+                  className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-pill"
                 >
                   <LogIn className="h-4 w-4" />
                   <span lang="bn">লগইন</span>
@@ -293,11 +292,15 @@ export function Navbar() {
               )}
             </div>
           )}
-          <Link
-            href={user ? "/exam/ssc-physics-live-01" : "/register"}
-            className="flex items-center gap-2 bg-brand-400 px-4 text-sm font-semibold text-forest transition-colors hover:bg-brand-300 sm:px-6 lg:px-10"
-          >
-            {user ? <Radio className="h-4 w-4" strokeWidth={1.75} /> : <UserPlus className="h-4 w-4" strokeWidth={1.75} />}
+          <Link href={user ? LIVE_EXAM_HREF : "/register"} className="btn-primary h-10 rounded-xl px-4 sm:px-5">
+            {user ? (
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-forest/60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-forest" />
+              </span>
+            ) : (
+              <UserPlus className="h-4 w-4" strokeWidth={1.75} />
+            )}
             <span lang="bn" className="hidden min-[380px]:inline">
               {user ? "লাইভ পরীক্ষা" : "ফ্রি রেজিস্ট্রেশন"}
             </span>

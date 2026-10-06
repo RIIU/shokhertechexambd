@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CheckCircle2, Eye, Trash2 } from "lucide-react";
 import { AdminHeader, Badge } from "@/components/admin/AdminUi";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
-import { ExamMetaForm, QuestionForm } from "@/components/admin/ExamForms";
+import { BulkQuestionForm, ExamMetaForm, QuestionForm } from "@/components/admin/ExamForms";
 import { EmptyState, Panel } from "@/components/ui/StatTile";
 import { deleteExamAction, deleteQuestionAction, setExamStatusAction } from "@/app/admin/actions";
 import { getExam } from "@/lib/server/exams";
@@ -98,6 +98,9 @@ export default async function EditExamPage({ params, searchParams }: { params: {
           <Panel title="নতুন প্রশ্ন যোগ করো">
             <QuestionForm examId={exam.id} />
           </Panel>
+          <Panel title="একসাথে অনেক প্রশ্ন যোগ করো">
+            <BulkQuestionForm examId={exam.id} />
+          </Panel>
           <Panel title="পরীক্ষার তথ্য">
             <ExamMetaForm
               defaults={{
@@ -114,6 +117,8 @@ export default async function EditExamPage({ params, searchParams }: { params: {
                 showSolutions: exam.showSolutions !== false,
                 isPaid: Boolean(exam.isPaid),
                 price: exam.price ?? 50,
+                startsAt: exam.startsAt,
+                closesAt: exam.closesAt,
               }}
             />
           </Panel>

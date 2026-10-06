@@ -79,27 +79,10 @@ export function LoginForm({ next }: { next?: string }) {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
-  const fillAdmin = () => {
-    setPhone("01798802374");
-    setPassword("Rakibema123@");
-  };
-
   return (
     <form action={action} className="space-y-4" noValidate>
       <input type="hidden" name="next" value={next ?? ""} />
       <FormError state={state} />
-
-      {/* Quick credential fill chip */}
-      <div className="flex items-center justify-between rounded-xl border border-brand-400/25 bg-brand-400/10 p-2.5 text-xs">
-        <span lang="bn" className="text-ink-muted">টেস্ট অ্যাডমিন লগইন:</span>
-        <button
-          type="button"
-          onClick={fillAdmin}
-          className="rounded-lg bg-brand-400 px-2.5 py-1 font-semibold text-forest shadow-sm hover:bg-brand-300 transition-colors"
-        >
-          অ্যাডমিন তথ্য বসাও
-        </button>
-      </div>
 
       <div>
         <label htmlFor="phone" className="field-label" lang="bn">

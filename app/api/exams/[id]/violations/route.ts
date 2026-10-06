@@ -16,6 +16,9 @@ const KINDS: readonly ViolationKind[] = [
   "context-menu",
   "clipboard",
   "watermark-tamper",
+  "split-screen",
+  "extension",
+  "multi-screen",
 ];
 
 /**

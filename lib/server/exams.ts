@@ -49,6 +49,8 @@ export interface ExamMetaInput {
   showSolutions?: boolean;
   isPaid?: boolean;
   price?: number;
+  startsAt?: number;
+  closesAt?: number;
 }
 
 export async function createExam(input: ExamMetaInput): Promise<StoredExam> {

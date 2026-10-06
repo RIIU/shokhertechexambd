@@ -11,7 +11,7 @@ const FEATURES: { icon: LucideIcon; title: string; body: string; className?: str
   { icon: Fingerprint, title: "আইডেন্টিটি ওয়াটারমার্ক", body: "স্ক্রিনজুড়ে ফোন নম্বর ও আইপি, তাই প্রশ্ন ফাঁস হলে উৎস খুঁজে পাওয়া যায়।" },
   { icon: Trophy, title: "লাইভ র‍্যাংক", body: "জমা দেওয়ার সাথে সাথেই সারা দেশে তোমার অবস্থান।" },
   { icon: BarChart3, title: "অ্যাকুরেসি বিশ্লেষণ", body: "টপিকভিত্তিক সঠিক-ভুলের চার্ট দেখে দুর্বল জায়গা চিনে নাও।" },
-  { icon: Lightbulb, title: "বিস্তারিত ব্যাখ্যা", body: "প্রতিটি প্রশ্নের ধাপে ধাপে সমাধান।", className: "md:col-span-2" },
+  { icon: Lightbulb, title: "বিস্তারিত ব্যাখ্যা", body: "প্রতিটি প্রশ্নের ধাপে ধাপে সমাধান।" },
 ];
 
 export function Features() {

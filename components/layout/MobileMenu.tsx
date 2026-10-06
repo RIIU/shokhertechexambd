@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  NotebookPen,
   BookOpen,
   ChevronDown,
   ChevronRight,
@@ -26,11 +27,10 @@ import { logoutAction } from "@/app/(auth)/actions";
 import { useAppShell } from "./AppShell";
 import { LEVELS, STREAMS, STREAM_IDS } from "@/lib/data/catalog";
 import { formatPhone } from "@/lib/phone";
-import { isFocusRoute } from "@/lib/routes";
+import { LIVE_EXAM_HREF, isFocusRoute } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import type { Level } from "@/lib/types";
 
-const LIVE_EXAM_HREF = "/exam/ssc-physics-live-01";
 
 /**
  * Mobile navigation menu: full screen on phones under 480px (like pixxen.com), a 400px
@@ -192,6 +192,7 @@ export function MobileMenu() {
               <SectionLabel>মেনু</SectionLabel>
               <ul className="space-y-1">
                 <Item index={0} href="/" icon={Home} label="হোম" active={isActive("/")} onNavigate={close} />
+                <Item index={1} href="/practice" icon={NotebookPen} label="প্র্যাকটিস ও প্রশ্ন ব্যাংক" active={isActive("/practice")} onNavigate={close} />
                 <Item
                   index={1}
                   href="/packages"
@@ -221,7 +222,7 @@ export function MobileMenu() {
                   href={LIVE_EXAM_HREF}
                   icon={Radio}
                   label="লাইভ পরীক্ষা"
-                  active={false}
+                  active={isActive("/live")}
                   onNavigate={close}
                   badge={
                     <span className="inline-flex items-center gap-1 rounded-full bg-state-danger/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-rose-300">

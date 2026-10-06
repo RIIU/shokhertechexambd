@@ -97,6 +97,10 @@ export interface ExamMeta {
   isPaid?: boolean;
   /** Exam fee in BDT if isPaid is true. */
   price?: number;
+  /** Live exams: when entry opens (epoch ms). Unset = open whenever published. */
+  startsAt?: number;
+  /** Live exams: last moment to take part; attempts end by then and solutions unlock after it. */
+  closesAt?: number;
 }
 
 export type PaymentMethod = "bkash" | "nagad" | "rocket" | "upay" | "demo";
@@ -153,7 +157,10 @@ export type ViolationKind =
   | "blocked-shortcut"
   | "context-menu"
   | "clipboard"
-  | "watermark-tamper";
+  | "watermark-tamper"
+  | "split-screen"
+  | "extension"
+  | "multi-screen";
 
 export interface ViolationEvent {
   kind: ViolationKind;

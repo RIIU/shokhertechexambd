@@ -120,6 +120,14 @@ export const jsonStore: Store = {
       return true;
     });
   },
+  saveProgress(id, userId, answers, expected) {
+    return mutateDb((db) => {
+      const a = db.attempts.find((x) => x.id === id && x.userId === userId);
+      if (!a || a.submittedAt || Object.keys(a.answers ?? {}).length !== expected) return false;
+      a.answers = answers;
+      return true;
+    });
+  },
   async scoresByExam(examIds) {
     const set = new Set(examIds);
     const map = new Map<string, number[]>();

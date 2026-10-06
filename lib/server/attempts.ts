@@ -2,44 +2,55 @@ import "server-only";
 import { gradeExam } from "@/lib/exams/grading";
 import { store } from "./store";
 import { newId } from "./ids";
+import { liveState } from "@/lib/live-window";
 import type { Attempt, ExamResult, StoredExam, StoredViolation, SubmitPayload, ViolationEvent } from "@/lib/types";
 
 /** Answers arriving later than this after the deadline are discarded. */
 export const SUBMIT_GRACE_MS = 2 * 60 * 1000;
 
 export type StartResult =
-  | { ok: true; attempt: Attempt }
-  | { ok: false; error: "already-submitted"; attemptId: string };
+  | { ok: true; attempt: Attempt; created: boolean }
+  | { ok: false; error: "already-submitted"; attemptId: string }
+  | { ok: false; error: "not-started" | "closed" };
 
 /**
  * Starts (or resumes) an attempt. The server clock sets the deadline, so
  * refreshing, changing the device clock or reopening the tab never buys time.
  * Live exams allow one submission per student.
  */
-export async function startAttempt(exam: StoredExam, userId: string, meta: { ip?: string; userAgent?: string }): Promise<StartResult> {
+export async function startAttempt(
+  exam: StoredExam,
+  userId: string,
+  meta: { ip?: string; userAgent?: string },
+  opts: { ignoreSchedule?: boolean } = {},
+): Promise<StartResult> {
   const s = await store();
   const mine = await s.findAttempts({ examId: exam.id, userId });
   const open = mine.find((a) => !a.submittedAt);
-  if (open) return { ok: true, attempt: open };
+  if (open) return { ok: true, attempt: open, created: false };
   const done = mine.find((a) => a.submittedAt);
   if (exam.type === "live" && done) return { ok: false, error: "already-submitted", attemptId: done.id };
 
   const now = Date.now();
+  const state = liveState(exam, now);
+  if (!opts.ignoreSchedule && state !== "open") return { ok: false, error: state === "upcoming" ? "not-started" : "closed" };
+  // A scheduled live exam ends for everyone at closesAt, however late they joined.
+  const endsAt = Math.min(now + exam.durationSec * 1000, exam.type === "live" && exam.closesAt ? exam.closesAt : Infinity);
   const attempt: Attempt = {
     id: newId("att"),
     examId: exam.id,
     userId,
     startedAt: now,
-    endsAt: now + exam.durationSec * 1000,
+    endsAt,
     strikes: 0,
     ...meta,
   };
   if ((await s.insertAttempt(attempt)) === "conflict") {
     // Two tabs pressed "start" at once: resume the one that won.
     const winner = (await s.findAttempts({ examId: exam.id, userId, submitted: false }))[0];
-    if (winner) return { ok: true, attempt: winner };
+    if (winner) return { ok: true, attempt: winner, created: false };
   }
-  return { ok: true, attempt };
+  return { ok: true, attempt, created: true };
 }
 
 export async function getOpenAttempt(examId: string, userId: string): Promise<Attempt | undefined> {

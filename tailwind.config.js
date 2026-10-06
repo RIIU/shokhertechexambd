@@ -60,6 +60,8 @@ module.exports = {
           800: "#012819", // header, raised surfaces
           DEFAULT: "#002417",
         },
+        // Dark overlay behind modals and sheets
+        scrim: "#001B11",
         surface: {
           DEFAULT: "#042E1B", // hero top / chips
           soft: "#012819",
@@ -80,7 +82,7 @@ module.exports = {
           danger: "#F43F5E",
         },
       },
-      // Line heights tuned for Bangla (Baloo Da 2): matras and conjuncts need
+      // Line heights tuned for Bangla: matras and conjuncts need
       // more room than Latin in body text, while big headings need much less
       // than body text so multi-line titles stay one visual block.
       fontSize: {
@@ -102,7 +104,7 @@ module.exports = {
         display: ["var(--font-jakarta)", "var(--font-inter)", "system-ui", "sans-serif"],
         // Every Bangla string uses this family. Inter comes first and has no
         // Bengali glyphs, so English words and Latin digits inside a Bangla
-        // sentence stay in Inter while Bangla letters and ০–৯ use Baloo Da 2.
+        // sentence stay in Inter while Bangla letters and ০–৯ use the Bangla face.
         bangla: ["var(--font-inter)", "var(--font-bangla)", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
@@ -132,6 +134,7 @@ module.exports = {
         "glow-leaf": "0 0 0 1px rgba(25,204,97,0.3), 0 0 40px -8px rgba(25,204,97,0.5)",
         "glow-danger": "0 0 0 1px rgba(244,63,94,0.4), 0 0 32px -4px rgba(244,63,94,0.6)",
         card: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 20px 40px -24px rgba(0,10,5,0.85)",
+        lift: "0 1px 0 0 rgba(255,255,255,0.05) inset, 0 24px 48px -20px rgba(0,10,5,0.9)",
       },
       borderRadius: {
         "4xl": "2rem",

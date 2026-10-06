@@ -215,23 +215,32 @@ const fromQuestion = (examId: string, q: Question, position: number): QuestionRo
 
 const HIDE_SOLUTIONS_TAG = "[hide_solutions]";
 
-export const buildExamTags = (showSolutions?: boolean, isPaid?: boolean, price?: number): string => {
+type TagFields = Pick<StoredExam, "showSolutions" | "isPaid" | "price" | "startsAt" | "closesAt">;
+
+/** Settings without their own column are kept as tags at the end of title_en. */
+export const buildExamTags = (e: TagFields): string => {
   let tags = "";
-  if (showSolutions === false) tags += ` ${HIDE_SOLUTIONS_TAG}`;
-  if (isPaid) tags += ` [paid:${price || 50}]`;
+  if (e.showSolutions === false) tags += ` ${HIDE_SOLUTIONS_TAG}`;
+  if (e.isPaid) tags += ` [paid:${e.price || 50}]`;
+  if (e.startsAt || e.closesAt) tags += ` [live:${e.startsAt ?? 0}-${e.closesAt ?? 0}]`;
   return tags;
 };
+
+const LIVE_TAG = /\[live:(\d+)-(\d+)\]/;
 
 export const cleanExamTitle = (raw: string): string =>
   raw
     .replace(HIDE_SOLUTIONS_TAG, "")
     .replace(/\[paid:\d+\]/g, "")
     .replace(/\[paid\]/g, "")
+    .replace(new RegExp(LIVE_TAG.source, "g"), "")
     .trim();
 
 const toExam = (r: ExamRow): StoredExam => {
   const hiddenInTitle = r.title_en?.includes(HIDE_SOLUTIONS_TAG) ?? false;
-  const showSolutions = r.show_solutions !== undefined ? Boolean(r.show_solutions) : !hiddenInTitle;
+  // The title tag is what insertExam/updateExam write, so it wins; the
+  // show_solutions column (from the migration) is never written and defaults to true.
+  const showSolutions = hiddenInTitle ? false : r.show_solutions !== undefined ? Boolean(r.show_solutions) : true;
 
   let isPaid = r.is_paid !== undefined ? Boolean(r.is_paid) : false;
   let price = r.price !== undefined ? Number(r.price) : 0;
@@ -245,6 +254,9 @@ const toExam = (r: ExamRow): StoredExam => {
   }
 
   const cleanTitleEn = cleanExamTitle(r.title_en ?? "");
+  const live = r.title_en?.match(LIVE_TAG);
+  const startsAt = live ? Number(live[1]) || undefined : undefined;
+  const closesAt = live ? Number(live[2]) || undefined : undefined;
 
   return {
     id: r.id,
@@ -260,6 +272,8 @@ const toExam = (r: ExamRow): StoredExam => {
     showSolutions,
     isPaid,
     price,
+    startsAt,
+    closesAt,
     status: r.status,
     createdAt: ms(r.created_at),
     updatedAt: ms(r.updated_at),
@@ -419,7 +433,7 @@ export const supabaseStore: Store = {
   },
   async insertExam(exam) {
     const { questions, ...e } = exam;
-    const tags = buildExamTags(e.showSolutions, e.isPaid, e.price);
+    const tags = buildExamTags(e);
     const cleanEn = cleanExamTitle(e.titleEn || e.titleBn);
     const { error } = await db()
       .from("exams")
@@ -452,33 +466,13 @@ export const supabaseStore: Store = {
   async updateExam(id, patch) {
     const row: Record<string, unknown> = { updated_at: iso(patch.updatedAt) };
     if (patch.titleBn !== undefined) row.title_bn = patch.titleBn;
-    if (
-      patch.titleEn !== undefined ||
-      patch.titleBn !== undefined ||
-      patch.showSolutions !== undefined ||
-      patch.isPaid !== undefined ||
-      patch.price !== undefined
-    ) {
-      let baseEn = patch.titleEn !== undefined ? patch.titleEn : (patch.titleBn ?? "");
-      let showSolutions = patch.showSolutions;
-      let isPaid = patch.isPaid;
-      let price = patch.price;
-
-      if (patch.titleEn === undefined || showSolutions === undefined || isPaid === undefined || price === undefined) {
-        const curr = await db().from("exams").select("title_en").eq("id", id).maybeSingle<{ title_en: string }>();
-        const currTitle = curr.data?.title_en ?? "";
-        if (patch.titleEn === undefined) baseEn = currTitle;
-        if (showSolutions === undefined) showSolutions = !currTitle.includes(HIDE_SOLUTIONS_TAG);
-        if (isPaid === undefined) {
-          isPaid = currTitle.includes("[paid");
-          const m = currTitle.match(/\[paid:(\d+)\]/);
-          if (m) price = Number(m[1]);
-        }
-      }
-
-      const cleanEn = cleanExamTitle(baseEn);
-      const tags = buildExamTags(showSolutions, isPaid, price);
-      row.title_en = `${cleanEn}${tags}`;
+    const tagKeys = ["titleEn", "titleBn", "showSolutions", "isPaid", "price", "startsAt", "closesAt"] as const;
+    if (tagKeys.some((k) => k in patch)) {
+      // Rebuild title_en from the stored values plus the keys this patch sets
+      // (a key present with undefined clears that setting).
+      const current = await supabaseStore.getExam(id);
+      const merged = { ...current, ...patch } as StoredExam;
+      row.title_en = `${cleanExamTitle(merged.titleEn || merged.titleBn || "")}${buildExamTags(merged)}`;
     }
     if (patch.level !== undefined) row.level = patch.level;
     if (patch.stream !== undefined) row.stream = patch.stream;
@@ -574,6 +568,17 @@ export const supabaseStore: Store = {
       .is("submitted_at", null) // first submission wins
       .select("id");
     check(error, "completeAttempt");
+    return (data?.length ?? 0) > 0;
+  },
+  async saveProgress(id, userId, answers, expected) {
+    const current = await supabaseStore.getAttempt(id);
+    if (!current || current.userId !== userId || current.submittedAt) return false;
+    if (Object.keys(current.answers ?? {}).length !== expected) return false;
+    // Compare-and-set on the previous answers so a concurrent save can't overwrite this one.
+    let q = db().from("attempts").update({ answers }).eq("id", id).eq("user_id", userId).is("submitted_at", null);
+    q = current.answers ? q.eq("answers", JSON.stringify(current.answers)) : q.is("answers", null);
+    const { data, error } = await q.select("id");
+    check(error, "saveProgress");
     return (data?.length ?? 0) > 0;
   },
   async scoresByExam(examIds) {

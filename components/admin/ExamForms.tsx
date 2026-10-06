@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { CheckCircle2, Loader2 } from "lucide-react";
-import { addQuestionAction, createExamAction, updateExamAction, type AdminFormState } from "@/app/admin/actions";
+import { addQuestionAction, bulkAddQuestionsAction, createExamAction, updateExamAction, type AdminFormState } from "@/app/admin/actions";
+import { parseQuestions } from "@/lib/question-import";
 import { EXAM_TYPES, EXAM_TYPE_META, LEVELS, STREAMS, STREAM_IDS, getSubjects } from "@/lib/data/catalog";
-import { OPTION_LABEL_BN, cn } from "@/lib/utils";
+import { OPTION_LABEL_BN, cn, toBn } from "@/lib/utils";
 import type { ExamType, Level, StreamId } from "@/lib/types";
 
-function Submit({ label }: { label: string }) {
+function Submit({ label, disabled }: { label: string; disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending} className="btn-primary">
+    <button type="submit" disabled={pending || disabled} className="btn-primary">
       {pending && <Loader2 className="h-4 w-4 animate-spin" />}
       <span lang="bn">{label}</span>
     </button>
@@ -56,6 +57,51 @@ export interface ExamMetaDefaults {
   showSolutions?: boolean;
   isPaid?: boolean;
   price?: number;
+  startsAt?: number;
+  closesAt?: number;
+}
+
+/* Live schedule inputs are entered and shown in Bangladesh time (UTC+6, no DST),
+   whatever the admin's device or the server's timezone is. */
+const BD_OFFSET_MS = 6 * 3600 * 1000;
+const toBdInput = (ts?: number) => (ts ? new Date(ts + BD_OFFSET_MS).toISOString().slice(0, 16) : "");
+const fromBdInput = (v: string) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(v);
+  return m ? Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!, +m[4]!, +m[5]!) - BD_OFFSET_MS : undefined;
+};
+
+function ScheduleFields({ state, startsAt, closesAt }: { state: AdminFormState; startsAt?: number; closesAt?: number }) {
+  const [start, setStart] = useState(toBdInput(startsAt));
+  const [close, setClose] = useState(toBdInput(closesAt));
+  return (
+    <div className="sm:col-span-2 space-y-3 rounded-2xl border border-state-danger/25 bg-state-danger/[0.04] p-4">
+      <p className="field-label text-sm font-semibold" lang="bn">
+        লাইভ পরীক্ষার সময়সূচি (বাংলাদেশ সময়)
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className="field-label" htmlFor="startsAtInput" lang="bn">
+            শুরু হবে
+          </label>
+          <input id="startsAtInput" type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} className="field" />
+          <input type="hidden" name="startsAt" value={fromBdInput(start) ?? ""} />
+          <Err state={state} name="startsAt" />
+        </div>
+        <div>
+          <label className="field-label" htmlFor="closesAtInput" lang="bn">
+            শেষ হবে (এরপর আর কেউ দিতে পারবে না)
+          </label>
+          <input id="closesAtInput" type="datetime-local" value={close} onChange={(e) => setClose(e.target.value)} className="field" />
+          <input type="hidden" name="closesAt" value={fromBdInput(close) ?? ""} />
+          <Err state={state} name="closesAt" />
+        </div>
+      </div>
+      <p className="text-xs text-ink-subtle" lang="bn">
+        শুরুর আগে শিক্ষার্থীরা কাউন্টডাউন দেখবে। দেরিতে ঢুকলে শেষ সময় পর্যন্তই সময় পাবে। শেষ সময়ের পর সমাধান ও চূড়ান্ত র‍্যাংক প্রকাশ হবে।
+        দুটোই খালি রাখলে প্রকাশ করার পর থেকে সবসময় খোলা থাকবে।
+      </p>
+    </div>
+  );
 }
 
 const BLANK: ExamMetaDefaults = {
@@ -80,6 +126,7 @@ export function ExamMetaForm({ defaults = BLANK }: { defaults?: ExamMetaDefaults
   const [level, setLevel] = useState<Level>(defaults.level);
   const [stream, setStream] = useState<StreamId>(defaults.stream);
   const [isPaidState, setIsPaidState] = useState<boolean>(Boolean(defaults.isPaid));
+  const [typeState, setTypeState] = useState<ExamType>(defaults.type);
   const subjects = getSubjects(level, stream);
 
   return (
@@ -149,7 +196,7 @@ export function ExamMetaForm({ defaults = BLANK }: { defaults?: ExamMetaDefaults
         <label className="field-label" htmlFor="type" lang="bn">
           পরীক্ষার ধরন
         </label>
-        <select id="type" name="type" defaultValue={defaults.type} className="field" lang="bn">
+        <select id="type" name="type" value={typeState} onChange={(e) => setTypeState(e.target.value as ExamType)} className="field" lang="bn">
           {EXAM_TYPES.map((t) => (
             <option key={t} value={t}>
               {EXAM_TYPE_META[t].nameBn}
@@ -178,6 +225,8 @@ export function ExamMetaForm({ defaults = BLANK }: { defaults?: ExamMetaDefaults
         <input id="maxWarnings" name="maxWarnings" type="number" min={1} max={10} defaultValue={defaults.maxWarnings} className="field" />
         <Err state={state} name="maxWarnings" />
       </div>
+      {typeState === "live" && <ScheduleFields state={state} startsAt={defaults.startsAt} closesAt={defaults.closesAt} />}
+
       <div className="sm:col-span-2">
         <label className="field-label" htmlFor="showSolutions" lang="bn">
           পরীক্ষার পর সঠিক উত্তর ও সমাধান দেখানো হবে কি না?
@@ -321,6 +370,105 @@ export function QuestionForm({ examId }: { examId: string }) {
       </div>
       <div className="flex items-center gap-4">
         <Submit label="প্রশ্ন যোগ করো" />
+        <Saved state={state} />
+      </div>
+    </form>
+  );
+}
+
+const BULK_EXAMPLE = `১. নিচের কোনটি মৌলিক রাশি?
+ক) বল
+খ) বেগ
+গ) তড়িৎ প্রবাহ *
+ঘ) কাজ
+ব্যাখ্যা: SI পদ্ধতিতে মৌলিক রাশি সাতটি।
+টপিক: ভৌত রাশি
+
+২. 72 km/h বেগকে m/s এককে প্রকাশ করলে কত?
+ক) 10 m/s
+খ) 20 m/s *
+গ) 36 m/s
+ঘ) 259.2 m/s`;
+
+/** Paste many MCQs at once, with a live preview of what will be added. */
+export function BulkQuestionForm({ examId }: { examId: string }) {
+  const [state, action] = useFormState(bulkAddQuestionsAction, {});
+  const [text, setText] = useState("");
+  const [topic, setTopic] = useState("");
+  const parsed = useMemo(() => parseQuestions(text, { topic: topic || undefined }), [text, topic]);
+  useEffect(() => {
+    if (state.ok) setText("");
+  }, [state.ok]);
+
+  return (
+    <form action={action} className="space-y-4">
+      <input type="hidden" name="examId" value={examId} />
+      <details className="rounded-xl border border-surface-border bg-obsidian-950/50 p-3 text-sm text-ink-muted">
+        <summary lang="bn" className="cursor-pointer font-semibold text-ink">
+          কীভাবে লিখবে? (উদাহরণ দেখো)
+        </summary>
+        <ul lang="bn" className="mt-2 list-disc space-y-1 pl-5 text-xs">
+          <li>প্রতিটি প্রশ্নের মাঝে একটি ফাঁকা লাইন দাও।</li>
+          <li>অপশন: ক) খ) গ) ঘ) অথবা a) b) c) d)। সঠিক অপশনের শেষে * দাও (অথবা আলাদা লাইনে &quot;উত্তর: গ&quot;)।</li>
+          <li>ঐচ্ছিক লাইন: &quot;ব্যাখ্যা: …&quot;, &quot;টপিক: …&quot;, &quot;মান: ২&quot;।</li>
+        </ul>
+        <pre lang="bn" className="mt-3 whitespace-pre-wrap rounded-lg bg-obsidian-900 p-3 font-bangla text-xs text-ink">
+          {BULK_EXAMPLE}
+        </pre>
+        <button type="button" onClick={() => setText(BULK_EXAMPLE)} className="mt-2 text-xs font-semibold text-brand-300 hover:underline">
+          <span lang="bn">উদাহরণটি বসাও</span>
+        </button>
+      </details>
+
+      <div>
+        <label className="field-label" htmlFor="bulk-topic" lang="bn">
+          টপিক না দিলে যেটা বসবে (ঐচ্ছিক)
+        </label>
+        <input id="bulk-topic" name="topic" value={topic} onChange={(e) => setTopic(e.target.value)} className="field" lang="bn" placeholder="যেমন: অধ্যায় ১" />
+      </div>
+      <div>
+        <label className="field-label" htmlFor="bulk" lang="bn">
+          প্রশ্নগুলো এখানে পেস্ট করো
+        </label>
+        <textarea
+          id="bulk"
+          name="bulk"
+          rows={12}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          className="field font-bangla"
+          lang="bn"
+          placeholder={BULK_EXAMPLE}
+        />
+      </div>
+
+      {text.trim() && (
+        <div className="space-y-2 text-sm" aria-live="polite">
+          <p lang="bn" className="flex items-center gap-2 text-brand-300">
+            <CheckCircle2 className="h-4 w-4" /> {toBn(parsed.questions.length)}টি প্রশ্ন ঠিক আছে
+          </p>
+          {parsed.errors.length > 0 && (
+            <ul lang="bn" className="space-y-1 rounded-xl bg-state-danger/10 p-3 text-rose-200 ring-1 ring-state-danger/30">
+              {parsed.errors.map((e, i) => (
+                <li key={i}>
+                  প্রশ্ন {toBn(e.block)}: {e.message}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {state.error && (
+        <p lang="bn" role="alert" className="text-sm text-rose-300">
+          {state.error}
+        </p>
+      )}
+      <div className="flex items-center gap-3">
+        <Submit
+          label={parsed.questions.length ? `${toBn(parsed.questions.length)}টি প্রশ্ন যোগ করো` : "প্রশ্ন যোগ করো"}
+          disabled={!parsed.questions.length || parsed.errors.length > 0}
+        />
         <Saved state={state} />
       </div>
     </form>
