@@ -8,9 +8,9 @@ import { AntiCheatWrapper } from "@/components/security/AntiCheatWrapper";
 import { ExamProgressBar } from "@/components/exam/ExamProgressBar";
 import { ExamRulesGate } from "@/components/exam/ExamRulesGate";
 import { ExamTimer } from "@/components/exam/ExamTimer";
-import { OptionSelector } from "@/components/exam/QuestionCard";
+import { OptionSelector } from "@/components/exam/OptionSelector";
 import { SubmitDialog } from "@/components/exam/SubmitDialog";
-import { StrikeMeter, toLocalClock, type AttemptInfo, type Candidate } from "./LiveExamClient";
+import { StrikeMeter, toLocalClock, type AttemptInfo, type Candidate } from "./shared";
 import { cn, toBn } from "@/lib/utils";
 import type { CandidateExam, CandidateQuestion, OptionId, SubmitReason } from "@/lib/types";
 

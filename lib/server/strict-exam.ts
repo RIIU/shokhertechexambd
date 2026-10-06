@@ -4,7 +4,13 @@ import { store } from "./store";
 import type { Attempt, CandidateQuestion, ExamType, OptionId, StoredExam } from "@/lib/types";
 
 /**
- * Strict exams (live and model tests) are served one question at a time:
+ * Every exam is served one question at a time by the server, in one of two modes.
+ *
+ * Practice (practice sets and archive): questions in the authored order, and
+ * each answer is locked and immediately marked right/wrong with the
+ * explanation, so the answer can't be changed after seeing the key.
+ *
+ * Strict (live and model tests), for ranking:
  *  - the exam page never contains questions; each one is fetched only after
  *    the previous one is answered or skipped, and earlier ones are never sent again
  *  - every attempt gets its own question and option order, so "Q5 is খ"
@@ -54,9 +60,9 @@ function shuffle<T>(items: readonly T[], seed: string): T[] {
   return out;
 }
 
-/** This attempt's question order. */
+/** This attempt's question order (authored order for practice). */
 export function questionOrder(exam: StoredExam, attemptId: string) {
-  return shuffle(exam.questions, `order:${attemptId}`);
+  return isStrict(exam) ? shuffle(exam.questions, `order:${attemptId}`) : exam.questions;
 }
 
 /* ------------------------------ Device lock ----------------------------- */
@@ -92,12 +98,19 @@ export function currentQuestion(exam: StoredExam, attempt: Attempt): StrictQuest
   return {
     index,
     total: order.length,
-    question: { ...q, options: shuffle(q.options, `options:${attempt.id}:${q.id}`) },
+    question: isStrict(exam) ? { ...q, options: shuffle(q.options, `options:${attempt.id}:${q.id}`) } : q,
   };
 }
 
+/** Practice mode: shown right after answering. */
+export interface Feedback {
+  correct: boolean;
+  correctOptionId?: OptionId;
+  explanation?: string;
+}
+
 export type AnswerResult =
-  | { ok: true; next?: StrictQuestion }
+  | { ok: true; next?: StrictQuestion; feedback?: Feedback }
   | { ok: false; error: "not-current" | "closed" | "conflict" };
 
 /** Records the answer (or a skip) for the current question only. */
@@ -116,23 +129,35 @@ export async function answerCurrent(
   const answers = { ...before, [questionId]: optionId };
   const saved = await (await store()).saveProgress(attempt.id, attempt.userId, answers, Object.keys(before).length);
   if (!saved) return { ok: false, error: "conflict" };
-  return { ok: true, next: currentQuestion(exam, { ...attempt, answers }) };
+  const next = currentQuestion(exam, { ...attempt, answers });
+  if (isStrict(exam)) return { ok: true, next };
+
+  const q = exam.questions.find((x) => x.id === questionId)!;
+  const reveal = exam.showSolutions !== false;
+  return {
+    ok: true,
+    next,
+    feedback: {
+      correct: optionId === q.correctOptionId,
+      ...(reveal ? { correctOptionId: q.correctOptionId, explanation: q.explanation } : {}),
+    },
+  };
 }
 
 /* ---------------------------- Request guard ----------------------------- */
 
-export type StrictGuard =
+export type AttemptGuard =
   | { ok: true; exam: StoredExam; attempt: Attempt }
   | { ok: false; status: number; error: string };
 
-/** Who may read or answer a strict attempt: its owner, from the browser that started it, while it is open. */
-export async function guardStrictAttempt(attemptId: string, userId: string, deviceCookie: string | undefined): Promise<StrictGuard> {
+/** Who may read or answer an attempt: its owner (strict: from the browser that started it), while it is open. */
+export async function guardAttempt(attemptId: string, userId: string, deviceCookie: string | undefined): Promise<AttemptGuard> {
   const s = await store();
   const attempt = await s.getAttempt(attemptId);
   if (!attempt || attempt.userId !== userId) return { ok: false, status: 404, error: "not-found" };
   const exam = await s.getExam(attempt.examId);
-  if (!exam || !isStrict(exam)) return { ok: false, status: 404, error: "not-found" };
-  if (!isAttemptDevice(attempt.id, deviceCookie)) return { ok: false, status: 423, error: "other-device" };
+  if (!exam) return { ok: false, status: 404, error: "not-found" };
+  if (isStrict(exam) && !isAttemptDevice(attempt.id, deviceCookie)) return { ok: false, status: 423, error: "other-device" };
   if (attempt.submittedAt) return { ok: false, status: 409, error: "already-submitted" };
   return { ok: true, exam, attempt };
 }

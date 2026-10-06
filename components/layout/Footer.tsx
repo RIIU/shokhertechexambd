@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-surface-border bg-section">
+    <footer className="mt-auto border-t border-surface-border bg-section">
       <div className="container flex flex-col items-center justify-between gap-3 py-8 text-sm text-ink-subtle sm:flex-row">
         <p>
           © {new Date().getFullYear()} Shokher Tech Academy.{" "}

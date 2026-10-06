@@ -25,10 +25,10 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/", label: "হোম" },
-  { href: "/packages", label: "প্যাকেজসমূহ" },
-  { href: "/ssc", label: "এসএসসি" },
-  { href: "/hsc", label: "এইচএসসি" },
+  { href: "/practice", label: "প্র্যাকটিস" },
+  { href: "/live", label: "লাইভ পরীক্ষা" },
   { href: "/subjects", label: "বিষয়সমূহ" },
+  { href: "/packages", label: "প্যাকেজ" },
 ];
 
 function UserDropdown({

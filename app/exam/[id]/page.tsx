@@ -10,8 +10,9 @@ import { getLatestUserPayment } from "@/lib/server/payments";
 import { toCandidateExam } from "@/lib/exams/grading";
 import { clientIp } from "@/lib/server/request";
 import { formatPhone } from "@/lib/phone";
-import { LiveExamClient } from "./LiveExamClient";
+import { PracticeClient } from "./PracticeClient";
 import { StrictExamClient } from "./StrictExamClient";
+import { findSubject } from "@/lib/data/catalog";
 import { isStrict } from "@/lib/server/strict-exam";
 import { PaidExamGate } from "@/components/exam/PaidExamGate";
 
@@ -78,7 +79,15 @@ export default async function ExamPage({ params }: ExamPageProps) {
     );
   }
 
-  return <LiveExamClient exam={toCandidateExam(exam)} candidate={candidate} initialAttempt={initialAttempt} />;
+  // Practice and archive: relaxed, one question at a time with instant feedback.
+  return (
+    <PracticeClient
+      exam={{ ...toCandidateExam(exam), questions: [] }}
+      questionCount={exam.questions.length}
+      subjectBn={findSubject(exam.level, exam.stream, exam.subjectId)?.nameBn}
+      initialAttempt={initialAttempt}
+    />
+  );
 }
 
 function AlreadySubmitted({ attemptId, title }: { attemptId: string; title: string }) {

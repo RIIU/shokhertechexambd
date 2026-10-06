@@ -17,7 +17,6 @@ export function MobileTabBar() {
   const pathname = usePathname() ?? "/";
   if (isFocusRoute(pathname)) return null;
 
-  const subjectsHref = user?.level && user.stream ? `/${user.level}/${user.stream}` : "/ssc";
   const account: { href: string; label: string; icon: LucideIcon } = !user
     ? { href: `/login?next=${encodeURIComponent(pathname)}`, label: "লগইন", icon: LogIn }
     : user.role === "admin"
@@ -27,7 +26,7 @@ export function MobileTabBar() {
   const on = (prefix: string) => (prefix === "/" ? pathname === "/" : pathname.startsWith(prefix));
   const tabs = [
     { href: "/", label: "হোম", icon: Home, active: on("/") },
-    { href: subjectsHref, label: "বিষয়", icon: BookOpen, active: on("/ssc") || on("/hsc") },
+    { href: "/practice", label: "প্র্যাকটিস", icon: BookOpen, active: on("/practice") },
     null, // centre button
     { href: account.href, label: account.label, icon: account.icon, active: on("/dashboard") || on("/admin") || on("/login") || on("/results") },
   ];
