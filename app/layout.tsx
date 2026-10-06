@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
-import { Hind_Siliguri, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Noto_Sans_Bengali, Plus_Jakarta_Sans } from "next/font/google";
 import { AppShellProvider } from "@/components/layout/AppShell";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -17,11 +17,10 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   display: "swap",
 });
-// Bangla: Ador Noirrit from the Bangla web font CDN (see the <link> below),
-// with Hind Siliguri (Google Fonts, OFL) as the self-hosted fallback.
-const bangla = Hind_Siliguri({
+// Bangla face (Google Fonts, SIL Open Font License): clear conjuncts at small
+// sizes and a full weight range. Variable font, self-hosted by next/font.
+const bangla = Noto_Sans_Bengali({
   subsets: ["bengali"],
-  weight: ["400", "500", "600", "700"],
   variable: "--font-bangla",
   display: "swap",
 });
@@ -50,10 +49,6 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bn" className={`dark ${inter.variable} ${jakarta.variable} ${bangla.variable}`}>
-      <head>
-        <link rel="preconnect" href="https://fonts.maateen.me" crossOrigin="" />
-        <link rel="stylesheet" href="https://fonts.maateen.me/ador-noirrit/font.css" />
-      </head>
       <body>
         <AppShellProvider>
           <Navbar />

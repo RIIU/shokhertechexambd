@@ -100,12 +100,12 @@ module.exports = {
         "8xl": ["6rem", { lineHeight: "1.1" }],
       },
       fontFamily: {
-        sans: ["var(--font-inter)", '"AdorNoirrit"', '"Ador Noirrit"', "var(--font-bangla)", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "var(--font-bangla)", "system-ui", "sans-serif"],
         display: ["var(--font-jakarta)", "var(--font-inter)", "system-ui", "sans-serif"],
         // Every Bangla string uses this family. Inter comes first and has no
         // Bengali glyphs, so English words and Latin digits inside a Bangla
         // sentence stay in Inter while Bangla letters and ০–৯ use the Bangla face.
-        bangla: ["var(--font-inter)", '"AdorNoirrit"', '"Ador Noirrit"', "var(--font-bangla)", "sans-serif"],
+        bangla: ["var(--font-inter)", "var(--font-bangla)", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       backgroundImage: {
