@@ -2,6 +2,7 @@ import "server-only";
 import { listAttempts } from "./attempts";
 import { listExams } from "./exams";
 import { getSubjects } from "@/lib/data/catalog";
+import { solutionsLocked } from "@/lib/live-window";
 import type { Level, OptionId, QuestionOption, StoredExam, StreamId, Subject } from "@/lib/types";
 
 /**
@@ -99,6 +100,7 @@ export async function recentMistakes(userId: string, limit = 60): Promise<Mistak
   for (const a of attempts) {
     const exam = exams.get(a.examId);
     if (!exam || !a.result) continue;
+    if (solutionsLocked(exam)) continue; // live exam still running: answers stay hidden
     const reveal = exam.showSolutions !== false;
     for (const q of a.result.questions) {
       const key = `${a.examId}:${q.id}`;

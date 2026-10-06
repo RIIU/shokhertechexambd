@@ -23,8 +23,16 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: "payment-required", message: "পেইড লাইভ পরীক্ষায় অংশ নিতে ফি প্রদান প্রয়োজন।" }, { status: 403 });
   }
 
-  const res = await startAttempt(exam, user.id, { ip: clientIp(), userAgent: headers().get("user-agent")?.slice(0, 200) });
-  if (!res.ok) return NextResponse.json({ error: res.error, attemptId: res.attemptId }, { status: 409 });
+  const res = await startAttempt(
+    exam,
+    user.id,
+    { ip: clientIp(), userAgent: headers().get("user-agent")?.slice(0, 200) },
+    { ignoreSchedule: user.role === "admin" },
+  );
+  if (!res.ok) {
+    if (res.error === "already-submitted") return NextResponse.json({ error: res.error, attemptId: res.attemptId }, { status: 409 });
+    return NextResponse.json({ error: res.error, startsAt: exam.startsAt, closesAt: exam.closesAt }, { status: 403 });
+  }
 
   const { id, startedAt, endsAt, strikes } = res.attempt;
 

@@ -41,6 +41,12 @@ function parseExamMeta(form: FormData): { data?: ExamMetaInput; fieldErrors?: Ad
   const isPaid = form.get("isPaid") === "true";
   const priceRaw = num(form, "price");
   const price = isPaid ? (Number.isFinite(priceRaw) && priceRaw >= 0 ? priceRaw : 50) : 0;
+  const when = (key: string) => {
+    const v = Number(str(form, key));
+    return str(form, key) && Number.isFinite(v) && v > 0 ? v : undefined;
+  };
+  const startsAt = type === "live" ? when("startsAt") : undefined;
+  const closesAt = type === "live" ? when("closesAt") : undefined;
 
   if (titleBn.length < 3) fieldErrors.titleBn = "বাংলা শিরোনাম দাও";
   if (!isLevel(level)) fieldErrors.level = "স্তর বেছে নাও";
@@ -51,6 +57,7 @@ function parseExamMeta(form: FormData): { data?: ExamMetaInput; fieldErrors?: Ad
   if (!Number.isFinite(negativeMark) || negativeMark < 0 || negativeMark > 1) fieldErrors.negativeMark = "০ থেকে ১";
   if (!Number.isInteger(maxWarnings) || maxWarnings < 1 || maxWarnings > 10) fieldErrors.maxWarnings = "১ থেকে ১০";
   if (isPaid && price < 0) fieldErrors.price = "সঠিক ফি লেখো";
+  if (startsAt && closesAt && closesAt <= startsAt) fieldErrors.closesAt = "শেষের সময় শুরুর পরে হতে হবে";
   if (Object.keys(fieldErrors).length || !isLevel(level) || !isStream(stream)) return { fieldErrors };
 
   return {
@@ -67,6 +74,8 @@ function parseExamMeta(form: FormData): { data?: ExamMetaInput; fieldErrors?: Ad
       showSolutions,
       isPaid,
       price,
+      startsAt,
+      closesAt,
     },
   };
 }

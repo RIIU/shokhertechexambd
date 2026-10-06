@@ -25,6 +25,7 @@ import {
 import { AccuracyDonut, TopicBars } from "@/components/result/ResultCharts";
 import { ShareResult } from "@/components/result/ShareResult";
 import { percentileOf, verdictFor } from "@/lib/result-copy";
+import { formatBdTime } from "@/lib/live-window";
 import { cn, formatClock, OPTION_LABEL_BN, toBn } from "@/lib/utils";
 import type { ExamResult, QuestionResult } from "@/lib/types";
 
@@ -62,6 +63,8 @@ interface ResultViewProps {
   backHref: string;
   backLabel: string;
   showSolutions?: boolean;
+  /** Live exam still running: solutions open at this time. */
+  solutionsUnlockAt?: number;
   /** Public link for the owner to share (absent for admins viewing others). */
   sharePath?: string;
   /** Who the shared card is about (the owner). */
@@ -77,6 +80,7 @@ export function ResultView({
   backHref,
   backLabel,
   showSolutions = true,
+  solutionsUnlockAt,
   sharePath,
   sharer,
   leaderboardHref,
@@ -333,10 +337,12 @@ export function ResultView({
                 <Lock className="h-6 w-6" strokeWidth={1.75} />
               </div>
               <h3 lang="bn" className="mb-2 text-lg font-bold text-ink">
-                সমাধান এই মুহূর্তে বন্ধ
+                {solutionsUnlockAt ? `সমাধান খুলবে ${formatBdTime(solutionsUnlockAt)}` : "সমাধান এই মুহূর্তে বন্ধ"}
               </h3>
               <p lang="bn" className="mx-auto max-w-lg text-sm leading-relaxed text-ink-muted">
-                এই পরীক্ষার সঠিক উত্তর ও ব্যাখ্যা অ্যাডমিন গোপন রেখেছেন। তোমার স্কোর, সময়, নির্ভুলতা আর র‍্যাংক উপরে দেখতে পাচ্ছ।
+                {solutionsUnlockAt
+                  ? "লাইভ পরীক্ষা এখনো চলছে, তাই সবার পরীক্ষা শেষ হলে সঠিক উত্তর ও ব্যাখ্যা দেখাবে। তোমার স্কোর আর এখন পর্যন্ত র‍্যাংক উপরে দেখতে পাচ্ছ।"
+                  : "এই পরীক্ষার সঠিক উত্তর ও ব্যাখ্যা অ্যাডমিন গোপন রেখেছেন। তোমার স্কোর, সময়, নির্ভুলতা আর র‍্যাংক উপরে দেখতে পাচ্ছ।"}
               </p>
             </div>
           ) : (

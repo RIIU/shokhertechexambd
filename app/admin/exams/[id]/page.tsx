@@ -114,6 +114,8 @@ export default async function EditExamPage({ params, searchParams }: { params: {
                 showSolutions: exam.showSolutions !== false,
                 isPaid: Boolean(exam.isPaid),
                 price: exam.price ?? 50,
+                startsAt: exam.startsAt,
+                closesAt: exam.closesAt,
               }}
             />
           </Panel>

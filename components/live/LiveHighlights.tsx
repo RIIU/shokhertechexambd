@@ -7,6 +7,7 @@ import { listExams } from "@/lib/server/exams";
 import { classifyError } from "@/lib/server/diagnose";
 import { findSubject } from "@/lib/data/catalog";
 import { LIVE_EXAM_HREF } from "@/lib/routes";
+import { liveState } from "@/lib/live-window";
 
 /** Home page strip with the most popular live exams. Renders nothing if there are none or the database is down. */
 export async function LiveHighlights() {
@@ -18,6 +19,7 @@ export async function LiveHighlights() {
     const scores = await scoresByExam(exams.map((e) => e.id));
     const attempts = user ? await listAttempts({ userId: user.id, submittedOnly: true }) : [];
     const shown = [...exams]
+      .filter((e) => liveState(e) !== "closed")
       .filter((e) => !user || user.role !== "student" || !user.level || e.level === user.level)
       .sort((a, b) => (scores.get(b.id)?.length ?? 0) - (scores.get(a.id)?.length ?? 0))
       .slice(0, 3);

@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Clock, FileQuestion, MinusCircle, Trophy, Users } from "lucide-react";
+import { ArrowRight, CalendarClock, CheckCircle2, Clock, FileQuestion, Lock, MinusCircle, Trophy, Users } from "lucide-react";
+import { InlineCountdown } from "./Countdown";
+import { formatBdTime, liveState } from "@/lib/live-window";
 import { SubjectIcon } from "@/components/subjects/SubjectIcon";
 import { ACCENT_STYLES } from "@/lib/accent";
 import { LEVELS, STREAMS } from "@/lib/data/catalog";
@@ -20,6 +22,7 @@ export interface LiveExamCardProps {
 export function LiveExamCard({ exam, subject, participants, topScore, mine, signedIn }: LiveExamCardProps) {
   const accent = ACCENT_STYLES[subject?.accent ?? "brand"];
   const totalMarks = exam.questions.reduce((sum, q) => sum + q.marks, 0);
+  const state = liveState(exam);
 
   return (
     <article className="group card flex h-full flex-col p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift">
@@ -42,6 +45,15 @@ export function LiveExamCard({ exam, subject, participants, topScore, mine, sign
             <CheckCircle2 className="h-3.5 w-3.5" />
             <span lang="bn">দিয়েছ</span>
           </span>
+        ) : state === "upcoming" && exam.startsAt ? (
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-amber-400/10 px-2.5 py-1 text-[11px] font-semibold text-amber-300 ring-1 ring-amber-400/25">
+            <CalendarClock className="h-3.5 w-3.5" />
+            <InlineCountdown to={exam.startsAt} refresh />
+          </span>
+        ) : state === "closed" ? (
+          <span lang="bn" className="inline-flex shrink-0 items-center rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-ink-muted ring-1 ring-white/10">
+            শেষ হয়েছে
+          </span>
         ) : (
           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-300 ring-1 ring-rose-500/15">
             <span className="relative flex h-1.5 w-1.5">
@@ -53,9 +65,16 @@ export function LiveExamCard({ exam, subject, participants, topScore, mine, sign
         )}
       </header>
 
-      <h3 lang="bn" className="mb-4 line-clamp-2 text-lg font-bold leading-snug text-ink">
+      <h3 lang="bn" className={cn("line-clamp-2 text-lg font-bold leading-snug text-ink", exam.startsAt || exam.closesAt ? "mb-1" : "mb-4")}>
         {exam.titleBn}
       </h3>
+      {(exam.startsAt || exam.closesAt) && (
+        <p lang="bn" className="mb-4 text-xs text-ink-subtle">
+          {exam.startsAt && <>শুরু {formatBdTime(exam.startsAt)}</>}
+          {exam.startsAt && exam.closesAt && " · "}
+          {exam.closesAt && <>শেষ {formatBdTime(exam.closesAt)}</>}
+        </p>
+      )}
 
       <dl className="mb-5 grid grid-cols-3 gap-2 text-center">
         {[
@@ -111,16 +130,24 @@ export function LiveExamCard({ exam, subject, participants, topScore, mine, sign
               <ArrowRight className="h-4 w-4" />
             </Link>
           </>
+        ) : state === "upcoming" ? (
+          <Link href={`/exam/${exam.id}`} className="btn-ghost flex-1 py-2.5">
+            <Lock className="h-4 w-4" />
+            <span lang="bn">অপেক্ষা কক্ষে যাও</span>
+          </Link>
+        ) : state === "closed" ? (
+          <Link href={`/leaderboard/${exam.id}`} className="btn-ghost flex-1 py-2.5">
+            <Trophy className="h-4 w-4" />
+            <span lang="bn">চূড়ান্ত র‍্যাংক দেখো</span>
+          </Link>
         ) : (
-          <>
-            <Link
-              href={signedIn ? `/exam/${exam.id}` : `/login?next=${encodeURIComponent(`/exam/${exam.id}`)}`}
-              className="btn-primary flex-1 py-2.5"
-            >
-              <span lang="bn">পরীক্ষা শুরু করো</span>
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </>
+          <Link
+            href={signedIn ? `/exam/${exam.id}` : `/login?next=${encodeURIComponent(`/exam/${exam.id}`)}`}
+            className="btn-primary flex-1 py-2.5"
+          >
+            <span lang="bn">পরীক্ষা শুরু করো</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         )}
         <Link
           href={`/leaderboard/${exam.id}`}

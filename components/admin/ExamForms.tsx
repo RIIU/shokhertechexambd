@@ -56,6 +56,51 @@ export interface ExamMetaDefaults {
   showSolutions?: boolean;
   isPaid?: boolean;
   price?: number;
+  startsAt?: number;
+  closesAt?: number;
+}
+
+/* Live schedule inputs are entered and shown in Bangladesh time (UTC+6, no DST),
+   whatever the admin's device or the server's timezone is. */
+const BD_OFFSET_MS = 6 * 3600 * 1000;
+const toBdInput = (ts?: number) => (ts ? new Date(ts + BD_OFFSET_MS).toISOString().slice(0, 16) : "");
+const fromBdInput = (v: string) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(v);
+  return m ? Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!, +m[4]!, +m[5]!) - BD_OFFSET_MS : undefined;
+};
+
+function ScheduleFields({ state, startsAt, closesAt }: { state: AdminFormState; startsAt?: number; closesAt?: number }) {
+  const [start, setStart] = useState(toBdInput(startsAt));
+  const [close, setClose] = useState(toBdInput(closesAt));
+  return (
+    <div className="sm:col-span-2 space-y-3 rounded-2xl border border-state-danger/25 bg-state-danger/[0.04] p-4">
+      <p className="field-label text-sm font-semibold" lang="bn">
+        লাইভ পরীক্ষার সময়সূচি (বাংলাদেশ সময়)
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className="field-label" htmlFor="startsAtInput" lang="bn">
+            শুরু হবে
+          </label>
+          <input id="startsAtInput" type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} className="field" />
+          <input type="hidden" name="startsAt" value={fromBdInput(start) ?? ""} />
+          <Err state={state} name="startsAt" />
+        </div>
+        <div>
+          <label className="field-label" htmlFor="closesAtInput" lang="bn">
+            শেষ হবে (এরপর আর কেউ দিতে পারবে না)
+          </label>
+          <input id="closesAtInput" type="datetime-local" value={close} onChange={(e) => setClose(e.target.value)} className="field" />
+          <input type="hidden" name="closesAt" value={fromBdInput(close) ?? ""} />
+          <Err state={state} name="closesAt" />
+        </div>
+      </div>
+      <p className="text-xs text-ink-subtle" lang="bn">
+        শুরুর আগে শিক্ষার্থীরা কাউন্টডাউন দেখবে। দেরিতে ঢুকলে শেষ সময় পর্যন্তই সময় পাবে। শেষ সময়ের পর সমাধান ও চূড়ান্ত র‍্যাংক প্রকাশ হবে।
+        দুটোই খালি রাখলে প্রকাশ করার পর থেকে সবসময় খোলা থাকবে।
+      </p>
+    </div>
+  );
 }
 
 const BLANK: ExamMetaDefaults = {
@@ -80,6 +125,7 @@ export function ExamMetaForm({ defaults = BLANK }: { defaults?: ExamMetaDefaults
   const [level, setLevel] = useState<Level>(defaults.level);
   const [stream, setStream] = useState<StreamId>(defaults.stream);
   const [isPaidState, setIsPaidState] = useState<boolean>(Boolean(defaults.isPaid));
+  const [typeState, setTypeState] = useState<ExamType>(defaults.type);
   const subjects = getSubjects(level, stream);
 
   return (
@@ -149,7 +195,7 @@ export function ExamMetaForm({ defaults = BLANK }: { defaults?: ExamMetaDefaults
         <label className="field-label" htmlFor="type" lang="bn">
           পরীক্ষার ধরন
         </label>
-        <select id="type" name="type" defaultValue={defaults.type} className="field" lang="bn">
+        <select id="type" name="type" value={typeState} onChange={(e) => setTypeState(e.target.value as ExamType)} className="field" lang="bn">
           {EXAM_TYPES.map((t) => (
             <option key={t} value={t}>
               {EXAM_TYPE_META[t].nameBn}
@@ -178,6 +224,8 @@ export function ExamMetaForm({ defaults = BLANK }: { defaults?: ExamMetaDefaults
         <input id="maxWarnings" name="maxWarnings" type="number" min={1} max={10} defaultValue={defaults.maxWarnings} className="field" />
         <Err state={state} name="maxWarnings" />
       </div>
+      {typeState === "live" && <ScheduleFields state={state} startsAt={defaults.startsAt} closesAt={defaults.closesAt} />}
+
       <div className="sm:col-span-2">
         <label className="field-label" htmlFor="showSolutions" lang="bn">
           পরীক্ষার পর সঠিক উত্তর ও সমাধান দেখানো হবে কি না?

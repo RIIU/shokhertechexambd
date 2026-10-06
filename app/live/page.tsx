@@ -7,6 +7,7 @@ import { listAttempts, rankFrom, scoresByExam } from "@/lib/server/attempts";
 import { listExams } from "@/lib/server/exams";
 import { LEVELS, findSubject, isLevel } from "@/lib/data/catalog";
 import { cn, toBn } from "@/lib/utils";
+import { liveState } from "@/lib/live-window";
 import type { Level } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -40,10 +41,22 @@ export default async function LivePage({ searchParams }: { searchParams: { level
     }
   }
 
-  // Not yet taken first, then the most popular.
-  const ordered = [...exams].sort(
-    (a, b) => Number(mine.has(a.id)) - Number(mine.has(b.id)) || (scores.get(b.id)?.length ?? 0) - (scores.get(a.id)?.length ?? 0),
-  );
+  const popular = (a: (typeof exams)[number], b: (typeof exams)[number]) => (scores.get(b.id)?.length ?? 0) - (scores.get(a.id)?.length ?? 0);
+  const groups = [
+    { key: "open", title: "এখন চলছে", items: exams.filter((e) => !mine.has(e.id) && liveState(e) === "open").sort(popular) },
+    {
+      key: "upcoming",
+      title: "আসন্ন",
+      items: exams.filter((e) => !mine.has(e.id) && liveState(e) === "upcoming").sort((a, b) => (a.startsAt ?? 0) - (b.startsAt ?? 0)),
+    },
+    { key: "mine", title: "তুমি দিয়েছ", items: exams.filter((e) => mine.has(e.id)).sort(popular) },
+    {
+      key: "closed",
+      title: "শেষ হয়েছে",
+      items: exams.filter((e) => !mine.has(e.id) && liveState(e) === "closed").sort((a, b) => (b.closesAt ?? 0) - (a.closesAt ?? 0)),
+    },
+  ].filter((g) => g.items.length);
+  const ordered = groups.flatMap((g) => g.items);
   const totalParticipants = all.reduce((n, e) => n + (scores.get(e.id)?.length ?? 0), 0);
 
   return (
@@ -106,23 +119,39 @@ export default async function LivePage({ searchParams }: { searchParams: { level
 
       <section className="container pb-20" aria-label="লাইভ পরীক্ষার তালিকা">
         {ordered.length ? (
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {ordered.map((exam) => {
-              const s = scores.get(exam.id) ?? [];
-              return (
-                <li key={exam.id}>
-                  <LiveExamCard
-                    exam={exam}
-                    subject={findSubject(exam.level, exam.stream, exam.subjectId)}
-                    participants={s.length}
-                    topScore={s.length ? Math.max(...s) : undefined}
-                    mine={mine.get(exam.id)}
-                    signedIn={Boolean(user)}
-                  />
-                </li>
-              );
-            })}
-          </ul>
+          <div className="space-y-10">
+            {groups.map((g) => (
+              <div key={g.key}>
+                <h2 lang="bn" className="mb-4 flex items-center gap-2 text-lg font-bold text-ink">
+                  {g.key === "open" && (
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500 opacity-60" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />
+                    </span>
+                  )}
+                  {g.title}
+                  <span className="text-sm font-normal text-ink-subtle">{toBn(g.items.length)}</span>
+                </h2>
+                <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {g.items.map((exam) => {
+                    const s = scores.get(exam.id) ?? [];
+                    return (
+                      <li key={exam.id}>
+                        <LiveExamCard
+                          exam={exam}
+                          subject={findSubject(exam.level, exam.stream, exam.subjectId)}
+                          participants={s.length}
+                          topScore={s.length ? Math.max(...s) : undefined}
+                          mine={mine.get(exam.id)}
+                          signedIn={Boolean(user)}
+                        />
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="card flex flex-col items-center px-6 py-16 text-center">
             <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-hover text-ink-subtle">

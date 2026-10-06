@@ -28,10 +28,11 @@ import { BkashLogo, NagadLogo, RocketLogo, UpayLogo } from "@/components/payment
 import { LEVELS, STREAMS, getSubjects } from "@/lib/data/catalog";
 import { formatMinutesBn, toBn, formatDateBn } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import type { PaymentMethod, PaymentRequest, PlanType, PublicUser, StoredExam } from "@/lib/types";
+import type { ExamMeta, PaymentMethod, PaymentRequest, PlanType, PublicUser } from "@/lib/types";
 
 interface PaidExamGateProps {
-  exam: StoredExam;
+  /** Exam details only: never the questions or answer key (this is a client component). */
+  exam: ExamMeta & { questionCount: number };
   user: PublicUser;
   initialPayment?: PaymentRequest | null;
 }
@@ -156,7 +157,7 @@ export function PaidExamGate({ exam, user, initialPayment }: PaidExamGateProps) 
             <div className="rounded-2xl border border-surface-border bg-obsidian-900 p-3.5 text-center">
               <FileQuestion className="mx-auto h-5 w-5 text-teal-400 mb-1" />
               <p lang="bn" className="text-xs text-ink-subtle">প্রশ্ন সংখ্যা</p>
-              <p lang="bn" className="font-bold text-ink text-sm sm:text-base">{toBn(exam.questions?.length ?? 0)}টি</p>
+              <p lang="bn" className="font-bold text-ink text-sm sm:text-base">{toBn(exam.questionCount)}টি</p>
             </div>
 
             <div className="rounded-2xl border border-surface-border bg-obsidian-900 p-3.5 text-center">
