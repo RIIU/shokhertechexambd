@@ -8,7 +8,7 @@ import type { Attempt, ExamResult, StoredExam, StoredViolation, SubmitPayload, V
 export const SUBMIT_GRACE_MS = 2 * 60 * 1000;
 
 export type StartResult =
-  | { ok: true; attempt: Attempt }
+  | { ok: true; attempt: Attempt; created: boolean }
   | { ok: false; error: "already-submitted"; attemptId: string };
 
 /**
@@ -20,7 +20,7 @@ export async function startAttempt(exam: StoredExam, userId: string, meta: { ip?
   const s = await store();
   const mine = await s.findAttempts({ examId: exam.id, userId });
   const open = mine.find((a) => !a.submittedAt);
-  if (open) return { ok: true, attempt: open };
+  if (open) return { ok: true, attempt: open, created: false };
   const done = mine.find((a) => a.submittedAt);
   if (exam.type === "live" && done) return { ok: false, error: "already-submitted", attemptId: done.id };
 
@@ -37,9 +37,9 @@ export async function startAttempt(exam: StoredExam, userId: string, meta: { ip?
   if ((await s.insertAttempt(attempt)) === "conflict") {
     // Two tabs pressed "start" at once: resume the one that won.
     const winner = (await s.findAttempts({ examId: exam.id, userId, submitted: false }))[0];
-    if (winner) return { ok: true, attempt: winner };
+    if (winner) return { ok: true, attempt: winner, created: false };
   }
-  return { ok: true, attempt };
+  return { ok: true, attempt, created: true };
 }
 
 export async function getOpenAttempt(examId: string, userId: string): Promise<Attempt | undefined> {

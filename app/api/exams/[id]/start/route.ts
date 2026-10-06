@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { getCurrentUser } from "@/lib/server/auth";
 import { getExam, getPublishedExam } from "@/lib/server/exams";
 import { startAttempt } from "@/lib/server/attempts";
 import { clientIp } from "@/lib/server/request";
+import { DEVICE_COOKIE, deviceToken, isAttemptDevice, isStrict } from "@/lib/server/strict-exam";
 
 export const dynamic = "force-dynamic";
 
@@ -26,5 +27,22 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
   if (!res.ok) return NextResponse.json({ error: res.error, attemptId: res.attemptId }, { status: 409 });
 
   const { id, startedAt, endsAt, strikes } = res.attempt;
+
+  // Strict exams: only the browser that started the attempt may continue it.
+  if (isStrict(exam)) {
+    const cookieName = `${DEVICE_COOKIE}_${id}`;
+    if (res.created) {
+      cookies().set(cookieName, deviceToken(id), {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production" && process.env.INSECURE_COOKIES !== "1",
+        path: "/",
+        maxAge: Math.ceil((endsAt - Date.now()) / 1000) + 600,
+      });
+    } else if (!isAttemptDevice(id, cookies().get(cookieName)?.value)) {
+      return NextResponse.json({ error: "other-device" }, { status: 423 });
+    }
+  }
+
   return NextResponse.json({ attempt: { id, startedAt, endsAt, strikes, serverNow: Date.now() } }, { headers: { "Cache-Control": "no-store" } });
 }

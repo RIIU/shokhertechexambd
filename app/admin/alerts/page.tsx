@@ -18,6 +18,9 @@ const KIND_BN: Record<ViolationKind, string> = {
   "blocked-shortcut": "নিষিদ্ধ শর্টকাট",
   "context-menu": "রাইট-ক্লিক",
   clipboard: "কপি/পেস্ট",
+  "split-screen": "স্প্লিট-স্ক্রিন / ছোট উইন্ডো",
+  extension: "ব্রাউজার এক্সটেনশন (সম্ভাব্য AI)",
+  "multi-screen": "একাধিক মনিটর",
 };
 
 export default async function AlertsPage({ searchParams }: { searchParams: { all?: string; attempt?: string } }) {

@@ -37,6 +37,12 @@ export interface Store {
   insertAttempt(attempt: Attempt): Promise<"ok" | "conflict">;
   /** Writes the submission only if the attempt is still unsubmitted. Returns false otherwise. */
   completeAttempt(id: string, userId: string, patch: Required<Pick<Attempt, "submittedAt" | "reason" | "answers" | "strikes" | "result">>): Promise<boolean>;
+  /**
+   * Saves answers given so far (strict one-question-at-a-time exams) while the
+   * attempt is still open. `expected` is the answer count the caller read, so
+   * two concurrent requests can't both record the same question.
+   */
+  saveProgress(id: string, userId: string, answers: Attempt["answers"] & object, expected: number): Promise<boolean>;
   /** Submitted scores per exam, for ranking. */
   scoresByExam(examIds: string[]): Promise<Map<string, number[]>>;
 

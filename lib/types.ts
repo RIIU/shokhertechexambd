@@ -153,7 +153,10 @@ export type ViolationKind =
   | "blocked-shortcut"
   | "context-menu"
   | "clipboard"
-  | "watermark-tamper";
+  | "watermark-tamper"
+  | "split-screen"
+  | "extension"
+  | "multi-screen";
 
 export interface ViolationEvent {
   kind: ViolationKind;

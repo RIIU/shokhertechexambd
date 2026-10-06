@@ -578,6 +578,17 @@ export const supabaseStore: Store = {
     check(error, "completeAttempt");
     return (data?.length ?? 0) > 0;
   },
+  async saveProgress(id, userId, answers, expected) {
+    const current = await supabaseStore.getAttempt(id);
+    if (!current || current.userId !== userId || current.submittedAt) return false;
+    if (Object.keys(current.answers ?? {}).length !== expected) return false;
+    // Compare-and-set on the previous answers so a concurrent save can't overwrite this one.
+    let q = db().from("attempts").update({ answers }).eq("id", id).eq("user_id", userId).is("submitted_at", null);
+    q = current.answers ? q.eq("answers", JSON.stringify(current.answers)) : q.is("answers", null);
+    const { data, error } = await q.select("id");
+    check(error, "saveProgress");
+    return (data?.length ?? 0) > 0;
+  },
   async scoresByExam(examIds) {
     const map = new Map<string, number[]>();
     const unique = [...new Set(examIds)];

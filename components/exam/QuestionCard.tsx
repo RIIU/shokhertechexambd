@@ -110,19 +110,23 @@ export function QuestionCard({
 
 /* -------------------------------------------------------------------------- */
 
+const POSITION_IDS: readonly OptionId[] = ["a", "b", "c", "d"];
+
 interface OptionSelectorProps {
   name: string;
   options: CandidateQuestion["options"];
   selected: OptionId | null;
   onSelect: (id: OptionId) => void;
   labelledBy: string;
+  /** Label options ক খ গ ঘ by position (shuffled options keep their ids but not their letters). */
+  labelByPosition?: boolean;
 }
 
 /**
  * Accessible radio group (roving tabindex, Up/Down arrows) with animated
  * selection. Rendered as buttons rather than native inputs for full styling control.
  */
-export function OptionSelector({ name, options, selected, onSelect, labelledBy }: OptionSelectorProps) {
+export function OptionSelector({ name, options, selected, onSelect, labelledBy, labelByPosition }: OptionSelectorProps) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const onKeyDown = useCallback(
@@ -188,7 +192,7 @@ export function OptionSelector({ name, options, selected, onSelect, labelledBy }
                   </motion.span>
                 ) : (
                   <motion.span key="label" lang="bn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    {OPTION_LABEL_BN[opt.id]}
+                    {OPTION_LABEL_BN[labelByPosition ? POSITION_IDS[i] ?? opt.id : opt.id]}
                   </motion.span>
                 )}
               </AnimatePresence>

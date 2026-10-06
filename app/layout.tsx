@@ -50,13 +50,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="bn" className={`dark ${inter.variable} ${jakarta.variable} ${bangla.variable}`}>
       <body>
-        <AppShellProvider>
-          <Navbar />
-          <MobileMenu />
-          <Suspense>{children}</Suspense>
-          <Footer />
-          <MobileTabBar />
-        </AppShellProvider>
+        {/* Single page-level root (display: contents, so no layout effect): anything else the
+            anti-cheat layer finds directly under <body> was injected by an extension. */}
+        <div data-app-root style={{ display: "contents" }}>
+          <AppShellProvider>
+            <Navbar />
+            <MobileMenu />
+            <Suspense>{children}</Suspense>
+            <Footer />
+            <MobileTabBar />
+          </AppShellProvider>
+        </div>
       </body>
     </html>
   );

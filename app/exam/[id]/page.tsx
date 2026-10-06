@@ -11,6 +11,8 @@ import { toCandidateExam } from "@/lib/exams/grading";
 import { clientIp } from "@/lib/server/request";
 import { formatPhone } from "@/lib/phone";
 import { LiveExamClient } from "./LiveExamClient";
+import { StrictExamClient } from "./StrictExamClient";
+import { isStrict } from "@/lib/server/strict-exam";
 import { PaidExamGate } from "@/components/exam/PaidExamGate";
 
 // Every attempt is personalised (watermark, server deadline): never cached.
@@ -53,20 +55,30 @@ export default async function ExamPage({ params }: ExamPageProps) {
   const open = await getOpenAttempt(exam.id, user.id);
   if (open?.submittedAt) redirect(`/results/${open.id}`);
 
-  return (
-    <LiveExamClient
-      exam={toCandidateExam(exam)}
-      candidate={{
-        name: user.name,
-        phone: formatPhone(user.phone),
-        roll: user.id.slice(-8).toUpperCase(),
-        ip: clientIp(),
-      }}
-      initialAttempt={
-        open ? { id: open.id, startedAt: open.startedAt, endsAt: open.endsAt, strikes: open.strikes, serverNow: Date.now() } : null
-      }
-    />
-  );
+  const candidate = {
+    name: user.name,
+    phone: formatPhone(user.phone),
+    roll: user.id.slice(-8).toUpperCase(),
+    ip: clientIp(),
+  };
+  const initialAttempt = open
+    ? { id: open.id, startedAt: open.startedAt, endsAt: open.endsAt, strikes: open.strikes, serverNow: Date.now() }
+    : null;
+
+  // Live and model tests: no question leaves the server before the attempt starts,
+  // and then only one at a time (see lib/server/strict-exam.ts).
+  if (isStrict(exam)) {
+    return (
+      <StrictExamClient
+        exam={{ ...toCandidateExam(exam), questions: [] }}
+        questionCount={exam.questions.length}
+        candidate={candidate}
+        initialAttempt={initialAttempt}
+      />
+    );
+  }
+
+  return <LiveExamClient exam={toCandidateExam(exam)} candidate={candidate} initialAttempt={initialAttempt} />;
 }
 
 function AlreadySubmitted({ attemptId, title }: { attemptId: string; title: string }) {

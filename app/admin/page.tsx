@@ -15,6 +15,8 @@ const KIND_BN: Record<string, string> = {
   "window-blur": "উইন্ডো থেকে ফোকাস সরেছে",
   "fullscreen-exit": "ফুলস্ক্রিন ত্যাগ",
   "watermark-tamper": "ওয়াটারমার্ক পরিবর্তন",
+  "split-screen": "স্প্লিট-স্ক্রিন / ছোট উইন্ডো",
+  extension: "ব্রাউজার এক্সটেনশন (সম্ভাব্য AI)",
 };
 
 export default async function AdminOverviewPage() {

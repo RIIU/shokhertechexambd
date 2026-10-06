@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, Copy, Eye, Loader2, Maximize, MonitorX, ShieldCheck, Play } from "lucide-react";
+import { Bot, Clock, Copy, Eye, ListOrdered, Loader2, Maximize, MonitorX, Shuffle, ShieldCheck, Play, Smartphone } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { formatMinutesBn, toBn } from "@/lib/utils";
 import type { CandidateExam } from "@/lib/types";
@@ -12,11 +12,24 @@ interface ExamRulesGateProps {
   starting?: boolean;
   error?: string | null;
   onStart: () => void;
+  /** One question at a time, server-delivered (live and model tests). */
+  strict?: boolean;
+  /** Question count when the questions themselves are not sent (strict mode). */
+  questionCount?: number;
 }
 
 /** Pre-exam briefing. The start click doubles as the user gesture fullscreen requires. */
-export function ExamRulesGate({ exam, resuming, starting, error, onStart }: ExamRulesGateProps) {
+export function ExamRulesGate({ exam, resuming, starting, error, onStart, strict, questionCount }: ExamRulesGateProps) {
+  const strictRules: { icon: LucideIcon; text: string }[] = strict
+    ? [
+        { icon: ListOrdered, text: "একবারে একটি প্রশ্ন আসবে। উত্তর দিলে বা এড়িয়ে গেলে পরের প্রশ্ন আসবে, আগের প্রশ্নে আর ফেরা যাবে না।" },
+        { icon: Shuffle, text: "প্রত্যেকের জন্য প্রশ্ন ও অপশনের ক্রম আলাদা, তাই উত্তর আদান-প্রদান কাজে আসবে না।" },
+        { icon: Bot, text: "স্প্লিট-স্ক্রিন, ছোট উইন্ডো, AI সহকারী বা অন্য এক্সটেনশন চালু করলে সতর্কতা দেওয়া হবে ও অ্যাডমিনকে জানানো হবে।" },
+        { icon: Smartphone, text: "যে ডিভাইস ও ব্রাউজারে শুরু করবে, শুধু সেখানেই পরীক্ষা চালিয়ে যাওয়া যাবে।" },
+      ]
+    : [];
   const rules: { icon: LucideIcon; text: string }[] = [
+    ...strictRules,
     { icon: Maximize, text: "পরীক্ষা ফুলস্ক্রিন মোডে চলবে। ফুলস্ক্রিন থেকে বের হলে সতর্কতা দেওয়া হবে।" },
     {
       icon: MonitorX,
@@ -50,7 +63,7 @@ export function ExamRulesGate({ exam, resuming, starting, error, onStart }: Exam
 
         <dl className="mb-8 grid grid-cols-3 gap-3">
           {[
-            { k: "প্রশ্ন", v: toBn(exam.questions?.length ?? 0) },
+            { k: "প্রশ্ন", v: toBn(questionCount ?? exam.questions?.length ?? 0) },
             { k: "পূর্ণমান", v: toBn(exam.totalMarks) },
             { k: "সময়", v: formatMinutesBn(exam.durationSec) },
           ].map((s) => (

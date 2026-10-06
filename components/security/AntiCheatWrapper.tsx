@@ -37,6 +37,8 @@ export interface AntiCheatWrapperProps {
   onViolation?: (event: ViolationEvent, strikes: number) => void;
   /** Fired exactly once when strikes reach maxWarnings. Submit the exam here. */
   onMaxWarnings?: () => void;
+  /** Extra context for the admin log, e.g. which question was on screen. */
+  context?: () => string | undefined;
   className?: string;
 }
 
@@ -62,12 +64,20 @@ export function useAntiCheat(): AntiCheatContextValue {
 /** Two events within this window (e.g. `blur` + `visibilitychange` from one tab switch) count once. */
 const STRIKE_DEDUPE_MS = 1500;
 const DEVTOOLS_GAP_PX = 170;
+/** Viewport smaller than this share of the screen = split screen / side-by-side / floating window. */
+const SPLIT_AREA_RATIO = 0.6;
+/** How long the small viewport must persist before it counts (ignores brief resizes). */
+const SPLIT_PERSIST_MS = 2000;
+/** Page-level nodes that are not the app root but are expected; anything else at <html>/<body> level is foreign. */
+const OWN_TAGS = new Set(["SCRIPT", "STYLE", "LINK", "META", "NOSCRIPT", "TEMPLATE", "NEXT-ROUTE-ANNOUNCER", "NEXTJS-PORTAL"]);
 
 const TOAST_COPY: Partial<Record<ViolationKind, string>> = {
   "context-menu": "রাইট-ক্লিক পরীক্ষার সময় বন্ধ",
   clipboard: "কপি / পেস্ট পরীক্ষার সময় বন্ধ",
   "blocked-shortcut": "এই কী-বোর্ড শর্টকাট পরীক্ষার সময় বন্ধ",
   "devtools-open": "ডেভেলপার টুলস খোলা শনাক্ত হয়েছে — রিপোর্ট করা হলো",
+  extension: "ব্রাউজার এক্সটেনশন শনাক্ত হয়েছে — রিপোর্ট করা হলো",
+  "multi-screen": "একাধিক মনিটর শনাক্ত হয়েছে — রিপোর্ট করা হলো",
 };
 
 const STRIKE_COPY: Partial<Record<ViolationKind, string>> = {
@@ -75,6 +85,8 @@ const STRIKE_COPY: Partial<Record<ViolationKind, string>> = {
   "window-blur": "পরীক্ষার উইন্ডো থেকে ফোকাস সরে গিয়েছিল।",
   "fullscreen-exit": "তুমি ফুলস্ক্রিন মোড থেকে বের হয়ে গিয়েছিলে।",
   "watermark-tamper": "পরীক্ষার নিরাপত্তা ওয়াটারমার্ক পরিবর্তনের চেষ্টা শনাক্ত হয়েছে।",
+  "split-screen": "স্ক্রিন ভাগ করে বা ছোট উইন্ডোতে পাশে অন্য কিছু খোলা শনাক্ত হয়েছে।",
+  extension: "পরীক্ষার পাতায় একটি এক্সটেনশন বা সহকারী টুল (যেমন AI) চালু হয়েছে।",
 };
 
 /** Returns a readable combo (e.g. "Ctrl+Shift+I") if the key event must be blocked. */
@@ -126,6 +138,7 @@ export function AntiCheatWrapper({
   reportEndpoint,
   onViolation,
   onMaxWarnings,
+  context,
   className,
 }: AntiCheatWrapperProps) {
   const [strikes, setStrikes] = useState(initialStrikes);
@@ -141,12 +154,14 @@ export function AntiCheatWrapper({
   /** True between `beforeunload` and the page actually going away (or the reload being cancelled). */
   const unloading = useRef(false);
   const activeRef = useRef(active);
-  const propsRef = useRef({ onViolation, onMaxWarnings, reportEndpoint, maxWarnings, enforceFullscreen });
+  const propsRef = useRef({ onViolation, onMaxWarnings, reportEndpoint, maxWarnings, enforceFullscreen, context });
   activeRef.current = active;
-  propsRef.current = { onViolation, onMaxWarnings, reportEndpoint, maxWarnings, enforceFullscreen };
+  propsRef.current = { onViolation, onMaxWarnings, reportEndpoint, maxWarnings, enforceFullscreen, context };
 
-  const report = useCallback((event: ViolationEvent) => {
-    const { reportEndpoint: url, onViolation: cb } = propsRef.current;
+  const report = useCallback((raw: ViolationEvent) => {
+    const { reportEndpoint: url, onViolation: cb, context: ctx } = propsRef.current;
+    const where = ctx?.();
+    const event = where ? { ...raw, detail: [raw.detail, where].filter(Boolean).join(" · ") } : raw;
     cb?.(event, strikesRef.current);
     if (!url) return;
     const body = JSON.stringify(event);
@@ -291,6 +306,67 @@ export function AntiCheatWrapper({
       window.clearInterval(devtoolsTimer);
     };
   }, [notify, strike]);
+
+  /* ------------------ Split screen, extensions, monitors ------------------ */
+  useEffect(() => {
+    if (!active) return;
+
+    // Split screen / side-by-side window / floating window: the viewport becomes a
+    // small part of the screen. Counted once per episode, after it persists.
+    let smallSince = 0;
+    let reported = false;
+    const checkViewport = () => {
+      const screenArea = window.screen.width * window.screen.height;
+      const viewArea = window.innerWidth * window.innerHeight;
+      const small = screenArea > 0 && viewArea / screenArea < SPLIT_AREA_RATIO;
+      if (!small) {
+        smallSince = 0;
+        reported = false;
+        return;
+      }
+      smallSince ||= Date.now();
+      if (!reported && Date.now() - smallSince >= SPLIT_PERSIST_MS) {
+        reported = true;
+        strike("split-screen", `${window.innerWidth}x${window.innerHeight} of ${window.screen.width}x${window.screen.height}`);
+      }
+    };
+    const viewportTimer = window.setInterval(checkViewport, 500);
+    window.addEventListener("resize", checkViewport);
+
+    // AI helpers and other extensions inject their UI at the top of the page.
+    // Already there when the exam starts: logged. Appearing during the exam
+    // (e.g. a sidebar or "ask AI" popup being opened): a strike.
+    const foreign = (n: Node): n is Element =>
+      n instanceof Element &&
+      n !== document.head &&
+      n !== document.body &&
+      !OWN_TAGS.has(n.tagName) &&
+      !n.hasAttribute("data-app-root");
+    const describe = (el: Element) => `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ""}`.slice(0, 60);
+    const present = [...document.documentElement.children, ...document.body.children].filter(foreign);
+    if (present.length) notify("extension", `present: ${present.map(describe).join(", ")}`);
+    const observer = new MutationObserver((records) => {
+      for (const r of records) {
+        for (const n of r.addedNodes) {
+          if (foreign(n)) {
+            strike("extension", `added: ${describe(n)}`);
+            return;
+          }
+        }
+      }
+    });
+    observer.observe(document.documentElement, { childList: true });
+    observer.observe(document.body, { childList: true });
+
+    // A second monitor makes a phone-free second screen easy (Chrome reports it).
+    if ((window.screen as Screen & { isExtended?: boolean }).isExtended) notify("multi-screen");
+
+    return () => {
+      window.clearInterval(viewportTimer);
+      window.removeEventListener("resize", checkViewport);
+      observer.disconnect();
+    };
+  }, [active, notify, strike]);
 
   // Leave fullscreen once the exam stops being active (submitted / time up).
   useEffect(() => {

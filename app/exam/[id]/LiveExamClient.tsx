@@ -34,7 +34,7 @@ export interface AttemptInfo {
 }
 
 /** Shift server timestamps onto the device clock so the countdown is right even if the phone's clock is off. */
-function toLocalClock(a: AttemptInfo): AttemptInfo {
+export function toLocalClock(a: AttemptInfo): AttemptInfo {
   const skew = a.serverNow - Date.now();
   return { ...a, startedAt: a.startedAt - skew, endsAt: a.endsAt - skew, serverNow: Date.now() };
 }
@@ -547,7 +547,7 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
 }
 
 /** Compact shield + dots showing how many strikes have been used. */
-function StrikeMeter() {
+export function StrikeMeter() {
   const { strikes, maxWarnings } = useAntiCheat();
   const danger = strikes > 0;
   return (
