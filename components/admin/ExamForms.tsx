@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { CheckCircle2, Loader2 } from "lucide-react";
-import { addQuestionAction, createExamAction, updateExamAction, type AdminFormState } from "@/app/admin/actions";
+import { addQuestionAction, bulkAddQuestionsAction, createExamAction, updateExamAction, type AdminFormState } from "@/app/admin/actions";
+import { parseQuestions } from "@/lib/question-import";
 import { EXAM_TYPES, EXAM_TYPE_META, LEVELS, STREAMS, STREAM_IDS, getSubjects } from "@/lib/data/catalog";
-import { OPTION_LABEL_BN, cn } from "@/lib/utils";
+import { OPTION_LABEL_BN, cn, toBn } from "@/lib/utils";
 import type { ExamType, Level, StreamId } from "@/lib/types";
 
-function Submit({ label }: { label: string }) {
+function Submit({ label, disabled }: { label: string; disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending} className="btn-primary">
+    <button type="submit" disabled={pending || disabled} className="btn-primary">
       {pending && <Loader2 className="h-4 w-4 animate-spin" />}
       <span lang="bn">{label}</span>
     </button>
@@ -369,6 +370,105 @@ export function QuestionForm({ examId }: { examId: string }) {
       </div>
       <div className="flex items-center gap-4">
         <Submit label="প্রশ্ন যোগ করো" />
+        <Saved state={state} />
+      </div>
+    </form>
+  );
+}
+
+const BULK_EXAMPLE = `১. নিচের কোনটি মৌলিক রাশি?
+ক) বল
+খ) বেগ
+গ) তড়িৎ প্রবাহ *
+ঘ) কাজ
+ব্যাখ্যা: SI পদ্ধতিতে মৌলিক রাশি সাতটি।
+টপিক: ভৌত রাশি
+
+২. 72 km/h বেগকে m/s এককে প্রকাশ করলে কত?
+ক) 10 m/s
+খ) 20 m/s *
+গ) 36 m/s
+ঘ) 259.2 m/s`;
+
+/** Paste many MCQs at once, with a live preview of what will be added. */
+export function BulkQuestionForm({ examId }: { examId: string }) {
+  const [state, action] = useFormState(bulkAddQuestionsAction, {});
+  const [text, setText] = useState("");
+  const [topic, setTopic] = useState("");
+  const parsed = useMemo(() => parseQuestions(text, { topic: topic || undefined }), [text, topic]);
+  useEffect(() => {
+    if (state.ok) setText("");
+  }, [state.ok]);
+
+  return (
+    <form action={action} className="space-y-4">
+      <input type="hidden" name="examId" value={examId} />
+      <details className="rounded-xl border border-surface-border bg-obsidian-950/50 p-3 text-sm text-ink-muted">
+        <summary lang="bn" className="cursor-pointer font-semibold text-ink">
+          কীভাবে লিখবে? (উদাহরণ দেখো)
+        </summary>
+        <ul lang="bn" className="mt-2 list-disc space-y-1 pl-5 text-xs">
+          <li>প্রতিটি প্রশ্নের মাঝে একটি ফাঁকা লাইন দাও।</li>
+          <li>অপশন: ক) খ) গ) ঘ) অথবা a) b) c) d)। সঠিক অপশনের শেষে * দাও (অথবা আলাদা লাইনে &quot;উত্তর: গ&quot;)।</li>
+          <li>ঐচ্ছিক লাইন: &quot;ব্যাখ্যা: …&quot;, &quot;টপিক: …&quot;, &quot;মান: ২&quot;।</li>
+        </ul>
+        <pre lang="bn" className="mt-3 whitespace-pre-wrap rounded-lg bg-obsidian-900 p-3 font-bangla text-xs text-ink">
+          {BULK_EXAMPLE}
+        </pre>
+        <button type="button" onClick={() => setText(BULK_EXAMPLE)} className="mt-2 text-xs font-semibold text-brand-300 hover:underline">
+          <span lang="bn">উদাহরণটি বসাও</span>
+        </button>
+      </details>
+
+      <div>
+        <label className="field-label" htmlFor="bulk-topic" lang="bn">
+          টপিক না দিলে যেটা বসবে (ঐচ্ছিক)
+        </label>
+        <input id="bulk-topic" name="topic" value={topic} onChange={(e) => setTopic(e.target.value)} className="field" lang="bn" placeholder="যেমন: অধ্যায় ১" />
+      </div>
+      <div>
+        <label className="field-label" htmlFor="bulk" lang="bn">
+          প্রশ্নগুলো এখানে পেস্ট করো
+        </label>
+        <textarea
+          id="bulk"
+          name="bulk"
+          rows={12}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          className="field font-bangla"
+          lang="bn"
+          placeholder={BULK_EXAMPLE}
+        />
+      </div>
+
+      {text.trim() && (
+        <div className="space-y-2 text-sm" aria-live="polite">
+          <p lang="bn" className="flex items-center gap-2 text-brand-300">
+            <CheckCircle2 className="h-4 w-4" /> {toBn(parsed.questions.length)}টি প্রশ্ন ঠিক আছে
+          </p>
+          {parsed.errors.length > 0 && (
+            <ul lang="bn" className="space-y-1 rounded-xl bg-state-danger/10 p-3 text-rose-200 ring-1 ring-state-danger/30">
+              {parsed.errors.map((e, i) => (
+                <li key={i}>
+                  প্রশ্ন {toBn(e.block)}: {e.message}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {state.error && (
+        <p lang="bn" role="alert" className="text-sm text-rose-300">
+          {state.error}
+        </p>
+      )}
+      <div className="flex items-center gap-3">
+        <Submit
+          label={parsed.questions.length ? `${toBn(parsed.questions.length)}টি প্রশ্ন যোগ করো` : "প্রশ্ন যোগ করো"}
+          disabled={!parsed.questions.length || parsed.errors.length > 0}
+        />
         <Saved state={state} />
       </div>
     </form>

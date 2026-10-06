@@ -14,6 +14,7 @@ import {
   type QuestionInput,
 } from "@/lib/server/exams";
 import { setUserBlocked } from "@/lib/server/users";
+import { parseQuestions } from "@/lib/question-import";
 import { EXAM_TYPES, getSubjects, isLevel, isStream } from "@/lib/data/catalog";
 import type { ExamType, OptionId } from "@/lib/types";
 
@@ -148,6 +149,19 @@ export async function addQuestionAction(_prev: AdminFormState, form: FormData): 
     marks,
   };
   await addQuestion(examId, input);
+  revalidateExamPages(examId);
+  return { ok: Date.now() };
+}
+
+/** Adds many questions pasted as text (format: lib/question-import.ts). All or nothing on errors. */
+export async function bulkAddQuestionsAction(_prev: AdminFormState, form: FormData): Promise<AdminFormState> {
+  await requireAdmin();
+  const examId = str(form, "examId");
+  const { questions, errors } = parseQuestions(String(form.get("bulk") ?? ""), { topic: str(form, "topic") || undefined });
+  if (errors.length) return { error: `${errors.length}টি প্রশ্নে সমস্যা আছে, ঠিক করে আবার চেষ্টা করো।` };
+  if (!questions.length) return { error: "কোনো প্রশ্ন পাওয়া যায়নি।" };
+  if (questions.length > 200) return { error: "একবারে সর্বোচ্চ ২০০টি প্রশ্ন যোগ করা যায়।" };
+  for (const q of questions) await addQuestion(examId, q);
   revalidateExamPages(examId);
   return { ok: Date.now() };
 }
