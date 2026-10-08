@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BrandLogo } from "@/components/layout/BrandLogo";
 
 /** Centered card on pixxen's popup gradient, shared by login and register. */
 export function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle: string; children: ReactNode; footer: ReactNode }) {
@@ -9,9 +10,8 @@ export function AuthShell({ title, subtitle, children, footer }: { title: string
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-radial-brand" />
       <div className="w-full max-w-md">
         <div className="rounded-3xl border border-surface-border bg-radial-forest p-6 shadow-card sm:p-8">
-          <Link href="/" className="mb-6 inline-flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-400 font-display text-sm font-black text-forest">STA</span>
-            <span className="font-display font-bold text-ink">Shokher Tech Academy<span className="text-brand-400">.</span></span>
+          <Link href="/" className="mb-6 inline-flex items-center" aria-label="Shokher Tech Academy — হোম">
+            <BrandLogo className="h-9" priority />
           </Link>
           <h1 lang="bn" className="mb-1 text-2xl font-bold text-ink">
             {title}

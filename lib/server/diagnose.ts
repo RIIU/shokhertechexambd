@@ -40,7 +40,7 @@ export function classifyError(err: unknown): ProblemCode {
   if (/SESSION_SECRET/.test(msg)) return "SESSION_SECRET_MISSING";
   if (/publishable/i.test(msg)) return "PUBLISHABLE_KEY_USED";
   if (/PGRST205|42P01|does not exist|schema cache/i.test(msg)) return "TABLES_MISSING";
-  if (/Invalid API key|No API key|JWT|JWS|PGRST30[0-3]|401|unauthori[sz]ed|permission denied|42501/i.test(msg)) return "INVALID_KEY";
+  if (/Invalid API key|No API key|Unregistered API key|JWT|JWS|PGRST30[0-3]|401|unauthori[sz]ed|permission denied|42501/i.test(msg)) return "INVALID_KEY";
   if (/fetch failed|ENOTFOUND|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|getaddrinfo|Invalid URL|SUPABASE_URL/i.test(msg)) return "SUPABASE_UNREACHABLE";
   if (/EROFS|EACCES|read-only file system/i.test(msg)) return "READONLY_FILESYSTEM";
   return "UNKNOWN";

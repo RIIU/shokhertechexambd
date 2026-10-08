@@ -1,15 +1,23 @@
 import { Hero } from "@/components/landing/Hero";
-import { PackagesSection } from "@/components/packages/PackagesSection";
+import { StatsStrip } from "@/components/landing/StatsStrip";
 import { LevelSwitcher } from "@/components/landing/LevelSwitcher";
 import { Features } from "@/components/landing/Features";
+import { LiveExamTicker } from "@/components/landing/LiveExamTicker";
+import { TopLearners } from "@/components/landing/TopLearners";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Testimonials } from "@/components/landing/Testimonials";
+import { FaqSection } from "@/components/landing/FaqSection";
+import { landingData } from "@/lib/server/landing";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const { stats, exams, leaderboard } = await landingData();
+
   return (
     <main>
       <Hero />
-
-      {/* Chorcha-style Subscription & Course Packages */}
-      <PackagesSection />
+      <StatsStrip stats={stats} />
 
       <section className="container py-16" aria-labelledby="level-title">
         <div className="mb-10 text-center">
@@ -24,6 +32,11 @@ export default function HomePage() {
       </section>
 
       <Features />
+      <LiveExamTicker exams={exams} />
+      <TopLearners learners={leaderboard} />
+      <HowItWorks />
+      <Testimonials />
+      <FaqSection />
     </main>
   );
 }

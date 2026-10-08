@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient, type PostgrestError, type SupabaseClient } from "@supabase/supabase-js";
 import type { Store } from "./types";
+import type { ExamCard } from "./types";
 import type { Attempt, ExamResult, ExamType, Level, OptionId, PaymentRequest, Question, QuestionOption, Role, StoredExam, StoredViolation, StreamId, SubmitReason, User, ViolationKind } from "@/lib/types";
 
 /**
@@ -90,35 +91,25 @@ const ms = (iso: string) => Date.parse(iso);
 const iso = (n: number) => new Date(n).toISOString();
 const opt = <T>(v: T | null): T | undefined => (v === null ? undefined : v);
 
+/** A column value wins when present; an empty string means "cleared", null means "never migrated". */
+const colOr = (col: string | null | undefined, legacy: string | undefined) =>
+  col == null ? legacy : col || undefined;
+
 const toUser = (r: UserRow): User => {
   let institution = opt(r.institution);
-  let avatarUrl = opt(r.avatar_url);
-  let coverUrl = opt(r.cover_url);
-  let bio = opt(r.bio);
-  let enrolledExams: string[] | undefined = undefined;
-  let subscriptionStatus: "active" | "pending" | "none" | undefined = undefined;
-  let subscriptionValidUntil: number | undefined = undefined;
-  let paymentRequests: PaymentRequest[] | undefined = undefined;
-  let latestPayment: PaymentRequest | undefined = undefined;
+  let meta: Record<string, unknown> = {};
 
   if (institution && institution.startsWith('{"') && institution.endsWith('}')) {
     try {
-      const meta = JSON.parse(institution);
-      if (typeof meta === "object" && meta !== null) {
-        institution = meta.institution ?? meta.inst ?? "";
-        if (!avatarUrl && meta.avatarUrl) avatarUrl = meta.avatarUrl;
-        if (!coverUrl && meta.coverUrl) coverUrl = meta.coverUrl;
-        if (!bio && meta.bio) bio = meta.bio;
-        if (Array.isArray(meta.enrolledExams)) enrolledExams = meta.enrolledExams;
-        if (meta.subscriptionStatus) subscriptionStatus = meta.subscriptionStatus;
-        if (meta.subscriptionValidUntil) subscriptionValidUntil = Number(meta.subscriptionValidUntil);
-        if (Array.isArray(meta.paymentRequests)) paymentRequests = meta.paymentRequests;
-        if (meta.latestPayment) latestPayment = meta.latestPayment;
-      }
+      const parsed: unknown = JSON.parse(institution);
+      if (typeof parsed === "object" && parsed !== null) meta = parsed as Record<string, unknown>;
     } catch {
       // not json
     }
+    if (Object.keys(meta).length) institution = (meta.institution ?? meta.inst ?? "") as string;
   }
+
+  const str = (k: string) => (typeof meta[k] === "string" ? (meta[k] as string) : undefined);
 
   return {
     id: r.id,
@@ -129,54 +120,41 @@ const toUser = (r: UserRow): User => {
     level: opt(r.level),
     stream: opt(r.stream),
     institution: institution || undefined,
-    avatarUrl: avatarUrl || undefined,
-    coverUrl: coverUrl || undefined,
-    bio: bio || undefined,
-    enrolledExams: enrolledExams && enrolledExams.length > 0 ? enrolledExams : undefined,
-    subscriptionStatus,
-    subscriptionValidUntil,
-    paymentRequests,
-    latestPayment,
+    avatarUrl: colOr(r.avatar_url, str("avatarUrl")),
+    coverUrl: colOr(r.cover_url, str("coverUrl")),
+    bio: colOr(r.bio, str("bio")),
+    enrolledExams: Array.isArray(meta.enrolledExams) && meta.enrolledExams.length ? (meta.enrolledExams as string[]) : undefined,
+    subscriptionStatus: meta.subscriptionStatus as User["subscriptionStatus"],
+    subscriptionValidUntil: meta.subscriptionValidUntil ? Number(meta.subscriptionValidUntil) : undefined,
+    paymentRequests: Array.isArray(meta.paymentRequests) ? (meta.paymentRequests as PaymentRequest[]) : undefined,
+    latestPayment: meta.latestPayment as PaymentRequest | undefined,
     blocked: r.blocked,
     createdAt: ms(r.created_at),
   };
 };
 
+/**
+ * `institution` holds the school name plus the enrolment/subscription meta that has
+ * no column of its own. Avatar, cover and bio live in real columns.
+ */
 export const packInstitution = (u: Partial<User>): string | null => {
-  let existing: Record<string, unknown> = {};
-  if (u.institution && u.institution.startsWith('{"') && u.institution.endsWith('}')) {
-    try {
-      existing = JSON.parse(u.institution);
-    } catch {
-      existing = { inst: u.institution };
-    }
-  } else if (u.institution) {
-    existing = { inst: u.institution };
-  }
+  const inst = typeof u.institution === "string" ? u.institution : null;
+  const hasMeta =
+    (u.enrolledExams?.length ?? 0) > 0 ||
+    u.subscriptionStatus !== undefined ||
+    u.subscriptionValidUntil !== undefined ||
+    u.paymentRequests !== undefined ||
+    u.latestPayment !== undefined;
 
-  if (u.avatarUrl !== undefined) existing.avatarUrl = u.avatarUrl;
-  if (u.coverUrl !== undefined) existing.coverUrl = u.coverUrl;
-  if (u.bio !== undefined) existing.bio = u.bio;
-  if (u.enrolledExams !== undefined) existing.enrolledExams = u.enrolledExams;
-  if (u.subscriptionStatus !== undefined) existing.subscriptionStatus = u.subscriptionStatus;
-  if (u.subscriptionValidUntil !== undefined) existing.subscriptionValidUntil = u.subscriptionValidUntil;
-  if (u.paymentRequests !== undefined) existing.paymentRequests = u.paymentRequests;
-  if (u.latestPayment !== undefined) existing.latestPayment = u.latestPayment;
+  if (!hasMeta) return inst;
 
-  const hasExtra =
-    existing.avatarUrl ||
-    existing.coverUrl ||
-    existing.bio ||
-    (Array.isArray(existing.enrolledExams) && existing.enrolledExams.length > 0) ||
-    existing.subscriptionStatus ||
-    existing.subscriptionValidUntil ||
-    existing.paymentRequests ||
-    existing.latestPayment;
-
-  if (hasExtra) {
-    return JSON.stringify(existing);
-  }
-  return typeof existing.inst === "string" ? existing.inst : (u.institution ?? null);
+  const meta: Record<string, unknown> = { inst: inst ?? "" };
+  if (u.enrolledExams !== undefined) meta.enrolledExams = u.enrolledExams;
+  if (u.subscriptionStatus !== undefined) meta.subscriptionStatus = u.subscriptionStatus;
+  if (u.subscriptionValidUntil !== undefined) meta.subscriptionValidUntil = u.subscriptionValidUntil;
+  if (u.paymentRequests !== undefined) meta.paymentRequests = u.paymentRequests;
+  if (u.latestPayment !== undefined) meta.latestPayment = u.latestPayment;
+  return JSON.stringify(meta);
 };
 
 const fromUser = (u: User): UserRow => ({
@@ -188,6 +166,9 @@ const fromUser = (u: User): UserRow => ({
   level: u.level ?? null,
   stream: u.stream ?? null,
   institution: packInstitution(u),
+  avatar_url: u.avatarUrl ?? null,
+  cover_url: u.coverUrl ?? null,
+  bio: u.bio ?? null,
   blocked: Boolean(u.blocked),
   created_at: iso(u.createdAt),
 });
@@ -215,13 +196,7 @@ const fromQuestion = (examId: string, q: Question, position: number): QuestionRo
 
 const HIDE_SOLUTIONS_TAG = "[hide_solutions]";
 
-export const buildExamTags = (showSolutions?: boolean, isPaid?: boolean, price?: number): string => {
-  let tags = "";
-  if (showSolutions === false) tags += ` ${HIDE_SOLUTIONS_TAG}`;
-  if (isPaid) tags += ` [paid:${price || 50}]`;
-  return tags;
-};
-
+/** Strips the flags this driver used to smuggle into `title_en` before the columns existed. */
 export const cleanExamTitle = (raw: string): string =>
   raw
     .replace(HIDE_SOLUTIONS_TAG, "")
@@ -229,27 +204,28 @@ export const cleanExamTitle = (raw: string): string =>
     .replace(/\[paid\]/g, "")
     .trim();
 
+/**
+ * `show_solutions` still honors the old `[hide_solutions]` title tag so rows
+ * written before the column keep their setting. Paywall state comes only from
+ * the columns: every exam is free until the admin marks it paid again.
+ */
+const examFlags = (r: { title_en?: string | null; show_solutions?: boolean; is_paid?: boolean; price?: number }) => {
+  const legacyTitle = r.title_en ?? "";
+  return {
+    titleEn: cleanExamTitle(legacyTitle),
+    showSolutions: !(r.show_solutions === false || legacyTitle.includes(HIDE_SOLUTIONS_TAG)),
+    isPaid: Boolean(r.is_paid),
+    price: Number(r.price ?? 0),
+  };
+};
+
 const toExam = (r: ExamRow): StoredExam => {
-  const hiddenInTitle = r.title_en?.includes(HIDE_SOLUTIONS_TAG) ?? false;
-  const showSolutions = r.show_solutions !== undefined ? Boolean(r.show_solutions) : !hiddenInTitle;
-
-  let isPaid = r.is_paid !== undefined ? Boolean(r.is_paid) : false;
-  let price = r.price !== undefined ? Number(r.price) : 0;
-  const paidMatch = r.title_en?.match(/\[paid:(\d+)\]/);
-  if (paidMatch) {
-    isPaid = true;
-    price = Number(paidMatch[1]) || 50;
-  } else if (r.title_en?.includes("[paid]")) {
-    isPaid = true;
-    price = price || 50;
-  }
-
-  const cleanTitleEn = cleanExamTitle(r.title_en ?? "");
+  const flags = examFlags(r);
 
   return {
     id: r.id,
     titleBn: r.title_bn,
-    titleEn: cleanTitleEn || r.title_bn,
+    titleEn: flags.titleEn || r.title_bn,
     level: r.level,
     stream: r.stream,
     subjectId: r.subject_id,
@@ -257,9 +233,9 @@ const toExam = (r: ExamRow): StoredExam => {
     durationSec: r.duration_sec,
     negativeMark: Number(r.negative_mark),
     maxWarnings: r.max_warnings,
-    showSolutions,
-    isPaid,
-    price,
+    showSolutions: flags.showSolutions,
+    isPaid: flags.isPaid,
+    price: flags.price,
     status: r.status,
     createdAt: ms(r.created_at),
     updatedAt: ms(r.updated_at),
@@ -337,6 +313,44 @@ async function all<T>(
 }
 
 const EXAM_SELECT = "*, questions(*)";
+const EXAM_CARD_SELECT =
+  "id, title_bn, title_en, level, stream, subject_id, type, duration_sec, show_solutions, is_paid, price, status, created_at, questions(marks)";
+
+interface ExamCardRow {
+  id: string;
+  title_bn: string;
+  title_en?: string | null;
+  level: Level;
+  stream: StreamId;
+  subject_id: string;
+  type: ExamType;
+  duration_sec: number;
+  show_solutions?: boolean;
+  is_paid?: boolean;
+  price?: number;
+  status: "draft" | "published";
+  created_at: string;
+  questions?: { marks: number }[];
+}
+
+const toExamCard = (r: ExamCardRow): ExamCard => {
+  const flags = examFlags(r);
+  const marks = r.questions ?? [];
+  return {
+    id: r.id,
+    titleBn: r.title_bn,
+    level: r.level,
+    stream: r.stream,
+    subjectId: r.subject_id,
+    type: r.type,
+    durationSec: r.duration_sec,
+    questionCount: marks.length,
+    totalMarks: marks.reduce((sum, q) => sum + Number(q.marks ?? 0), 0),
+    isPaid: flags.isPaid,
+    price: flags.price,
+    createdAt: ms(r.created_at),
+  };
+};
 
 /* -------------------------------- Driver -------------------------------- */
 
@@ -380,15 +394,19 @@ export const supabaseStore: Store = {
     if (!current) throw new Error(`[supabase] updateUser: user ${id} not found`);
 
     const merged: User = { ...current, ...patch };
-    const payload: Record<string, unknown> = {
-      name: merged.name,
-      password_hash: merged.passwordHash,
-      level: merged.level ?? null,
-      stream: merged.stream ?? null,
-      institution: packInstitution(merged),
-    };
-
-    const { error } = await db().from("users").update(payload).eq("id", id);
+    const { error } = await db()
+      .from("users")
+      .update({
+        name: merged.name,
+        password_hash: merged.passwordHash,
+        level: merged.level ?? null,
+        stream: merged.stream ?? null,
+        institution: packInstitution(merged),
+        avatar_url: merged.avatarUrl ?? null,
+        cover_url: merged.coverUrl ?? null,
+        bio: merged.bio ?? null,
+      })
+      .eq("id", id);
     check(error, "updateUser");
   },
   async setUserBlocked(id, blocked) {
@@ -399,6 +417,15 @@ export const supabaseStore: Store = {
     const { count, error } = await db().from("users").select("id", { count: "exact", head: true }).eq("role", "admin");
     check(error, "hasAdmin");
     return (count ?? 0) > 0;
+  },
+  async countStudents() {
+    const { count, error } = await db()
+      .from("users")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "student")
+      .eq("blocked", false);
+    check(error, "countStudents");
+    return count ?? 0;
   },
 
   /* exams */
@@ -417,17 +444,26 @@ export const supabaseStore: Store = {
     }, "listExams");
     return rows.map(toExam);
   },
+  async listExamCards(filter) {
+    const rows = await all<ExamCardRow>((f, t) => {
+      let q = db().from("exams").select(EXAM_CARD_SELECT);
+      if (filter?.level) q = q.eq("level", filter.level);
+      if (filter?.stream) q = q.eq("stream", filter.stream);
+      if (filter?.status) q = q.eq("status", filter.status);
+      if (filter?.type) q = q.eq("type", filter.type);
+      return q.order("created_at", { ascending: false }).range(f, t);
+    }, "listExamCards");
+    return rows.map(toExamCard);
+  },
   async insertExam(exam) {
     const { questions, ...e } = exam;
-    const tags = buildExamTags(e.showSolutions, e.isPaid, e.price);
-    const cleanEn = cleanExamTitle(e.titleEn || e.titleBn);
     const { error } = await db()
       .from("exams")
       .upsert(
         {
           id: e.id,
           title_bn: e.titleBn,
-          title_en: `${cleanEn}${tags}`,
+          title_en: cleanExamTitle(e.titleEn || e.titleBn),
           level: e.level,
           stream: e.stream,
           subject_id: e.subjectId,
@@ -435,6 +471,9 @@ export const supabaseStore: Store = {
           duration_sec: e.durationSec,
           negative_mark: e.negativeMark,
           max_warnings: e.maxWarnings,
+          show_solutions: e.showSolutions !== false,
+          is_paid: Boolean(e.isPaid),
+          price: e.price ?? 0,
           status: e.status,
           created_at: iso(e.createdAt),
           updated_at: iso(e.updatedAt),
@@ -452,34 +491,11 @@ export const supabaseStore: Store = {
   async updateExam(id, patch) {
     const row: Record<string, unknown> = { updated_at: iso(patch.updatedAt) };
     if (patch.titleBn !== undefined) row.title_bn = patch.titleBn;
-    if (
-      patch.titleEn !== undefined ||
-      patch.titleBn !== undefined ||
-      patch.showSolutions !== undefined ||
-      patch.isPaid !== undefined ||
-      patch.price !== undefined
-    ) {
-      let baseEn = patch.titleEn !== undefined ? patch.titleEn : (patch.titleBn ?? "");
-      let showSolutions = patch.showSolutions;
-      let isPaid = patch.isPaid;
-      let price = patch.price;
-
-      if (patch.titleEn === undefined || showSolutions === undefined || isPaid === undefined || price === undefined) {
-        const curr = await db().from("exams").select("title_en").eq("id", id).maybeSingle<{ title_en: string }>();
-        const currTitle = curr.data?.title_en ?? "";
-        if (patch.titleEn === undefined) baseEn = currTitle;
-        if (showSolutions === undefined) showSolutions = !currTitle.includes(HIDE_SOLUTIONS_TAG);
-        if (isPaid === undefined) {
-          isPaid = currTitle.includes("[paid");
-          const m = currTitle.match(/\[paid:(\d+)\]/);
-          if (m) price = Number(m[1]);
-        }
-      }
-
-      const cleanEn = cleanExamTitle(baseEn);
-      const tags = buildExamTags(showSolutions, isPaid, price);
-      row.title_en = `${cleanEn}${tags}`;
-    }
+    const newTitle = patch.titleEn !== undefined ? patch.titleEn : patch.titleBn;
+    if (newTitle !== undefined) row.title_en = cleanExamTitle(newTitle);
+    if (patch.showSolutions !== undefined) row.show_solutions = patch.showSolutions;
+    if (patch.isPaid !== undefined) row.is_paid = patch.isPaid;
+    if (patch.price !== undefined) row.price = patch.price;
     if (patch.level !== undefined) row.level = patch.level;
     if (patch.stream !== undefined) row.stream = patch.stream;
     if (patch.subjectId !== undefined) row.subject_id = patch.subjectId;
@@ -588,6 +604,28 @@ export const supabaseStore: Store = {
       for (const r of rows) (map.get(r.exam_id) ?? map.set(r.exam_id, []).get(r.exam_id)!).push(Number(r.score ?? 0));
     }
     return map;
+  },
+  async countSubmissions() {
+    const { count, error } = await db()
+      .from("attempts")
+      .select("id", { count: "exact", head: true })
+      .not("submitted_at", "is", null);
+    check(error, "countSubmissions");
+    return count ?? 0;
+  },
+  async listRecentScores(limit) {
+    const rows = await all<{ user_id: string; exam_id: string; score: number; submitted_at: string }>(
+      (f, t) =>
+        db()
+          .from("attempts")
+          .select("user_id, exam_id, score, submitted_at")
+          .not("submitted_at", "is", null)
+          .order("submitted_at", { ascending: false })
+          .range(f, t),
+      "listRecentScores",
+      limit,
+    );
+    return rows.map((r) => ({ userId: r.user_id, examId: r.exam_id, score: Number(r.score ?? 0), submittedAt: ms(r.submitted_at) }));
   },
 
   /* violations */

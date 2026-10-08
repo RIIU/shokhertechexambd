@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { logoutAction } from "@/app/(auth)/actions";
 import { useAppShell } from "./AppShell";
+import { BrandLogo } from "./BrandLogo";
 import { LEVELS, STREAMS, STREAM_IDS } from "@/lib/data/catalog";
 import { formatPhone } from "@/lib/phone";
 import { isFocusRoute } from "@/lib/routes";
@@ -112,11 +113,8 @@ export function MobileMenu() {
           >
             {/* Header */}
             <div className="flex h-14 shrink-0 items-center justify-between border-b border-forest pl-4">
-              <Link href="/" className="flex items-center gap-2.5" onClick={close}>
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-400 font-display text-xs font-black text-forest">STA</span>
-                <span className="font-display text-base font-bold text-ink">
-                  Shokher Tech Academy<span className="text-brand-400">.</span>
-                </span>
+              <Link href="/" className="flex items-center py-1 pr-4" onClick={close} aria-label="Shokher Tech Academy — হোম">
+                <BrandLogo className="h-7" />
               </Link>
               <button
                 ref={closeRef}

@@ -1,4 +1,28 @@
-import type { Attempt, ExamMeta, ExamStatus, Level, Question, StoredExam, StoredViolation, StreamId, User } from "@/lib/types";
+import type { Attempt, ExamMeta, ExamStatus, ExamType, Level, Question, StoredExam, StoredViolation, StreamId, User } from "@/lib/types";
+
+/** An exam without its questions — what public listing pages need. */
+export interface ExamCard {
+  id: string;
+  titleBn: string;
+  level: Level;
+  stream: StreamId;
+  subjectId: string;
+  type: ExamType;
+  durationSec: number;
+  questionCount: number;
+  totalMarks: number;
+  isPaid: boolean;
+  price: number;
+  createdAt: number;
+}
+
+/** A submitted score without the answers/result payload, for public listings. */
+export interface ScoreRow {
+  userId: string;
+  examId: string;
+  score: number;
+  submittedAt: number;
+}
 
 /**
  * Everything the app needs from persistence. Two drivers implement it:
@@ -18,10 +42,14 @@ export interface Store {
   updateUser(id: string, patch: Partial<User>): Promise<void>;
   setUserBlocked(id: string, blocked: boolean): Promise<void>;
   hasAdmin(): Promise<boolean>;
+  /** Students who are not blocked. Cheap enough for a public counter. */
+  countStudents(): Promise<number>;
 
   // exams & questions
   getExam(id: string): Promise<StoredExam | undefined>;
   listExams(filter?: { level?: Level; stream?: StreamId; status?: ExamStatus }): Promise<StoredExam[]>;
+  /** Like listExams but without question bodies, for listing pages. */
+  listExamCards(filter?: { level?: Level; stream?: StreamId; status?: ExamStatus; type?: ExamType }): Promise<ExamCard[]>;
   insertExam(exam: StoredExam): Promise<void>;
   updateExam(id: string, patch: Partial<ExamMeta> & { status?: ExamStatus; updatedAt: number }): Promise<void>;
   /** Refuses (returns "has-attempts") once anyone has sat the exam. */
@@ -39,6 +67,10 @@ export interface Store {
   completeAttempt(id: string, userId: string, patch: Required<Pick<Attempt, "submittedAt" | "reason" | "answers" | "strikes" | "result">>): Promise<boolean>;
   /** Submitted scores per exam, for ranking. */
   scoresByExam(examIds: string[]): Promise<Map<string, number[]>>;
+  /** How many papers have been submitted in total. Cheap enough for a public counter. */
+  countSubmissions(): Promise<number>;
+  /** Newest submitted scores, without the heavy answer/result columns. */
+  listRecentScores(limit: number): Promise<ScoreRow[]>;
 
   // anti-cheat log
   /** Also bumps the attempt's strike counter when `strike` is true. */

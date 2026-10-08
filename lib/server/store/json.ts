@@ -44,9 +44,37 @@ export const jsonStore: Store = {
   async hasAdmin() {
     return (await readDb()).users.some((u) => u.role === "admin");
   },
+  async countStudents() {
+    return (await readDb()).users.filter((u) => u.role === "student" && !u.blocked).length;
+  },
 
   async getExam(id) {
     return (await readDb()).exams.find((e) => e.id === id);
+  },
+  async listExamCards(filter) {
+    return (await readDb())
+      .exams.filter(
+        (e) =>
+          (!filter?.level || e.level === filter.level) &&
+          (!filter?.stream || e.stream === filter.stream) &&
+          (!filter?.status || e.status === filter.status) &&
+          (!filter?.type || e.type === filter.type),
+      )
+      .sort(byNewest)
+      .map((e) => ({
+        id: e.id,
+        titleBn: e.titleBn,
+        level: e.level,
+        stream: e.stream,
+        subjectId: e.subjectId,
+        type: e.type,
+        durationSec: e.durationSec,
+        questionCount: e.questions.length,
+        totalMarks: e.questions.reduce((sum, q) => sum + Number(q.marks ?? 0), 0),
+        isPaid: Boolean(e.isPaid),
+        price: e.price ?? 0,
+        createdAt: e.createdAt,
+      }));
   },
   async listExams(filter) {
     return (await readDb()).exams
@@ -128,6 +156,16 @@ export const jsonStore: Store = {
       (map.get(a.examId) ?? map.set(a.examId, []).get(a.examId)!).push(a.result.score);
     }
     return map;
+  },
+  async countSubmissions() {
+    return (await readDb()).attempts.filter((a) => a.submittedAt).length;
+  },
+  async listRecentScores(limit) {
+    return (await readDb())
+      .attempts.filter((a) => a.submittedAt)
+      .sort((a, b) => (b.submittedAt ?? 0) - (a.submittedAt ?? 0))
+      .slice(0, limit)
+      .map((a) => ({ userId: a.userId, examId: a.examId, score: a.result?.score ?? 0, submittedAt: a.submittedAt ?? a.startedAt }));
   },
 
   async insertViolation(v) {

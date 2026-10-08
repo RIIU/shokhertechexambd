@@ -9,12 +9,13 @@ interface SubmitDialogProps {
   answered: number;
   flagged: number;
   total: number;
+  negativeMark: number;
   submitting: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-export function SubmitDialog({ open, answered, flagged, total, submitting, onCancel, onConfirm }: SubmitDialogProps) {
+export function SubmitDialog({ open, answered, flagged, total, negativeMark, submitting, onCancel, onConfirm }: SubmitDialogProps) {
   const unanswered = total - answered;
   return (
     <AnimatePresence>
@@ -62,9 +63,16 @@ export function SubmitDialog({ open, answered, flagged, total, submitting, onCan
             </dl>
 
             {unanswered > 0 && (
-              <p lang="bn" className="mb-5 flex items-start gap-2 rounded-xl bg-amber-400/10 p-3 text-xs text-amber-200 ring-1 ring-amber-400/25">
+              <p lang="bn" className="mb-3 flex items-start gap-2 rounded-xl bg-amber-400/10 p-3 text-xs text-amber-200 ring-1 ring-amber-400/25">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.5} />
-                এখনো {toBn(unanswered)}টি প্রশ্নের উত্তর দেওয়া হয়নি।
+                এখনো {toBn(unanswered)}টি প্রশ্নের উত্তর দেওয়া হয়নি। উত্তর না দিলে {toBn(unanswered)}টির জন্য ০ নম্বর থাকবে।
+              </p>
+            )}
+
+            {negativeMark > 0 && (
+              <p lang="bn" className="mb-5 flex items-start gap-2 rounded-xl bg-state-danger/10 p-3 text-xs text-rose-200 ring-1 ring-state-danger/25">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.5} />
+                প্রতিটি <strong className="font-semibold">ভুল</strong> উত্তরে {toBn(negativeMark)} নম্বর কাটা যাবে। নিশ্চিত না হলে উত্তর না দেওয়াই ভালো।
               </p>
             )}
 

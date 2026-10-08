@@ -12,6 +12,7 @@ import { ExamTimer } from "@/components/exam/ExamTimer";
 import { OptionSelector, QuestionCard } from "@/components/exam/QuestionCard";
 import { QuestionPalette } from "@/components/exam/QuestionPalette";
 import { SubmitDialog } from "@/components/exam/SubmitDialog";
+import { BrandLogo } from "@/components/layout/BrandLogo";
 import { clearExamSession, useExamSession } from "@/lib/hooks/useExamSession";
 import { cn, toBn } from "@/lib/utils";
 import type { CandidateExam, OptionId, SubmitPayload, SubmitReason } from "@/lib/types";
@@ -197,10 +198,8 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
       <header className="sticky top-1 z-40 px-3 pt-2 sm:px-6">
         <div className="glass mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-2xl px-3 py-2 sm:px-5">
           <div className="flex min-w-0 items-center gap-3">
-            <Link href="/" aria-label="Home" className="hidden shrink-0 items-center gap-2 sm:flex" tabIndex={-1}>
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-400 font-display text-sm font-black text-forest shadow-glow">
-                ST
-              </span>
+            <Link href="/" aria-label="Shokher Tech Academy — হোম" className="hidden shrink-0 items-center sm:flex" tabIndex={-1}>
+              <BrandLogo className="h-6 sm:h-7" />
             </Link>
             <div className="min-w-0">
               <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-400">
@@ -538,6 +537,7 @@ export function LiveExamClient({ exam, candidate, initialAttempt }: LiveExamClie
         answered={answeredCount}
         flagged={flaggedCount}
         total={total}
+        negativeMark={exam.negativeMark}
         submitting={submitting}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => void submit("manual")}
@@ -553,7 +553,7 @@ function StrikeMeter() {
   return (
     <div
       className={cn(
-        "hidden items-center gap-2 rounded-xl border px-2.5 py-2 sm:flex",
+        "flex items-center gap-1.5 rounded-xl border px-2 py-1.5 sm:gap-2 sm:px-2.5 sm:py-2",
         danger ? "border-state-danger/40 bg-state-danger/10" : "border-brand-400/20 bg-brand-400/5",
       )}
       title={`Warnings ${strikes}/${maxWarnings}`}

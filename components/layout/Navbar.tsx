@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useAppShell, type SessionUser } from "./AppShell";
+import { BrandLogo } from "./BrandLogo";
 import { LEVELS, STREAMS } from "@/lib/data/catalog";
 import { formatPhone } from "@/lib/phone";
 import { isFocusRoute } from "@/lib/routes";
@@ -239,13 +240,8 @@ export function Navbar() {
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-          <Link href="/" className="flex items-center gap-2.5 px-3 sm:px-6 lg:px-8">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-400 font-display text-sm font-black text-forest">
-              STA
-            </span>
-            <span className="font-display text-sm font-bold tracking-tight text-ink sm:text-base md:text-lg whitespace-nowrap">
-              Shokher Tech Academy<span className="text-brand-400">.</span>
-            </span>
+          <Link href="/" className="flex items-center px-3 sm:px-6 lg:px-8" aria-label="Shokher Tech Academy — হোম">
+            <BrandLogo className="h-7 sm:h-8 md:h-9" priority />
           </Link>
         </div>
 
