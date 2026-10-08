@@ -16,6 +16,15 @@
 
 ফাইলটা দুবার চালালেও কোনো সমস্যা নেই, কিছু ডুপ্লিকেট হবে না।
 
+### পুরোনো প্রজেক্টে একটা ডেটা ঠিক করা বাকি থাকতে পারে
+
+`supabase/migrations/20261008000000_move_packed_flags_into_columns.sql` — `setup.sql` আবার Run করলেই এটা চলবে, না চাইলে শুধু এই ফাইলটা কপি করে SQL Editor-এ Run করো। এটা পুরোনো row গুলোর দুটো অসুবিধা ঠিক করে:
+
+- `exams.title_en`-এ লুকানো `[paid:60]` / `[hide_solutions]` ট্যাগ → `is_paid`, `price`, `show_solutions` কলামে বসে, টাইটেল পরিষ্কার হয়
+- `users.institution`-এর ভেতরে JSON করে প্যাক করা অ্যাভাটার, কভার ও বায়ো → `avatar_url`, `cover_url`, `bio` কলামে বসে
+
+কোনো ডেটা মুছে ফেলে না, দুবার চালালেও সমস্যা হয় না। না চালানোতেও অ্যাপ ঠিক আছে — পড়ার সময় দুটো জায়গাই দেখা হয়, তাই লেখার সময় নিজে থেকেই ঠিক হয়ে যাবে।
+
 ## ৩. URL আর secret key
 - **Project Settings → Data API**: **Project URL** (যেমন `https://abcdxyz.supabase.co`)। এটা `SUPABASE_URL`
 - **Project Settings → API Keys → Secret keys**: `sb_secret_…` দিয়ে শুরু হওয়া key। এটা `SUPABASE_SECRET_KEY`
@@ -47,7 +56,7 @@ npm run dev
 ## ৬. Vercel-এ ডিপ্লয়
 Vercel প্রজেক্টের **Settings → Environment Variables**-এ উপরের ৫টি ভেরিয়েবল বসাও, তারপর ডিপ্লয় করো। Supabase থাকায় Vercel-এও ডেটা হারাবে না।
 
-> মনে রেখো: Vercel-এ ভেরিয়েবল বদলালে **Deployments → … → Redeploy** না করা পর্যন্ত নতুন মান কাজ করে না।
+> মনে রেখো: Vercel-এ ভেরিয়েবল বদলালে **Deployments → … → Redeploy** না করা পর্যন্ত নতুন মান কাজ করে না। Supabase-এর secret key rotate (বা নতুন বানানো) করার পরেও ঠিক এই কাজটা করতে হবে, নইলে লাইভ সাইট পুরোনো বাতিল key দিয়ে `/api/health`-এ `INVALID_KEY` দেখাবে।
 
 ## ৭. সমস্যা হলে: `/api/health`
 ডিপ্লয়ের পর ব্রাউজারে `https://তোমার-সাইট/api/health` খোলো। কোন ভেরিয়েবল আছে বা নেই, টেবিল আছে কিনা, key ঠিক কিনা সব দেখাবে (কোনো secret দেখায় না)। সব ঠিক থাকলে `"ok": true`।
